@@ -1,9 +1,11 @@
 #include "stdlib.h"
-#include "stdio.h"
-#include "neuron.h"
+#include <stdio.h>
+#include <time.h>
+#include "network.h"
 
 int main(void) {
-    neuron_t a;
-    init_neuron(&a);
+    srand(time(NULL));  // Don't need to be secure
+
+    network_t *a = create_network(8, 2, 1);
     printf("Hello world!\n");
 }

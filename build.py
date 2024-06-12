@@ -3,7 +3,7 @@ import subprocess
 
 files_to_build = ["main.c", "neuron.c", "network.c", "utils.c"]
 output_file_name = "main"
-flags = ["-lm"]
+flags = ["-lm", "-g", "-Wall"]
 
 
 def main():

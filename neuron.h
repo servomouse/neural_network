@@ -22,3 +22,4 @@ void calc_output(neuron_t *neuron, neuron_t *net);
 uint32_t update_output(neuron_t *neuron);
 void random_mutation(neuron_t *neuron);
 void rollback_mutation(neuron_t *neuron);
+void print_coeffs(neuron_t *neuron, neuron_t *net);

@@ -18,3 +18,4 @@ void save_network(network_t *net, char *filename);
 void restore_network(char *filename);
 void mutate(network_t *net);
 void repair(network_t *net);
+void print_results(network_t *net);

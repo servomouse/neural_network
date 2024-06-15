@@ -35,7 +35,7 @@ sample_t train_data[] = {
 
 double get_error(network_t *net, double inputs[], double target_output) {
     double real_output = get_output(net, NUM_INPUTS, inputs);
-    double delta = real_output - target_output;
+    double delta = target_output - real_output;
     return delta*delta;
 }
 
@@ -61,17 +61,28 @@ int main(void) {
     srand(time(NULL));  // Don't need to be secure
 
     network_t *net = create_network(4, 1, 1);
-    uint32_t counter = 0;
-    while(1000000 > counter) {
+    uint32_t counter = 1000000;
+    while(counter--) {
         double init_err = average_error(net);
-        if(counter%1000 == 0)
-            printf("Currect error: %lf, output: %lf\n", init_err, get_output(net, NUM_INPUTS, inputs));
+        if(counter%10000 == 0) {
+            printf("Current error: %lf, output: %lf\n", init_err, get_output(net, NUM_INPUTS, inputs));
+            print_results(net);
+        }
         mutate(net);
         double new_err = average_error(net);
-        if(new_err > init_err)
+        if(init_err < new_err) {
             repair(net);
-        counter++;
-        if(new_err < 0.000006) break;
+        // } else {
+        //     printf("Current error: %lf, output: %lf\n", init_err, get_output(net, NUM_INPUTS, inputs));
+        //     print_results(net);
+        }
+        if(new_err < 0.000002) break;
     }
     test_net(net);
+    print_results(net);
+    // print_results(net);
+    // mutate(net);
+    // print_results(net);
+    // repair(net);
+    // print_results(net);
 }

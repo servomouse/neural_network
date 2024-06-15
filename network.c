@@ -26,24 +26,38 @@ network_t* create_network(uint32_t num_inputs, uint32_t num_neurons, uint32_t nu
     return net;
 }
 
-double get_output(network_t *net, uint32_t num_inputs, double inputs[]) {
-    for(uint32_t i=0; i<num_inputs; i++)
-        net->neurons[i].output = inputs[i];
-    for(uint32_t i=num_inputs; i<net->net_size;i++) {
-        calc_output(&net->neurons[i], net->neurons);
-    // for(uint32_t i=num_inputs; i<net->net_size;i++)
-    //     updated = update_output(&net->neurons[i]);
-        update_output(&net->neurons[i]);
+void print_inputs(neuron_t *net) {
+    printf("Net: 0x%X, Afte inputs: ", net);
+    for(uint32_t i=0; i<4; i++) {
+        printf("%lf, ", net[i].output);
     }
+    printf("\n");
+}
+
+double get_output(network_t *net, uint32_t num_inputs, double inputs[]) {
+    // printf("Net: 0x%X, Init inputs: ", net->neurons);
+    for(uint32_t i=0; i<num_inputs; i++) {
+        // printf("%lf, ", inputs[i]);
+        net->neurons[i].output = inputs[i];
+    }
+    // printf("\n");
+    // print_inputs(net->neurons);
+    uint32_t updated = 0;
+    uint32_t counter = 0;
+    // while(updated == 0 && counter++ < 100) {
+        for(uint32_t i=0; i<(net->net_size); i++) {
+            calc_output(&net->neurons[i], net->neurons);
+        // }
+        // for(uint32_t i=num_inputs; i<net->net_size;i++) {
+            updated = update_output(&net->neurons[i]);
+            // update_output(&net->neurons[i]);
+        }
+    // }
     return net->neurons[net->net_size-1].output;
 }
 
 void mutate(network_t *net) {
     net->last_mutant_idx = random_int(net->num_inputs, net->net_size);
-    if(net->last_mutant_idx != 4) {
-        printf("Error!!!! random_int returned %d, net_size = %d\n", net->last_mutant_idx, net->net_size);
-        exit(1);
-    }
     random_mutation(&net->neurons[net->last_mutant_idx]);
 }
 
@@ -57,4 +71,8 @@ void save_network(network_t *net, char *filename) {
 
 void restore_network(char *filename) {
     return;
+}
+
+void print_results(network_t *net) {
+    print_coeffs(&net->neurons[4], net->neurons);
 }

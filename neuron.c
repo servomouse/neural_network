@@ -34,7 +34,7 @@ void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t 
             neuron->inputs[i] = idx-i;
     }
     for(uint32_t i=0; i<(neuron->num_coeffitients); i++)
-        neuron->coeffitients[i] = random_double(-0.1, 0.1);
+        neuron->coeffitients[i] = random_double(-0.02, 0.02);
 }
 
 void deinit_neuron(neuron_t *neuron) {
@@ -45,36 +45,58 @@ void deinit_neuron(neuron_t *neuron) {
 }
 
 void calc_output(neuron_t *neuron, neuron_t *net) {
-    if(neuron->num_inputs == 0)
+    
+    // printf("Net: 0x%X, Calc inputs: ", net);
+    // for(uint32_t i=0; i<4; i++) {
+    //     printf("%lf, ", net[i].output);
+    // }
+    // printf("\n\n");
+    if(neuron->num_inputs == 0) {
         return;
-    double temp_output = neuron->coeffitients[0];
-    for(uint32_t i=0; i<(neuron->num_coeffitients); i++) {
-        double temp = neuron->coeffitients[i];
-        for(uint32_t j=0; j<neuron->num_inputs; j++) {
-            if(((1 << j) & i) > 0)
-                temp *= net[neuron->inputs[j]].output;
+    } else {
+        neuron->temp_output = 0;
+        for(uint32_t i=0; i<(neuron->num_coeffitients); i++) {
+            double temp = neuron->coeffitients[i];
+            for(uint32_t j=0; j<(neuron->num_inputs); j++) {
+                if(((1 << j) & i) > 0) {
+                    temp *= net[neuron->inputs[j]].output;
+                }
+            }
+            neuron->temp_output += temp;
         }
-        temp_output += temp;
     }
-    neuron->temp_output = limit_value(temp_output);
 }
 
 uint32_t update_output(neuron_t *neuron) {
-    uint32_t changed = (neuron->output == neuron->temp_output)? 1:0;
-    neuron->output = neuron->temp_output;
+    if(neuron->num_inputs == 0)
+        return 0;
+    uint32_t changed = (neuron->output == limit_value(neuron->temp_output))? 1:0;
+    neuron->output = limit_value(neuron->temp_output);
     return changed;
 }
 
 void random_mutation(neuron_t *neuron) {
-    // printf("neuron: %d\n", neuron);
     uint32_t idx = random_int(0, neuron->num_coeffitients);
     double delta = random_double(-0.0001, 0.0001);
     neuron->old_coeffitient.idx = idx;
     neuron->old_coeffitient.value = neuron->coeffitients[idx];
-    neuron->coeffitients[idx] += delta;
+    neuron->coeffitients[idx] = limit_value(neuron->coeffitients[idx] + delta);
 }
 
 void rollback_mutation(neuron_t *neuron) {
     uint32_t idx = neuron->old_coeffitient.idx;
     neuron->coeffitients[idx] = neuron->old_coeffitient.value;
+}
+
+void print_coeffs(neuron_t *neuron, neuron_t *net) {
+    // printf("Inputs: ");
+    // for(uint32_t i=0; i<neuron->num_inputs; i++) {
+    //     printf("%lf, ", net[neuron->inputs[i]].output);
+    // }
+    // printf("\n");
+    printf("Coeffs: ");
+    for(uint32_t i=0; i<neuron->num_coeffitients; i++) {
+        printf("%lf, ", neuron->coeffitients[i]);
+    }
+    printf("\n");
 }

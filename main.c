@@ -11,7 +11,6 @@ typedef struct {
     double output;
 } sample_t;
 
-
 sample_t train_data[] = {
     {.inputs={0, 0, 0, 0}, .output=1},
     {.inputs={0, 0, 0, 1}, .output=0},
@@ -33,16 +32,16 @@ sample_t train_data[] = {
 
 #define DATASET_SIZE sizeof(train_data)/sizeof(sample_t)
 
-double get_error(network_t *net, double inputs[], double target_output) {
-    double real_output = get_output(net, NUM_INPUTS, inputs);
-    double delta = target_output - real_output;
+double get_error(network_t *net, double inputs[], double target_output, uint32_t num_inputs) {
+    double real_output = get_output(net, num_inputs, inputs);
+    double delta = real_output - target_output;
     return delta*delta;
 }
 
-double average_error(network_t *net, sample_t * dataset, uint32_t dataset_size) {
+double average_error(network_t *net, sample_t * dataset, uint32_t dataset_size, uint32_t num_inputs) {
     double err = 0;
     for(uint32_t i=0; i<dataset_size; i++)
-        err += get_error(net, dataset[i].inputs, dataset[i].output);
+        err += get_error(net, dataset[i].inputs, dataset[i].output, num_inputs);
     return err/dataset_size;
 }
 
@@ -61,20 +60,20 @@ int main(void) {
     srand(time(NULL));  // Don't need to be secure
 
     network_t *net = create_network(4, 1, 1);
-    uint32_t counter = 1000000;
-    while(counter--) {
-        double init_err = average_error(net, train_data, DATASET_SIZE);
-        if(counter%10000 == 0) {
-            double output = get_output(net, NUM_INPUTS, train_data[DATASET_SIZE-1].inputs);
-            printf("Current error: %lf, output: %lf\n", init_err, output);
-            // print_results(net);
+    for(uint32_t c=0; c<1000; c++) {
+        for(uint32_t a=0; a<10000; a++) {
+            double init_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+            mutate(net);
+            double new_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+            if(init_err < new_err) {
+                repair(net);
+            }
+            if(new_err < 0.000002) break;
         }
-        mutate(net);
-        double new_err = average_error(net, train_data, DATASET_SIZE);
-        if(init_err < new_err) {
-            repair(net);
-        }
-        if(new_err < 0.000002) break;
+        double curr_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+        double output = get_output(net, NUM_INPUTS, train_data[DATASET_SIZE-1].inputs);
+        print_results(net);
+        printf("Current error: %lf, output: %lf\n", curr_err, output);
     }
     test_net(net);
     print_results(net);

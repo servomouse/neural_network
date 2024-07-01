@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "utils.h"
 
-#define RANDOM_CONNECT true
+#define RANDOM_CONNECT false
 
 double limit_value(double value) {
     if(value > 1.0)
@@ -70,7 +70,7 @@ uint32_t update_output(neuron_t *neuron) {
 
 void random_mutation(neuron_t *neuron) {
     uint32_t idx = random_int(0, neuron->num_coeffitients);
-    double delta = random_double(-0.0001, 0.0001);
+    double delta = random_double(-0.001, 0.001);
     neuron->old_coeffitient.idx = idx;
     neuron->old_coeffitient.value = neuron->coeffitients[idx];
     neuron->coeffitients[idx] = limit_value(neuron->coeffitients[idx] + delta);

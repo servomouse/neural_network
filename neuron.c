@@ -14,7 +14,6 @@ double limit_value(double value) {
 }
 
 void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t idx) {
-    // neuron = malloc(sizeof(neuron_t));
     neuron->num_inputs = num_inputs;
     neuron->num_coeffitients = 1 << num_inputs;
     neuron->idx = idx;
@@ -45,12 +44,6 @@ void deinit_neuron(neuron_t *neuron) {
 }
 
 void calc_output(neuron_t *neuron, neuron_t *net) {
-    
-    // printf("Net: 0x%X, Calc inputs: ", net);
-    // for(uint32_t i=0; i<4; i++) {
-    //     printf("%lf, ", net[i].output);
-    // }
-    // printf("\n\n");
     if(neuron->num_inputs == 0) {
         return;
     } else {
@@ -89,11 +82,6 @@ void rollback_mutation(neuron_t *neuron) {
 }
 
 void print_coeffs(neuron_t *neuron, neuron_t *net) {
-    // printf("Inputs: ");
-    // for(uint32_t i=0; i<neuron->num_inputs; i++) {
-    //     printf("%lf, ", net[neuron->inputs[i]].output);
-    // }
-    // printf("\n");
     printf("Coeffs: ");
     for(uint32_t i=0; i<neuron->num_coeffitients; i++) {
         printf("%lf, ", neuron->coeffitients[i]);

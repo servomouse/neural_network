@@ -46,12 +46,39 @@ void repair(network_t *net) {
     rollback_mutation(&net->neurons[net->last_mutant_idx]);
 }
 
-void save_network(network_t *net, char *filename) {
-    return;
+typedef struct {
+    uint32_t idx;
+    uint8_t field_size;
+    double value;
+} mystruct_t;
+
+void save_network(mystruct_t *s, char *filename) {
+    FILE *file = fopen(filename, "w");
+    if(file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+    fprint(file, "{\n");
+    fprint(file, "'idx': %u, \n", s->idx);
+    fprint(file, "'field_size': %u, \n", s->field_size);
+    fprint(file, "'value': %.2f\n", s->value);
+    fprint(file, "}\n");
+    fclose(file);
 }
 
-void restore_network(char *filename) {
-    return;
+int restore_network(mystruct_t *s, char *filename) {
+    FILE *file = fopen(filename, "r");
+    if(file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+    int res = fscanf(file, "{\n 'idx': %u,\n'field_size': %hhu'\n'value': %%lf\n}\n", &s->idx, &s->field_size, &s->value);
+    fclose(file);
+    if(res == 3) {
+        return 0;   // Success
+    } else {
+        return -1;  // Error
+    }
 }
 
 void print_results(network_t *net) {

@@ -34,7 +34,7 @@ sample_t train_data[] = {
 
 double get_error(network_t *net, double inputs[], double target_output, uint32_t num_inputs) {
     double real_output = get_output(net, num_inputs, inputs);
-    double delta = real_output - target_output;
+    double delta = target_output - real_output;
     return delta*delta;
 }
 

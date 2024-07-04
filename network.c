@@ -52,32 +52,64 @@ typedef struct {
     double value;
 } mystruct_t;
 
-void save_network(mystruct_t *s, char *filename) {
+    uint32_t net_size;
+    uint32_t num_inputs;
+    uint32_t num_outputs;
+
+void save_network(network_t *s, char *filename) {
     FILE *file = fopen(filename, "w");
     if(file == NULL) {
         perror("Error opening file");
         return;
     }
     fprint(file, "{\n");
-    fprint(file, "'idx': %u, \n", s->idx);
-    fprint(file, "'field_size': %u, \n", s->field_size);
-    fprint(file, "'value': %.2f\n", s->value);
+    fprint(file, "'net_size': %u, \n", s->net_size);
+    fprint(file, "'num_inputs': %u, \n", s->num_inputs);
+    fprint(file, "'num_outputs': %u, \n", s->num_outputs);
+    // fprint(file, "'value': %.2f\n", s->value);
     fprint(file, "}\n");
     fclose(file);
 }
 
-int restore_network(mystruct_t *s, char *filename) {
+int restore_network(network_t *s, char *filename) {
     FILE *file = fopen(filename, "r");
     if(file == NULL) {
         perror("Error opening file");
         return;
     }
-    int res = fscanf(file, "{\n 'idx': %u,\n'field_size': %hhu'\n'value': %%lf\n}\n", &s->idx, &s->field_size, &s->value);
+    // int res = fscanf(file, "{\n 'value': %%lf\n}\n", &s->value);
+    int res = fscanf(file, "{\n 'net_size': %u,\n'num_inputs': %hhu'\n'num_outputs': %%lf\n}\n", &s->net_size, &s->num_inputs, &s->num_outputs);
     fclose(file);
     if(res == 3) {
         return 0;   // Success
     } else {
         return -1;  // Error
+    }
+}
+
+void test_save_restore(void) {
+    // Initialize random number generator
+    srand((unsigned int)time(NULL));
+
+    // Create and populate the structure with random values
+    network_t originalData;
+    originalData.net_size = rand();
+    originalData.num_inputs = rand() % 256;
+    originalData.num_outputs = rand() % 256;
+    // originalData.value = (double)rand() / RAND_MAX * 100.0; // Random double value between 0 and 100
+
+    save_network(&originalData, "test_data.json");
+
+    network_t newData;
+    restore_network(&newData, "test_data.json");
+
+    // Compare the values
+    if(originalData.net_size == newData.net_size &&
+       originalData.num_inputs == newData.num_inputs &&
+       originalData.num_outputs == newData.num_outputs) {
+        printf("Success: The values match!\n");
+    } else {
+        printf("Error: The values do not match!\n");
     }
 }
 

@@ -46,28 +46,18 @@ void repair(network_t *net) {
     rollback_mutation(&net->neurons[net->last_mutant_idx]);
 }
 
-typedef struct {
-    uint32_t idx;
-    uint8_t field_size;
-    double value;
-} mystruct_t;
-
-    uint32_t net_size;
-    uint32_t num_inputs;
-    uint32_t num_outputs;
-
 void save_network(network_t *s, char *filename) {
     FILE *file = fopen(filename, "w");
     if(file == NULL) {
         perror("Error opening file");
         return;
     }
-    fprint(file, "{\n");
-    fprint(file, "'net_size': %u, \n", s->net_size);
-    fprint(file, "'num_inputs': %u, \n", s->num_inputs);
-    fprint(file, "'num_outputs': %u, \n", s->num_outputs);
+    fprintf(file, "{\n");
+    fprintf(file, "\t\"net_size\": %u,\n", s->net_size);
+    fprintf(file, "\t\"num_inputs\": %u,\n", s->num_inputs);
+    fprintf(file, "\t\"num_outputs\": %u\n", s->num_outputs);
     // fprint(file, "'value': %.2f\n", s->value);
-    fprint(file, "}\n");
+    fprintf(file, "}\n");
     fclose(file);
 }
 
@@ -75,10 +65,11 @@ int restore_network(network_t *s, char *filename) {
     FILE *file = fopen(filename, "r");
     if(file == NULL) {
         perror("Error opening file");
-        return;
+        return -1;
     }
     // int res = fscanf(file, "{\n 'value': %%lf\n}\n", &s->value);
-    int res = fscanf(file, "{\n 'net_size': %u,\n'num_inputs': %hhu'\n'num_outputs': %%lf\n}\n", &s->net_size, &s->num_inputs, &s->num_outputs);
+    int res = fscanf(file, "{\n\t\"net_size\": %u,\n\t\"num_inputs\": %u,\n\t\"num_outputs\": %u\n}\n",
+                     &s->net_size, &s->num_inputs, &s->num_outputs);
     fclose(file);
     if(res == 3) {
         return 0;   // Success
@@ -87,30 +78,31 @@ int restore_network(network_t *s, char *filename) {
     }
 }
 
-void test_save_restore(void) {
-    // Initialize random number generator
-    srand((unsigned int)time(NULL));
-
-    // Create and populate the structure with random values
-    network_t originalData;
-    originalData.net_size = rand();
-    originalData.num_inputs = rand() % 256;
-    originalData.num_outputs = rand() % 256;
+int test_save_restore_network(char *filename) {
+    network_t original_data;
+    original_data.net_size = rand();
+    original_data.num_inputs = rand() % 256;
+    original_data.num_outputs = rand() % 256;
     // originalData.value = (double)rand() / RAND_MAX * 100.0; // Random double value between 0 and 100
 
-    save_network(&originalData, "test_data.json");
+    save_network(&original_data, filename);
 
-    network_t newData;
-    restore_network(&newData, "test_data.json");
+    network_t new_data;
+    restore_network(&new_data, filename);
 
-    // Compare the values
-    if(originalData.net_size == newData.net_size &&
-       originalData.num_inputs == newData.num_inputs &&
-       originalData.num_outputs == newData.num_outputs) {
-        printf("Success: The values match!\n");
-    } else {
-        printf("Error: The values do not match!\n");
+    printf("orig net_size: %u, read value: %u\n", original_data.net_size, new_data.net_size);
+    printf("orig num_inputs: %u, read value: %u\n", original_data.num_inputs, new_data.num_inputs);
+    printf("orig num_outputs: %u, read value: %u\n", original_data.num_outputs, new_data.num_outputs);
+
+    if((original_data.net_size != new_data.net_size) &&
+       (original_data.num_inputs != new_data.num_inputs) &&
+       (original_data.num_outputs != new_data.num_outputs)) {
+        printf("Error: The values of num_outputs do not match!\n");
+        return -1;
     }
+    remove(filename);
+    printf("Success: The values match!\n");
+    return 0;
 }
 
 void print_results(network_t *net) {

@@ -56,7 +56,7 @@ void test_net(network_t *net) {
 
 // double inputs[] = {1.0, 1.0, 1.0, 1.0};
 
-int main(void) {
+int work_main(void) {
     srand(time(NULL));  // Don't need to be secure
 
     network_t *net = create_network(4, 1, 1);
@@ -77,4 +77,11 @@ int main(void) {
     }
     test_net(net);
     print_results(net);
+    return 0;
+}
+
+int main(void) {
+    srand(time(NULL));  // Don't need to be secure
+    test_save_restore_network("test_data.json");
+    return 0;
 }

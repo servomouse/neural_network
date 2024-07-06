@@ -61,7 +61,7 @@ void save_network(network_t *s, char *filename) {
         perror("Error opening file");
         return;
     }
-    char output[1024] = {0};
+    char output[2048] = {0};
     char *str_ptr = output;
     str_ptr += sprintf(str_ptr, "{\n");
     str_ptr += sprintf(str_ptr, "\t\"net_size\": %u,\n", s->net_size);
@@ -84,7 +84,7 @@ void save_network(network_t *s, char *filename) {
         str_ptr += sprintf(str_ptr, "\t\t\t\"num_coeffs\": %u,\n", s->neurons[i].num_coeffitients);
         str_ptr += sprintf(str_ptr, "\t\t\t\"coeffs\": [");
         for(uint32_t j=0; j<s->neurons[i].num_coeffitients; j++) {
-            str_ptr += sprintf(str_ptr, "%.2f, ", s->neurons[i].coeffitients[j]);
+            str_ptr += sprintf(str_ptr, "%lf, ", s->neurons[i].coeffitients[j]);
         }
         if(s->neurons[i].num_coeffitients > 0) {
             str_ptr -= 2;

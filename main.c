@@ -59,8 +59,8 @@ void test_net(network_t *net) {
 int main(void) {
     srand(time(NULL));  // Don't need to be secure
 
-    network_t *net = create_network(4, 1, 1);
-    for(uint32_t c=0; c<100; c++) {
+    network_t *net = create_network(4, 3, 1);
+    for(uint32_t c=0; c<10; c++) {
         for(uint32_t a=0; a<1000; a++) {
             double init_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
             mutate(net);

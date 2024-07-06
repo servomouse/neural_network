@@ -28,12 +28,12 @@ void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t 
 
     neuron->coeffitients = malloc(sizeof(double) * (neuron->num_coeffitients));
     neuron->inputs = malloc(num_inputs * sizeof(uint32_t));
-    if(RANDOM_CONNECT || (num_inputs < idx)) {
+    if(RANDOM_CONNECT || (num_inputs > idx)) {
         for(uint32_t i=0; i<num_inputs; i++)
             neuron->inputs[i] = random_int(0, idx);
     } else {
         for(uint32_t i=0; i<num_inputs; i++)
-            neuron->inputs[i] = idx-i;
+            neuron->inputs[i] = idx-(i+1);
     }
     for(uint32_t i=0; i<(neuron->num_coeffitients); i++)
         neuron->coeffitients[i] = random_double(-0.02, 0.02);

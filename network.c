@@ -46,6 +46,15 @@ void repair(network_t *net) {
     rollback_mutation(&net->neurons[net->last_mutant_idx]);
 }
 
+// neurons = {
+//     0: {
+//         "num_inputs": 5,
+//         "num_coeffs": 32,
+//         "inputs": [0, 1, 2, 3, 4],
+//         "coeffs": {0.1, 0.2, 0.3 . . . ]
+//     }
+// }
+
 void save_network(network_t *s, char *filename) {
     FILE *file = fopen(filename, "w");
     if(file == NULL) {
@@ -55,7 +64,25 @@ void save_network(network_t *s, char *filename) {
     fprintf(file, "{\n");
     fprintf(file, "\t\"net_size\": %u,\n", s->net_size);
     fprintf(file, "\t\"num_inputs\": %u,\n", s->num_inputs);
-    fprintf(file, "\t\"num_outputs\": %u\n", s->num_outputs);
+    fprintf(file, "\t\"num_outputs\": %u,\n", s->num_outputs);
+    fprintf(file, "\t\"neurons\": {\n");
+    for(uint32_t i=0; i<s->net_size; i++) {
+        fprintf(file, "\t\t\"%u\": {\n", i);
+        fprintf(file, "\t\t\"num_inputs\": %u,\n", s->neurons[i].num_inputs);
+        fprintf(file, "\t\t\"inputs\": [");
+        for(uint32_t j=0; j<s->neurons[i].num_inputs; j++) {
+            fprintf(file, "%u, ", s->neurons[i].inputs[j]);
+        }
+        fprintf(file, "],\n");
+        fprintf(file, "\t\t\"num_coeffs\": %u,\n", s->neurons[i].num_coeffitients);
+        fprintf(file, "\t\t\"coeffs\": [");
+        for(uint32_t j=0; j<s->neurons[i].num_coeffitients; j++) {
+            fprintf(file, "%.2f, ", s->neurons[i].coeffitients[j]);
+        }
+        fprintf(file, "]\n");
+        fprintf(file, "\t},\n");
+    }
+    fprintf(file, "\t}\n");
     // fprint(file, "'value': %.2f\n", s->value);
     fprintf(file, "}\n");
     fclose(file);

@@ -56,12 +56,12 @@ void test_net(network_t *net) {
 
 // double inputs[] = {1.0, 1.0, 1.0, 1.0};
 
-int work_main(void) {
+int main(void) {
     srand(time(NULL));  // Don't need to be secure
 
     network_t *net = create_network(4, 1, 1);
-    for(uint32_t c=0; c<1000; c++) {
-        for(uint32_t a=0; a<10000; a++) {
+    for(uint32_t c=0; c<100; c++) {
+        for(uint32_t a=0; a<1000; a++) {
             double init_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
             mutate(net);
             double new_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
@@ -77,10 +77,11 @@ int work_main(void) {
     }
     test_net(net);
     print_results(net);
+    save_network(net, "test_data.json");
     return 0;
 }
 
-int main(void) {
+int test_main(void) {
     srand(time(NULL));  // Don't need to be secure
     test_save_restore_network("test_data.json");
     return 0;

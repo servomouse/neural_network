@@ -15,7 +15,7 @@ double limit_value(double value) {
 
 void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t idx) {
     neuron->num_inputs = num_inputs;
-    neuron->num_coeffitients = 1 << num_inputs;
+    neuron->num_coeffitients = (1 << num_inputs) - 1;
     neuron->idx = idx;
     neuron->temp_output = 0;
     neuron->output = 0;

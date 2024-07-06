@@ -61,30 +61,44 @@ void save_network(network_t *s, char *filename) {
         perror("Error opening file");
         return;
     }
-    fprintf(file, "{\n");
-    fprintf(file, "\t\"net_size\": %u,\n", s->net_size);
-    fprintf(file, "\t\"num_inputs\": %u,\n", s->num_inputs);
-    fprintf(file, "\t\"num_outputs\": %u,\n", s->num_outputs);
-    fprintf(file, "\t\"neurons\": {\n");
+    char output[1024] = {0};
+    char *str_ptr = output;
+    str_ptr += sprintf(str_ptr, "{\n");
+    str_ptr += sprintf(str_ptr, "\t\"net_size\": %u,\n", s->net_size);
+    str_ptr += sprintf(str_ptr, "\t\"num_inputs\": %u,\n", s->num_inputs);
+    str_ptr += sprintf(str_ptr, "\t\"num_outputs\": %u,\n", s->num_outputs);
+    str_ptr += sprintf(str_ptr, "\t\"neurons\": {\n");
     for(uint32_t i=0; i<s->net_size; i++) {
-        fprintf(file, "\t\t\"%u\": {\n", i);
-        fprintf(file, "\t\t\"num_inputs\": %u,\n", s->neurons[i].num_inputs);
-        fprintf(file, "\t\t\"inputs\": [");
+        str_ptr += sprintf(str_ptr, "\t\t\"%u\": {\n", i);
+        str_ptr += sprintf(str_ptr, "\t\t\t\"num_inputs\": %u,\n", s->neurons[i].num_inputs);
+        str_ptr += sprintf(str_ptr, "\t\t\t\"inputs\": [");
         for(uint32_t j=0; j<s->neurons[i].num_inputs; j++) {
-            fprintf(file, "%u, ", s->neurons[i].inputs[j]);
+            str_ptr += sprintf(str_ptr, "%u, ", s->neurons[i].inputs[j]);
         }
-        fprintf(file, "],\n");
-        fprintf(file, "\t\t\"num_coeffs\": %u,\n", s->neurons[i].num_coeffitients);
-        fprintf(file, "\t\t\"coeffs\": [");
+        if(s->neurons[i].num_inputs > 0) {
+            str_ptr -= 2;
+            str_ptr[0] = 0;
+            str_ptr[1] = 0;
+        }
+        str_ptr += sprintf(str_ptr, "],\n");
+        str_ptr += sprintf(str_ptr, "\t\t\t\"num_coeffs\": %u,\n", s->neurons[i].num_coeffitients);
+        str_ptr += sprintf(str_ptr, "\t\t\t\"coeffs\": [");
         for(uint32_t j=0; j<s->neurons[i].num_coeffitients; j++) {
-            fprintf(file, "%.2f, ", s->neurons[i].coeffitients[j]);
+            str_ptr += sprintf(str_ptr, "%.2f, ", s->neurons[i].coeffitients[j]);
         }
-        fprintf(file, "]\n");
-        fprintf(file, "\t},\n");
+        if(s->neurons[i].num_coeffitients > 0) {
+            str_ptr -= 2;
+            str_ptr[0] = 0;
+            str_ptr[1] = 0;
+        }
+        str_ptr += sprintf(str_ptr, "]\n");
+        str_ptr += sprintf(str_ptr, "\t\t},\n");
     }
-    fprintf(file, "\t}\n");
+    str_ptr -= 2;
+    str_ptr += sprintf(str_ptr, "\n\t}\n");
     // fprint(file, "'value': %.2f\n", s->value);
-    fprintf(file, "}\n");
+    str_ptr += sprintf(str_ptr, "}\n");
+    fprintf(file, "%s", output);
     fclose(file);
 }
 

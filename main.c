@@ -60,30 +60,33 @@ void test_net(network_t *net) {
 int main(void) {
     srand(time(NULL));  // Don't need to be secure
 
-    // network_t *net = create_network(4, 3, 1);
-    // for(uint32_t c=0; c<10; c++) {
-    //     for(uint32_t a=0; a<1000; a++) {
-    //         double init_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
-    //         mutate(net);
-    //         double new_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
-    //         if(init_err < new_err) {
-    //             repair(net);
-    //         }
-    //         if(new_err < 0.000002) break;
-    //     }
-    //     double curr_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
-    //     double output = get_output(net, NUM_INPUTS, train_data[DATASET_SIZE-1].inputs);
-    //     print_results(net);
-    //     printf("Current error: %lf, output: %lf\n", curr_err, output);
-    // }
-    // test_net(net);
+    network_t *net = create_network(4, 3, 1);
+    for(uint32_t c=0; c<10; c++) {
+        for(uint32_t a=0; a<1000; a++) {
+            double init_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+            mutate(net);
+            double new_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+            if(init_err < new_err) {
+                repair(net);
+            }
+            if(new_err < 0.000002) break;
+        }
+        double curr_err = average_error(net, train_data, DATASET_SIZE, NUM_INPUTS);
+        double output = get_output(net, NUM_INPUTS, train_data[DATASET_SIZE-1].inputs);
+        print_results(net);
+        printf("Current error: %lf, output: %lf\n", curr_err, output);
+    }
+    printf("Original net results:\n");
+    test_net(net);
     // print_results(net);
-    // save_network(net, "test_data.json");
-    network_t net;
-    restore_network(&net, "test_data.json");
-    printf("s->net_size: %d\n", net.net_size);
-    printf("s->num_inputs: %d\n", net.num_inputs);
-    printf("s->num_outputs: %d\n", net.num_outputs);
+    save_network(net, "test_data.json");
+    network_t restored;
+    restore_network(&restored, "test_data.json");
+    printf("Restored net results:\n");
+    test_net(&restored);
+    // printf("s->net_size: %d\n", net.net_size);
+    // printf("s->num_inputs: %d\n", net.num_inputs);
+    // printf("s->num_outputs: %d\n", net.num_outputs);
     return 0;
 }
 

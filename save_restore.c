@@ -37,12 +37,7 @@ static double get_double(FILE *file) {
 }
 
 void save_network(network_t *s, char *filename) {
-    FILE *file = fopen(filename, "w");
-    if(file == NULL) {
-        perror("Error opening file");
-        return;
-    }
-    char output[2048] = {0};
+    char *output = calloc(4096 * s->net_size, sizeof(char));
     char *str_ptr = output;
     str_ptr += sprintf(str_ptr, "{\n");
     str_ptr += sprintf(str_ptr, "\t\"net_size\": %u,\n", s->net_size);
@@ -77,8 +72,14 @@ void save_network(network_t *s, char *filename) {
     }
     str_ptr -= 2;
     str_ptr += sprintf(str_ptr, "\n\t}\n");
-    // fprint(file, "'value': %.2f\n", s->value);
     str_ptr += sprintf(str_ptr, "}\n");
+
+    FILE *file = fopen(filename, "w");
+    if(file == NULL) {
+        printf("Error opening file, here is the results:\n\n%s\n\n", output);
+        perror("Error opening file");
+        return;
+    }
     fprintf(file, "%s", output);
     fclose(file);
 }
@@ -103,6 +104,7 @@ int restore_network(network_t *s, char *filename) {
             memset(temp_arr, 0, sizeof(temp_arr));
             temp_ptr = temp_arr;
             s->net_size = get_int(file);
+            s->neurons = (neuron_t*)malloc(s->net_size * sizeof(neuron_t));
         } else if (0 == strcmp(temp_arr, "num_inputs: "))
         {
             memset(temp_arr, 0, sizeof(temp_arr));
@@ -118,10 +120,6 @@ int restore_network(network_t *s, char *filename) {
             uint32_t num_neurons = 0;
             while(num_neurons < s->net_size) {
                 uint32_t idx = 0;
-                uint32_t num_inputs = 0;
-                uint32_t num_coeffs = 0;
-                uint32_t *inputs = NULL;
-                double *coeffs = NULL;
                 while(test_c != '\"')
                     test_c = (char)fgetc(file);
                 memset(temp_arr, 0, sizeof(temp_arr));
@@ -132,7 +130,7 @@ int restore_network(network_t *s, char *filename) {
                     test_c = (char)fgetc(file);
                 }
                 sscanf(temp_arr, "%d", &idx);
-                printf("Neuron idx = %d\n", idx);
+                // printf("Neuron idx = %d\n", idx);
                 test_c = '0';
                 while(test_c != '\"')
                     test_c = (char)fgetc(file);
@@ -144,15 +142,16 @@ int restore_network(network_t *s, char *filename) {
                         *temp_ptr++ = test_c;
                     }
                     if (0 == strcmp(temp_arr, "num_inputs: ")) {
-                        num_inputs = get_int(file);
-                        inputs = (uint32_t*)malloc(num_inputs * sizeof(uint32_t));
-                        printf("Neuron num_inputs = %d\n", num_inputs);
+                        s->neurons[idx].num_inputs = get_int(file);
+                        s->neurons[idx].inputs = (uint32_t*)malloc(s->neurons[idx].num_inputs * sizeof(uint32_t));
+
+                        // printf("Neuron num_inputs = %d\n", s->neurons[idx].num_inputs);
                         memset(temp_arr, 0, sizeof(temp_arr));
                         temp_ptr = temp_arr;
                     } else if (0 == strcmp(temp_arr, "num_coeffs: ")) {
-                        num_coeffs = get_int(file);
-                        coeffs = (double*)malloc(num_coeffs * sizeof(double));
-                        printf("Neuron num_coeffs = %d\n", num_coeffs);
+                        s->neurons[idx].num_coeffitients = get_int(file);
+                        s->neurons[idx].coeffitients = (double*)malloc(s->neurons[idx].num_coeffitients * sizeof(double));
+                        // printf("Neuron num_coeffs = %d\n", s->neurons[idx].num_coeffitients);
                         memset(temp_arr, 0, sizeof(temp_arr));
                         temp_ptr = temp_arr;
                     } else if (0 == strcmp(temp_arr, "inputs: ")) {
@@ -160,10 +159,10 @@ int restore_network(network_t *s, char *filename) {
                             test_c = (char)fgetc(file);
                         }
                         uint32_t inputs_counter = 0;
-                        while(inputs_counter < num_inputs) {
-                            inputs[inputs_counter++] = get_int(file);
+                        while(inputs_counter < s->neurons[idx].num_inputs) {
+                            s->neurons[idx].inputs[inputs_counter++] = get_int(file);
                         }
-                        if(num_inputs == 0) {
+                        if(s->neurons[idx].num_inputs == 0) {
                             while(test_c != ']') {
                                 test_c = (char)fgetc(file);
                             }
@@ -175,10 +174,10 @@ int restore_network(network_t *s, char *filename) {
                             test_c = (char)fgetc(file);
                         }
                         uint32_t coeff_counter = 0;
-                        while(coeff_counter < num_coeffs) {
-                            coeffs[coeff_counter++] = get_double(file);
+                        while(coeff_counter < s->neurons[idx].num_coeffitients) {
+                            s->neurons[idx].coeffitients[coeff_counter++] = get_double(file);
                         }
-                        if(num_coeffs == 0) {
+                        if(s->neurons[idx].num_coeffitients == 0) {
                             while(test_c != ']') {
                                 test_c = (char)fgetc(file);
                             }
@@ -187,20 +186,20 @@ int restore_network(network_t *s, char *filename) {
                         temp_ptr = temp_arr;
                     }
                 }
-                if(num_inputs > 0) {
-                    printf("inputs: ");
-                    for(uint32_t i=0; i<num_inputs; i++) {
-                        printf("%d, ", inputs[i]);
-                    }
-                    printf("\n");
-                }
-                if(num_coeffs > 0) {
-                    printf("inputs: ");
-                    for(uint32_t i=0; i<num_coeffs; i++) {
-                        printf("%lf, ", coeffs[i]);
-                    }
-                    printf("\n");
-                }
+                // if(s->neurons[idx].num_inputs > 0) {
+                //     printf("inputs: ");
+                //     for(uint32_t i=0; i<s->neurons[idx].num_inputs; i++) {
+                //         printf("%d, ", s->neurons[idx].inputs[i]);
+                //     }
+                //     printf("\n");
+                // }
+                // if(s->neurons[idx].num_coeffitients > 0) {
+                //     printf("coeffitients: ");
+                //     for(uint32_t i=0; i<s->neurons[idx].num_coeffitients; i++) {
+                //         printf("%lf, ", s->neurons[idx].coeffitients[i]);
+                //     }
+                //     printf("\n");
+                // }
                 memset(temp_arr, 0, sizeof(temp_arr));
                 temp_ptr = temp_arr;
                 num_neurons++;
@@ -216,16 +215,15 @@ int test_save_restore_network(char *filename) {
     original_data.net_size = rand();
     original_data.num_inputs = rand() % 256;
     original_data.num_outputs = rand() % 256;
-    // originalData.value = (double)rand() / RAND_MAX * 100.0; // Random double value between 0 and 100
 
     save_network(&original_data, filename);
 
     network_t new_data;
     restore_network(&new_data, filename);
 
-    printf("orig net_size: %u, read value: %u\n", original_data.net_size, new_data.net_size);
-    printf("orig num_inputs: %u, read value: %u\n", original_data.num_inputs, new_data.num_inputs);
-    printf("orig num_outputs: %u, read value: %u\n", original_data.num_outputs, new_data.num_outputs);
+    // printf("orig net_size: %u, read value: %u\n", original_data.net_size, new_data.net_size);
+    // printf("orig num_inputs: %u, read value: %u\n", original_data.num_inputs, new_data.num_inputs);
+    // printf("orig num_outputs: %u, read value: %u\n", original_data.num_outputs, new_data.num_outputs);
 
     if((original_data.net_size != new_data.net_size) &&
        (original_data.num_inputs != new_data.num_inputs) &&

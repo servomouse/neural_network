@@ -3,7 +3,7 @@ import os
 import sys
 
 
-files_to_build = ["main.c", "neuron.c", "network.c", "utils.c"]
+files_to_build = ["main.c", "neuron.c", "network.c", "utils.c", "save_restore.c"]
 output_file_name = "main"
 flags = ["-lm", "-g", "-Wall"]
 

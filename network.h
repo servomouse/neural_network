@@ -17,7 +17,3 @@ double get_output(network_t *net, uint32_t num_inputs, double inputs[]);
 void mutate(network_t *net);
 void repair(network_t *net);
 void print_results(network_t *net);
-
-void save_network(network_t *s, char *filename);
-int restore_network(network_t *s, char *filename);
-int test_save_restore_network(char *filename);

@@ -2,8 +2,14 @@
 
 #include "stdint.h"
 
+typedef struct {
+    uint32_t index;
+    uint32_t id;
+} neuron_input_t;
+
 typedef struct{
-    uint32_t *inputs;
+    neuron_input_t *inputs;
+    // uint32_t *inputs;
     uint32_t num_inputs;
     uint32_t idx;
     double *coeffitients;

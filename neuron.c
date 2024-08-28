@@ -27,13 +27,17 @@ void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t 
     if(num_inputs == 0) return;
 
     neuron->coeffitients = malloc(sizeof(double) * (neuron->num_coeffitients));
-    neuron->inputs = malloc(num_inputs * sizeof(uint32_t));
+    neuron->inputs = (neuron_input_t*)malloc(num_inputs * sizeof(neuron_input_t));
     if(RANDOM_CONNECT || (num_inputs > idx)) {
-        for(uint32_t i=0; i<num_inputs; i++)
-            neuron->inputs[i] = random_int(0, idx);
+        for(uint32_t i=0; i < num_inputs; i++) {
+            neuron->inputs[i].index = random_int(0, idx);
+            neuron->inputs[i].id = random_int(0, 4096);
+        }
     } else {
-        for(uint32_t i=0; i<num_inputs; i++)
-            neuron->inputs[i] = idx-(i+1);
+        for(uint32_t i=0; i<num_inputs; i++) {
+            neuron->inputs[i].index = idx-(i+1);
+            neuron->inputs[i].id = random_int(0, 4096);
+        }
     }
     for(uint32_t i=0; i<(neuron->num_coeffitients); i++)
         neuron->coeffitients[i] = random_double(-0.02, 0.02);
@@ -55,7 +59,7 @@ void calc_output(neuron_t *neuron, neuron_t *net) {
             double temp = neuron->coeffitients[i];
             for(uint32_t j=0; j<(neuron->num_inputs); j++) {
                 if(((1 << j) & i) > 0) {
-                    temp *= net[neuron->inputs[j]].output;
+                    temp *= net[neuron->inputs[j].index].output;
                 }
             }
             neuron->temp_output += temp;

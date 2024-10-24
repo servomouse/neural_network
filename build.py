@@ -2,6 +2,8 @@ import subprocess
 import os
 import sys
 
+# https://www.futurelearn.com/info/courses/python-in-hpc/0/steps/65129
+
 
 files_to_build = ["main.c", "neuron.c", "network.c", "utils.c", "save_restore.c"]
 output_file_name = "main"

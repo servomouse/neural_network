@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three.js Demo</title>
+<style>
+    body { margin: 0; display: flex; }
+    #globalView, #fpvView {
+    width: 50%;
+    height: 100vh;
+    }
+    .controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    }
+    </style>
+</head>
+<body>
+    <div id="globalView"></div>
+    <div id="fpvView">
+        <div class="controls">
+            <button id="stepForward">Step Forward</button>
+            <button id="stepBack">Step Back</button>
+            <button id="turnLeft">Turn Left</button>
+            <button id="turnRight">Turn Right</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// Scene setup
+const cubeSize = 10;
+const arenaSize = 200;
+
+
+const scene = new THREE.Scene();
+
+// Global view setup
+const globalCamera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000);
+const globalRenderer = new THREE.WebGLRenderer();
+globalRenderer.setSize(window.innerWidth / 2, window.innerHeight);
+document.getElementById('globalView').appendChild(globalRenderer.domElement);
+
+// FPV view setup
+const fpvCamera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000);
+const fpvRenderer = new THREE.WebGLRenderer();
+fpvRenderer.setSize(window.innerWidth / 2, window.innerHeight);
+document.getElementById('fpvView').appendChild(fpvRenderer.domElement);
+
+// OrbitControls for global view
+const controls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.25;
+controls.screenSpacePanning = false;
+controls.maxPolarAngle = Math.PI / 2;
+
+// Plane
+const planeGeometry = new THREE.PlaneGeometry(arenaSize, arenaSize);
+const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.rotation.x = -Math.PI / 2;
+scene.add(plane);
+
+// Cubes
+const loader = new THREE.TextureLoader();
+const textures = [
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg')
+];
+const materials = textures.map(texture => new THREE.MeshBasicMaterial({ map: texture }));
+
+const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+// const geometry = new THREE.BoxGeometry();
+
+const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const cubes = [];
+for (let i = 0; i < 10; i++) {
+    const cubesAreaSize = arenaSize - cubeSize;
+    const cube = new THREE.Mesh(cubeGeometry, materials);
+    // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(Math.random() * cubesAreaSize - (cubesAreaSize/2), cubeSize/2, Math.random() * cubesAreaSize - (cubesAreaSize/2));
+    scene.add(cube);
+    cubes.push(cube);
+}
+
+// Lighting
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(0, 100, 100).normalize();
+scene.add(light);
+
+// Set initial camera positions
+globalCamera.position.set(0, 100, 100);
+fpvCamera.position.set(0, 1.6, 0); // Example FPV position
+
+// Sphere to represent FPV camera
+const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const fpvSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+scene.add(fpvSphere);
+
+// Raycaster for collision detection
+const raycaster = new THREE.Raycaster();
+const moveDistance = 1; // Distance to move per step
+
+// Movement and rotation functions with collision detection
+function moveFPVCamera(direction) {
+    const moveVector = direction.clone().normalize().multiplyScalar(moveDistance);
+    const newPosition = fpvCamera.position.clone().add(moveVector);
+
+    // Check for collisions
+    raycaster.set(fpvCamera.position, direction.normalize());
+    const intersects = raycaster.intersectObjects(cubes);
+
+    if (intersects.length === 0 || intersects[0].distance > moveDistance) {
+        fpvCamera.position.copy(newPosition);
+    }
+}
+
+// Movement and rotation functions
+function stepForward() {
+    moveFPVCamera(fpvCamera.getWorldDirection(new THREE.Vector3()));
+}
+
+function stepBack() {
+    moveFPVCamera(fpvCamera.getWorldDirection(new THREE.Vector3()).negate());
+}
+
+function turnLeft() {
+    fpvCamera.rotation.y += Math.PI / 8;
+}
+
+function turnRight() {
+    fpvCamera.rotation.y -= Math.PI / 8;
+}
+
+// Event listeners for buttons
+document.getElementById('stepForward').addEventListener('click', stepForward);
+document.getElementById('stepBack').addEventListener('click', stepBack);
+document.getElementById('turnLeft').addEventListener('click', turnLeft);
+document.getElementById('turnRight').addEventListener('click', turnRight);
+
+// Render loop
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    fpvSphere.position.copy(fpvCamera.position); // Update sphere position
+    globalRenderer.render(scene, globalCamera);
+    fpvRenderer.render(scene, fpvCamera);
+}
+animate();
+</script>
+</body>
+</html>
+</script>
+</body>
+</html>

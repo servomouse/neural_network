@@ -1,21 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wael Yasmina</title>
-    <style>
-        body {
-            margin: 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three.js and Cannon-es Example</title>
+<style>
+body { margin: 0; }
+canvas { display: block; }
+</style>
+<script type="importmap">
+{
+"imports": {
+"three": "./js-libs/three.module.js",
+"three/examples/jsm/controls/OrbitControls": "./js-libs/OrbitControls.js"
+}
+}
+</script>
 </head>
 <body>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
-    <!-- <script type="module" src="OrbitControls.js"></script> -->
-    <script type="module" src="cannon-es.js"></script>
-    <script type="module" src="arena.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script> -->
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as CANNON from './js-libs/cannon-es.js';
+
+// Scene setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// OrbitControls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// Lighting
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(5, 5, 5).normalize();
+scene.add(light);
+
+// Cube
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+// Ground
+const groundGeometry = new THREE.PlaneGeometry(10, 10);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
+
+// Cannon-es setup
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0);
+
+// Cube physics
+const cubeShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
+const cubeBody = new CANNON.Body({ mass: 1 });
+cubeBody.addShape(cubeShape);
+cubeBody.position.set(0, 5, 0);
+world.addBody(cubeBody);
+
+// Ground physics
+const groundShape = new CANNON.Plane();
+const groundBody = new CANNON.Body({ mass: 0 });
+groundBody.addShape(groundShape);
+groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+world.addBody(groundBody);
+
+// Animation loop
+function animate() {
+requestAnimationFrame(animate);
+
+// Update physics
+world.step(1 / 60);
+cube.position.copy(cubeBody.position);
+cube.quaternion.copy(cubeBody.quaternion);
+
+// Update controls
+controls.update();
+
+// Render scene
+renderer.render(scene, camera);
+}
+
+// Initial camera position
+camera.position.set(0, 2, 5);
+controls.update();
+
+animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
 </body>
 </html>

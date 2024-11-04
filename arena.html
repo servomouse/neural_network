@@ -69,31 +69,31 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 scene.add(ground);
 
 // Cubes
-// const loader = new THREE.TextureLoader();
-// const textures = [
-//     loader.load('box.jpg'),
-//     loader.load('box.jpg'),
-//     loader.load('box.jpg'),
-//     loader.load('box.jpg'),
-//     loader.load('box.jpg'),
-//     loader.load('box.jpg')
-// ];
-// const materials = textures.map(texture => new THREE.MeshBasicMaterial({ map: texture }));
+const loader = new THREE.TextureLoader();
+const textures = [
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg'),
+    loader.load('box.jpg')
+];
+const materials = textures.map(texture => new THREE.MeshBasicMaterial({ map: texture }));
 
-// const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
-// // const geometry = new THREE.BoxGeometry();
+// const geometry = new THREE.BoxGeometry();
 
-// const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-// const cubes = [];
-// for (let i = 0; i < 10; i++) {
-//     const cubesAreaSize = arenaSize - cubeSize;
-//     const cube = new THREE.Mesh(cubeGeometry, materials);
-//     // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-//     cube.position.set(Math.random() * cubesAreaSize - (cubesAreaSize/2), cubeSize/2, Math.random() * cubesAreaSize - (cubesAreaSize/2));
-//     scene.add(cube);
-//     cubes.push(cube);
-// }
+const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const cubes = [];
+for (let i = 0; i < 10; i++) {
+    const cubesAreaSize = arenaSize - cubeSize;
+    const cube = new THREE.Mesh(cubeGeometry, materials);
+    // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(Math.random() * cubesAreaSize - (cubesAreaSize/2), cubeSize/2, Math.random() * cubesAreaSize - (cubesAreaSize/2));
+    scene.add(cube);
+    cubes.push(cube);
+}
 
 // Lighting
 const light = new THREE.DirectionalLight(0xffffff, 1);

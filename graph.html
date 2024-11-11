@@ -34,7 +34,59 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.screenSpacePanning = false;
-controls.maxPolarAngle = Math.PI / 2;
+controls.maxPolarAngle = Math.PI;
+controls.zoomToCursor = true;
+
+// // Function to handle zooming towards the cursor
+// function zoomToCursor(event) {
+//     const mouse = new THREE.Vector2();
+//     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+//     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+//     const raycaster = new THREE.Raycaster();
+//     raycaster.setFromCamera(mouse, camera);
+
+//     // Calculate the intersection point with a plane
+//     const plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+//     const intersection = new THREE.Vector3();
+//     raycaster.ray.intersectPlane(plane, intersection);
+
+//     const direction = new THREE.Vector3().subVectors(intersection, camera.position).normalize();
+//     const distance = camera.position.distanceTo(intersection);
+
+//     camera.position.add(direction.multiplyScalar(distance * 0.1));
+//     controls.target.copy(intersection);
+//     controls.update();
+// }
+
+// // Add event listener for mouse wheel
+// window.addEventListener('wheel', zoomToCursor);
+
+// // Function to handle zooming towards the cursor
+// function zoomToCursor(event) {
+//     const mouse = new THREE.Vector2();
+//     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+//     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+//     const raycaster = new THREE.Raycaster();
+//     raycaster.setFromCamera(mouse, camera);
+
+//     const planeNormal = new THREE.Vector3();
+//     camera.getWorldDirection(planeNormal).negate();
+//     const plane = new THREE.Plane(planeNormal, -10);
+//     const intersection = new THREE.Vector3();
+//     raycaster.ray.intersectPlane(plane, intersection);
+
+//     const direction = new THREE.Vector3().subVectors(intersection, camera.position).normalize();
+//     const distance = camera.position.distanceTo(intersection);
+
+//     camera.position.add(direction.multiplyScalar(distance * 0.1));
+//     controls.target.copy(intersection);
+//     controls.update();
+// }
+
+// // Add event listener for mouse wheel
+// window.addEventListener('wheel', zoomToCursor);
 
 // Function to create balls
 function createBalls(nodes) {
@@ -63,7 +115,7 @@ camera.position.z = 50;
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
 }
 animate();
@@ -107,6 +159,32 @@ setTimeout(() => {
     };
     updateBalls(newNodes);
 }, 5000);
+
+const ws = new WebSocket('ws://localhost:8765')
+
+ws.onopen = () => {
+    console.log('ws opened on browser')
+    ws.send('hello world')
+}
+
+ws.onmessage = function(event) {
+  alert(`[message] Data received from server: ${event.data}`);
+};
+
+ws.onerror = function(error) {
+    alert(`[error]`);
+};
+
+ws.onclose = function(event) {
+  if (event.wasClean) {
+    alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+  } else {
+    // e.g. server process killed or network down
+    // event.code is usually 1006 in this case
+    alert('[close] Connection died');
+  }
+};
+
 </script>
 </body>
 </html>

@@ -139,7 +139,7 @@ def send_data(data):
 
 
 def main():
-    network_size = 512   # 32768
+    network_size = 1000   # 32768
     space_size = 10
     init_coords = [int(space_size/2), int(space_size/2), int(space_size/2)]
     space =  [[[None for i in range(space_size)] for j in range(space_size)] for k in range(space_size)]
@@ -162,7 +162,8 @@ def main():
                         space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
                         space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
                         space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
-                        space_nodes[f"{i}-{j}-{k}"]['color'] = '0x00FFFF'
+                        space_nodes[f"{i}-{j}-{k}"]['color'] = hex(random.randint(100, 0x00FFFF))
+                        # space_nodes[f"{i}-{j}-{k}"]['color'] = '0x00FFFF'
         print(f"There are {node_count} nodes in the space")
         while True:
             time.sleep(1)

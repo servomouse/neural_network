@@ -105,11 +105,11 @@ function createBalls(nodes) {
     }
 
     // Add new balls
-    console.log(nodes);
+    // console.log(nodes);
     for (let key in nodes) {
         const node = nodes[key];
-        console.log(node);
-        const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+        // console.log(node);
+        const geometry = new THREE.SphereGeometry(0.1, 32, 32);
         const material = new THREE.MeshBasicMaterial({ color: parseInt(node.color) });
         const ball = new THREE.Mesh(geometry, material);
         ball.position.set(node.coords.x, node.coords.y, node.coords.z);

@@ -32,44 +32,32 @@ def get_dimensions(space, coords, axis, space_size):
     pos_dir = 0
     neg_dir = 0
     c = copy.deepcopy(coords)
+    cell_found = False
     for i in range(coords[axis]+1, space_size):
         c[axis] = i
         node = space[c[0]][c[1]][c[2]]
+        pos_dir += 1
         if node is None:
-            pos_dir += 1
+            cell_found = True
             break
         # if node['blocked']:
         #     pos_dir = space_size
         #     break
-        pos_dir += 1
+    if not cell_found:
+        pos_dir = space_size
+    cell_found = False
     for i in range(coords[axis]-1, 0, -1):
         c[axis] = i
         node = space[c[0]][c[1]][c[2]]
+        neg_dir += 1
         if node is None:
-            neg_dir += 1
+            cell_found = True
             break
         # if node['blocked']:
         #     neg_dir = space_size
         #     break
-        neg_dir += 1
-    # if neg_dir == 0:
-    #     print(f"neg_dir == 0!: {coords = }, {axis = }")
-    if (coords[axis] + pos_dir) == (space_size - 1):
-        pos_dir = space_size
-    if (coords[axis] - neg_dir) < 0:
+    if not cell_found:
         neg_dir = space_size
-    if neg_dir == 0:
-        if coords[axis] == 0:
-            neg_dir = space_size
-        else:
-            neg_dir = 1
-    if pos_dir == 0:
-        if coords[axis] == space_size-1:
-            pos_dir = space_size
-        else:
-            pos_dir = 1
-    if neg_dir == 0 or pos_dir == 0:
-        raise Exception(f"ERROR!!!! {neg_dir = }, {pos_dir = }")
     return neg_dir, pos_dir
 
 
@@ -122,6 +110,7 @@ def divide_node(space, coords, space_size, step):
                     raise Exception(f"Trying to overwrite a node!!! {neg_dir = }, {coords = }, {axis = }, {i = }")
                 space[c2[0]][c2[1]][c2[2]] = space[c1[0]][c1[1]][c1[2]]
                 space[c1[0]][c1[1]][c1[2]] = None
+
         c = copy.deepcopy(coords)
         c[axis] -= 1
         if space[c[0]][c[1]][c[2]] is not None:
@@ -139,14 +128,10 @@ def divide_node(space, coords, space_size, step):
             c1[axis] = i-1
             c2[axis] = i
             if space[c2[0]][c2[1]][c2[2]] is not None:
-                raise Exception(f"Trying to overwrite a node!!!")
+                raise Exception(f"Trying to overwrite a node!!! {neg_dir = }, {coords = }, {axis = }, {i = }")
             space[c2[0]][c2[1]][c2[2]] = space[c1[0]][c1[1]][c1[2]]
             space[c1[0]][c1[1]][c1[2]] = None
 
-            c[axis] = i
-            n = space[c[0]][c[1]][c[2]]
-            c[axis] = i + 1
-            space[c[0]][c[1]][c[2]] = n
         c = copy.deepcopy(coords)
         c[axis] += 1
         space[c[0]][c[1]][c[2]] = node['right_child']
@@ -170,6 +155,11 @@ def get_free_cell(space, new_coords, space_size):
                     n = space[new_coords[0] + i][new_coords[1] + j][new_coords[2] + k]
                     if n is None:
                         return [new_coords[0] + i, new_coords[1] + j, new_coords[2] + k]
+    for i in range(space_size):
+        for j in range(space_size):
+            for k in range(space_size):
+                if space[i][j][k] is None:
+                    return [i, j, k]
     raise Exception(f"Cannot find a free cell for {new_coords = }")
 
 

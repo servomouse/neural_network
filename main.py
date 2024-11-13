@@ -4,6 +4,8 @@ import websockets
 import threading
 import time
 import json
+import sys
+from nodes import move_node, divide_node, count_nodes
 
 # neuron = {
 #     "mov_x": 0,
@@ -18,38 +20,34 @@ import json
 # }
 
 ws_port = 8765
-space_size = 100
 
-space =  [[[None for i in range(space_size)] for j in range(space_size)] for k in range(space_size)]
+# genome = {
+#     "move_to": [0, 0, 0],
+#     "split_dir": 0,
+#     "right_child": None,
+#     "left_child": None,
+#     "neuron_id": 0
+# }
 
-genome = {
-    "move_x": 0,
-    "move_y": 0,
-    "move_z": 0,
-    "split_dir": 'x',
-    "right_child": None,
-    "left_child": None,
-    "neuron_id": 0
-}
-
-network_size = 32   # 32768
 
 def assign_ids(nodes):
+    leaf_counter = 0
     for node in nodes:
         if node['left_child'] is None and node['right_child'] is None:
             node['id'] = random.randint(0, 128)
+            leaf_counter += 1
+    print(f"{leaf_counter = }")
+
 
 def create_node():
     node = {}
-    node["move_x"] = random.randint(-5, 5)
-    node["move_y"] = random.randint(-5, 5)
-    node["move_z"] = random.randint(-5, 5)
-    dirs = ['x', 'y', 'z']
-    node["split_dir"] = dirs[random.randint(0, 2)]
+    node["move_to"] = [random.randint(-5, 5), random.randint(-5, 5), random.randint(-5, 5)]
+    node["split_dir"] = random.randint(0, 2)
     node["right_child"] = None
     node["left_child"] = None
     node["id"] = 0
     return node
+
 
 def create_network(network_size):
     network_size = (network_size * 2) - 1
@@ -65,103 +63,35 @@ def create_network(network_size):
     return nodes[0]
 
 
-init_coords = [int(space_size/2), int(space_size/2), int(space_size/2)]
-
-def move_neuron(coords, new_coords):
-    global space
-    neuron = space[coords[0]][coords[1]][coords[2]]
-    if neuron:
-        space[new_coords[0]][new_coords[1]][new_coords[2]] = neuron
-        space[coords[0]][coords[1]][coords[2]] = None
-
-
-def move_node(coords, axis, direction):
-    global space
-    if direction == 'pos':
-        if axis == 'x':
-            if space[coords[0]+1][coords[1]][coords[2]] is not None:
-                move_node([[coords[0]+1], [coords[1]], [coords[2]]], axis, direction)
-            space[coords[0]+1][coords[1]][coords[2]] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-        elif axis == 'y':
-            if space[coords[0]][coords[1]+1][coords[2]] is not None:
-                move_node([[coords[0]], [coords[1]+1], [coords[2]]], axis, direction)
-            space[coords[0]][coords[1]+1][coords[2]] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-        elif axis == 'z':
-            if space[coords[0]][coords[1]][coords[2]+1] is not None:
-                move_node([[coords[0]], [coords[1]], [coords[2]+1]], axis, direction)
-            space[coords[0]][coords[1]][coords[2]+1] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-    elif direction == 'neg':
-        if axis == 'x':
-            if space[coords[0]-1][coords[1]][coords[2]] is not None:
-                move_node([[coords[0]-1], [coords[1]], [coords[2]]], axis, direction)
-            space[coords[0]-1][coords[1]][coords[2]] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-        elif axis == 'y':
-            if space[coords[0]][coords[1]-1][coords[2]] is not None:
-                move_node([[coords[0]], [coords[1]-1], [coords[2]]], axis, direction)
-            space[coords[0]][coords[1]-1][coords[2]] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-        elif axis == 'z':
-            if space[coords[0]][coords[1]][coords[2]-1] is not None:
-                move_node([[coords[0]], [coords[1]], [coords[2]-1]], axis, direction)
-            space[coords[0]][coords[1]][coords[2]-1] = space[coords[0]][coords[1]][coords[2]]
-            space[coords[0]][coords[1]][coords[2]] = None
-
-
-def process_node(coords):
-    global space
+def process_node(space, coords, space_size):
     node = space[coords[0]][coords[1]][coords[2]]
-    new_coords = [coords[0] + node['move_x'], coords[1] + node['move_y'], coords[2] + node['move_z']]
-    if node["left_child"] is not None and node["right_child"] is not None:
-        space[coords[0]][coords[1]][coords[2]] = None
-        if node['split_dir'] == 'x':
-            if space[new_coords[0]+1][new_coords[1]][new_coords[2]] is not None:
-                move_node([new_coords[0]+1, new_coords[1], new_coords[2]], 'x', 'pos')
-            space[new_coords[0]+1][new_coords[1]][new_coords[2]] = node['left_child']
-            if space[new_coords[0]-1][new_coords[1]][new_coords[2]] is not None:
-                move_node([new_coords[0]-1, new_coords[1], new_coords[2]], 'x', 'neg')
-            space[new_coords[0]-1][new_coords[1]][new_coords[2]] = node['right_child']
-            process_node([new_coords[0]+1, new_coords[1], new_coords[2]])
-            process_node([new_coords[0]-1, new_coords[1], new_coords[2]])
-        if node['split_dir'] == 'y':
-            if space[new_coords[0]][new_coords[1]+1][new_coords[2]] is not None:
-                move_node([new_coords[0], new_coords[1]+1, new_coords[2]], 'y', 'pos')
-            space[new_coords[0]][new_coords[1]+1][new_coords[2]] = node['left_child']
-            if space[new_coords[0]][new_coords[1]-1][new_coords[2]] is not None:
-                move_node([new_coords[0], new_coords[1]-1, new_coords[2]], 'y', 'neg')
-            space[new_coords[0]][new_coords[1]-1][new_coords[2]] = node['right_child']
-            process_node([new_coords[0], new_coords[1]+1, new_coords[2]])
-            process_node([new_coords[0], new_coords[1]-1, new_coords[2]])
-        if node['split_dir'] == 'z':
-            if space[new_coords[0]][new_coords[1]][new_coords[2]+1] is not None:
-                move_node([new_coords[0], new_coords[1], new_coords[2]+1], 'z', 'pos')
-            space[new_coords[0]][new_coords[1]][new_coords[2]+1] = node['left_child']
-            if space[new_coords[0]][new_coords[1]][new_coords[2]-1] is not None:
-                move_node([new_coords[0], new_coords[1], new_coords[2]-1], 'z', 'neg')
-            space[new_coords[0]][new_coords[1]][new_coords[2]-1] = node['right_child']
-            process_node([new_coords[0], new_coords[1], new_coords[2]+1])
-            process_node([new_coords[0], new_coords[1], new_coords[2]-1])
-    elif node["left_child"] is not None:
-        space[coords[0]][coords[1]][coords[2]] = None
-        space[new_coords[0]][new_coords[1]][new_coords[2]] = node["left_child"]
-        process_node([new_coords[0], new_coords[1], new_coords[2]])
-    elif node["right_child"] is not None:
-        space[coords[0]][coords[1]][coords[2]] = None
-        space[new_coords[0]][new_coords[1]][new_coords[2]] = node["right_child"]
-        process_node([new_coords[0], new_coords[1], new_coords[2]])
-    else:
-        space[new_coords[0]][new_coords[1]][new_coords[2]] = node
+    if node is None:
+        return False
+    if (node['left_child'] is None) and (node['right_child'] is None):
+        return False
+    count = count_nodes(space, space_size)
+    new_coords = move_node(space, coords, node["move_to"], space_size)
+    node = space[new_coords[0]][new_coords[1]][new_coords[2]]
+    expect_increase = False
+    if (node['left_child'] is not None) and (node['right_child'] is not None):
+        expect_increase = True
+    divide_node(space, new_coords, space_size, 1)
+    new_count = count_nodes(space, space_size)
+    if expect_increase and (new_count <= count):
+        raise Exception(f"Network size didn't increase: {count = }, {new_count = }")
+    return True
 
 
-def unfold_genome(genome, init_coords):
-    global space
-    space[init_coords[0]][init_coords[1]][init_coords[2]] = genome
-    print(f"{space[init_coords[0]][init_coords[1]][init_coords[2]] = }")
-    print(f"{space[init_coords[0]][init_coords[1]][init_coords[2]]['move_x'] = }")
-    process_node(init_coords)
+def unfold_genome(space, root_cell, init_coords, space_size):
+    space[init_coords[0]][init_coords[1]][init_coords[2]] = root_cell
+    need_to_continue = True
+    while need_to_continue:
+        need_to_continue = False
+        for i in range(space_size):
+            for j in range(space_size):
+                for k in range(space_size):
+                    if process_node(space, [i, j, k], space_size):
+                        need_to_continue = True
 
  
 # Global variable to store the WebSocket connection
@@ -209,22 +139,31 @@ def send_data(data):
 
 
 def main():
-    global space
+    network_size = 512   # 32768
+    space_size = 10
+    init_coords = [int(space_size/2), int(space_size/2), int(space_size/2)]
+    space =  [[[None for i in range(space_size)] for j in range(space_size)] for k in range(space_size)]
+
+    if network_size > (space_size ** 3):
+        print("Network is too large and does not fit into the given space")
+        sys.exit()
+    unfold_genome(space, create_network(network_size), init_coords, space_size)
     server_thread = threading.Thread(target=start_server)
     server_thread.start()
+    node_count = 0
     try:
-        unfold_genome(create_network(network_size), init_coords)
         for i in range(space_size):
             for j in range(space_size):
                 for k in range(space_size):
                     if space[i][j][k] is not None:
+                        node_count += 1
                         space_nodes[f"{i}-{j}-{k}"] = {}
                         space_nodes[f"{i}-{j}-{k}"]['coords'] = {}
                         space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
                         space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
                         space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
                         space_nodes[f"{i}-{j}-{k}"]['color'] = '0x00FFFF'
-
+        print(f"There are {node_count} nodes in the space")
         while True:
             time.sleep(1)
             # send_data({'array': [1, 2, 3, 4, 5]})

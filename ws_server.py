@@ -5,8 +5,8 @@ import threading
 import select
 import time
 
+
 HOST = 'localhost'
-PORT = 8765
 stop_server_flag = False
 server_socket = None
 ws_server = None
@@ -141,7 +141,8 @@ def stop_server():
     stop_server_flag = True
     ws_server.join()
 
-
+# Example of usage:
+PORT = 8765
 if __name__ == "__main__":
     start_server(PORT)
     try:

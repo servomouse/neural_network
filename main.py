@@ -10,6 +10,11 @@ import ws_server as ws
 
 ws_port = 8765
 
+neurone_types = [
+    "input",
+    "type_0"
+]
+
 # Example structure
 # neuron = {
 #     "move_to": [0, 0, 0],

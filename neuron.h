@@ -20,7 +20,7 @@ typedef struct{
     } old_coeffitient;
     double temp_output;
     double output;
-}neuron_t;
+} neuron_t;
 
 void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t idx);
 void deinit_neuron(neuron_t *neuron);

@@ -6,22 +6,12 @@ import time
 import json
 import sys
 from nodes import move_node, divide_node, count_nodes
-
-# neuron = {
-#     "mov_x": 0,
-#     "mov_y": 0,
-#     "mov_z": 0,
-#     "rot_x": 0,
-#     "rot_y": 0,
-#     "rot_z": 0,
-#     "right_child": None,
-#     "left_child": None,
-#     "neuron_id": 0
-# }
+import ws_server as ws
 
 ws_port = 8765
 
-# genome = {
+# Example structure
+# neuron = {
 #     "move_to": [0, 0, 0],
 #     "split_dir": 0,
 #     "right_child": None,
@@ -46,6 +36,7 @@ def create_node():
     node["right_child"] = None
     node["left_child"] = None
     node["id"] = 0
+    node['color'] = hex(random.randint(100, 0x00FFFF))
     return node
 
 
@@ -92,50 +83,26 @@ def unfold_genome(space, root_cell, init_coords, space_size):
                 for k in range(space_size):
                     if process_node(space, [i, j, k], space_size):
                         need_to_continue = True
-
- 
-# Global variable to store the WebSocket connection
-client_connection = None
-async_loop = None
-shutdown_event = None
-
-space_nodes = {}
-
-async def handler(websocket, path):
-    global client_connection
-    client_connection = websocket
-    try:
-        async for message in websocket:
-            print(f"Received message: {message}")
-            # await client_connection.send(json.dumps({'array': [1, 2, 3, 4, 5]}))
-            await client_connection.send(json.dumps(space_nodes))
-    except websockets.ConnectionClosed:
-        print("Client disconnected")
-    finally:
-        client_connection = None
+                        send_graph(space, space_size)
+                        time.sleep(1)
 
 
-async def run_server():
-    global async_loop, shutdown_event
-    shutdown_event = asyncio.Event()
-    async_loop = asyncio.get_running_loop()
-    server = await websockets.serve(handler, "localhost", ws_port)
-    await shutdown_event.wait()
-    server.close()
-    await server.wait_closed()
-
-
-def start_server():
-    asyncio.run(run_server())
-
-
-def send_data(data):
-    global client_connection, async_loop
-    if client_connection:
-        print(f"Sending {data = }")
-        # async_loop.run_until_complete(client_connection.send(data))
-        async_loop.run_until_complete(client_connection.send(json.dumps(data)))
-        # asyncio.run_coroutine_threadsafe(client_connection.send(data), async_loop)
+def send_graph(space, space_size):
+    space_nodes = {}
+    node_count = 0
+    for i in range(space_size):
+            for j in range(space_size):
+                for k in range(space_size):
+                    if space[i][j][k] is not None:
+                        node_count += 1
+                        space_nodes[f"{i}-{j}-{k}"] = {}
+                        space_nodes[f"{i}-{j}-{k}"]['coords'] = {}
+                        space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
+                        space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
+                        space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
+                        space_nodes[f"{i}-{j}-{k}"]['color'] = space[i][j][k]['color']  # hex(random.randint(100, 0x00FFFF))
+    print(f"There are {node_count} nodes in the space")
+    ws.send_data(json.dumps(space_nodes))
 
 
 def main():
@@ -147,31 +114,20 @@ def main():
     if network_size > (space_size ** 3):
         print("Network is too large and does not fit into the given space")
         sys.exit()
-    unfold_genome(space, create_network(network_size), init_coords, space_size)
-    server_thread = threading.Thread(target=start_server)
-    server_thread.start()
+    ws.start_server(ws_port)
     node_count = 0
     try:
+        unfold_genome(space, create_network(network_size), init_coords, space_size)
         for i in range(space_size):
             for j in range(space_size):
                 for k in range(space_size):
                     if space[i][j][k] is not None:
                         node_count += 1
-                        space_nodes[f"{i}-{j}-{k}"] = {}
-                        space_nodes[f"{i}-{j}-{k}"]['coords'] = {}
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
-                        space_nodes[f"{i}-{j}-{k}"]['color'] = hex(random.randint(100, 0x00FFFF))
-                        # space_nodes[f"{i}-{j}-{k}"]['color'] = '0x00FFFF'
         print(f"There are {node_count} nodes in the space")
         while True:
             time.sleep(1)
-            # send_data({'array': [1, 2, 3, 4, 5]})
     except KeyboardInterrupt:
-        async_loop.call_soon_threadsafe(shutdown_event.set)
-        server_thread.join()
-        print("Server stopped")
+        ws.stop_server()
 
 
 if __name__ == "__main__":

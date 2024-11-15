@@ -15,21 +15,15 @@ canvas { display: block; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js
 "></script>
 <script>
-// Initial JSON object
-// let nodes = {
-//     '001': { 'coords': { 'x': 10, 'y': 3, 'z': 5 }, 'color': '0xFF0000' },
-//     '002': { 'coords': { 'x': 5, 'y': -2, 'z': 55 }, 'color': '0x00FF00' },
-//     '003': { 'coords': { 'x': 8, 'y': 14, 'z': 0 }, 'color': '0x0000FF' }
-// };
 let nodes = {
-    "41-51-49": {"coords": {"x": 41, "y": 51, "z": 49}, "color": "0x00FFFF"},
-    "44-52-46": {"coords": {"x": 44, "y": 52, "z": 46}, "color": "0x00FFFF"},
-    "44-53-49": {"coords": {"x": 44, "y": 53, "z": 49}, "color": "0x00FFFF"},
-    "44-53-51": {"coords": {"x": 44, "y": 53, "z": 51}, "color": "0x00FFFF"},
-    "46-50-50": {"coords": {"x": 46, "y": 50, "z": 50}, "color": "0x00FFFF"},
-    "46-52-46": {"coords": {"x": 46, "y": 52, "z": 46}, "color": "0x00FFFF"},
-    "47-57-51": {"coords": {"x": 47, "y": 57, "z": 51}, "color": "0x00FFFF"},
-    "49-51-52": {"coords": {"x": 49, "y": 51, "z": 52}, "color": "0x00FFFF"}}
+    "41-51-49": {"coords": {"x": 4, "y": 4, "z": 4}, "color": "0x00FFFF"},
+    "44-52-46": {"coords": {"x": 5, "y": 4, "z": 4}, "color": "0x00FFFF"},
+    "44-53-49": {"coords": {"x": 4, "y": 5, "z": 4}, "color": "0x00FFFF"},
+    "44-53-51": {"coords": {"x": 5, "y": 5, "z": 4}, "color": "0x00FFFF"},
+    "46-50-50": {"coords": {"x": 4, "y": 4, "z": 5}, "color": "0x00FFFF"},
+    "46-52-46": {"coords": {"x": 5, "y": 4, "z": 5}, "color": "0x00FFFF"},
+    "47-57-51": {"coords": {"x": 4, "y": 5, "z": 5}, "color": "0x00FFFF"},
+    "47-57-52": {"coords": {"x": 5, "y": 5, "z": 5}, "color": "0x00FFFF"}}
 
 // Scene setup
 const scene = new THREE.Scene();
@@ -48,79 +42,49 @@ controls.zoomToCursor = true;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 1.0;
 
-// // Function to handle zooming towards the cursor
-// function zoomToCursor(event) {
-//     const mouse = new THREE.Vector2();
-//     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-//     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function updateSpheres(sphereDict) {
+    // Create a map to track existing spheres by their coordinates
+    const existingSpheres = new Map();
 
-//     const raycaster = new THREE.Raycaster();
-//     raycaster.setFromCamera(mouse, camera);
+    // Iterate over the children of the scene to find existing spheres
+    scene.children.forEach(child => {
+        if (child.isMesh && child.geometry.type === 'SphereGeometry') {
+            const key = `${child.position.x},${child.position.y},${child.position.z}`;
+            existingSpheres.set(key, child);
+        }
+    });
 
-//     // Calculate the intersection point with a plane
-//     const plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
-//     const intersection = new THREE.Vector3();
-//     raycaster.ray.intersectPlane(plane, intersection);
+    // Iterate over the dictionary to update or add spheres
+    for (const key in sphereDict) {
+        const { coords, color } = sphereDict[key];
+        const positionKey = `${coords.x},${coords.y},${coords.z}`;
 
-//     const direction = new THREE.Vector3().subVectors(intersection, camera.position).normalize();
-//     const distance = camera.position.distanceTo(intersection);
-
-//     camera.position.add(direction.multiplyScalar(distance * 0.1));
-//     controls.target.copy(intersection);
-//     controls.update();
-// }
-
-// // Add event listener for mouse wheel
-// window.addEventListener('wheel', zoomToCursor);
-
-// // Function to handle zooming towards the cursor
-// function zoomToCursor(event) {
-//     const mouse = new THREE.Vector2();
-//     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-//     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-//     const raycaster = new THREE.Raycaster();
-//     raycaster.setFromCamera(mouse, camera);
-
-//     const planeNormal = new THREE.Vector3();
-//     camera.getWorldDirection(planeNormal).negate();
-//     const plane = new THREE.Plane(planeNormal, -10);
-//     const intersection = new THREE.Vector3();
-//     raycaster.ray.intersectPlane(plane, intersection);
-
-//     const direction = new THREE.Vector3().subVectors(intersection, camera.position).normalize();
-//     const distance = camera.position.distanceTo(intersection);
-
-//     camera.position.add(direction.multiplyScalar(distance * 0.1));
-//     controls.target.copy(intersection);
-//     controls.update();
-// }
-
-// // Add event listener for mouse wheel
-// window.addEventListener('wheel', zoomToCursor);
-
-// Function to create balls
-function createBalls(nodes) {
-    // Remove existing balls
-    while (scene.children.length > 0) {
-        scene.remove(scene.children[0]);
+        if (existingSpheres.has(positionKey)) {
+            // Update the color if the sphere already exists
+            const existingSphere = existingSpheres.get(positionKey);
+            if (existingSphere.material.color.getHexString() !== color.replace('0x', '')) {
+                existingSphere.material.color.setHex(color);
+            }
+                // Remove from the map to keep track of spheres that should remain
+                existingSpheres.delete(positionKey);
+        } else {
+            // Create a new sphere if it doesn't exist
+            const geometry = new THREE.SphereGeometry(0.1, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: parseInt(color, 16) });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(coords.x, coords.y, coords.z);
+            scene.add(sphere);
+        }
     }
 
-    // Add new balls
-    // console.log(nodes);
-    for (let key in nodes) {
-        const node = nodes[key];
-        // console.log(node);
-        const geometry = new THREE.SphereGeometry(0.1, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: parseInt(node.color) });
-        const ball = new THREE.Mesh(geometry, material);
-        ball.position.set(node.coords.x, node.coords.y, node.coords.z);
-        scene.add(ball);
-    }
+    // Remove spheres that are not in the dictionary
+    existingSpheres.forEach(sphere => {
+        scene.remove(sphere);
+    });
 }
 
 // Initial ball creation
-createBalls(nodes);
+updateSpheres(nodes);
 
 // Camera position
 camera.position.z = 50;
@@ -138,7 +102,7 @@ animate();
 // Function to update balls
 function updateBalls(newNodes) {
     nodes = newNodes;
-    createBalls(nodes);
+    updateSpheres(nodes);
 }
 
 // Example of updating the balls after 5 seconds
@@ -149,28 +113,6 @@ function updateBalls(newNodes) {
     //     '003': { 'coords': { 'x': 2, 'y': 0, 'z': 0 }, 'color': '0x00FFFF' },
     //     '004': { 'coords': { 'x': 0, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
     //     '005': { 'coords': { 'x': 1, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
-    //     '006': { 'coords': { 'x': 2, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
-    //     '007': { 'coords': { 'x': 0, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-    //     '008': { 'coords': { 'x': 1, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-    //     '009': { 'coords': { 'x': 2, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-    //     '010': { 'coords': { 'x': 0, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '011': { 'coords': { 'x': 1, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '012': { 'coords': { 'x': 2, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '013': { 'coords': { 'x': 0, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '014': { 'coords': { 'x': 1, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '015': { 'coords': { 'x': 2, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '016': { 'coords': { 'x': 0, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '017': { 'coords': { 'x': 1, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '018': { 'coords': { 'x': 2, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-    //     '019': { 'coords': { 'x': 0, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '020': { 'coords': { 'x': 1, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '021': { 'coords': { 'x': 2, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '022': { 'coords': { 'x': 0, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '023': { 'coords': { 'x': 1, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '024': { 'coords': { 'x': 2, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '025': { 'coords': { 'x': 0, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '026': { 'coords': { 'x': 1, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
-    //     '027': { 'coords': { 'x': 2, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
     // };
 //     updateBalls(newNodes);
 // }, 5000);
@@ -189,13 +131,7 @@ socket.onmessage = (event) => {
 };
 
 socket.onclose = () => {
-  if (event.wasClean) {
-    console.error(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
-  } else {
-    // e.g. server process killed or network down
-    // event.code is usually 1006 in this case
-    console.error('[close] Disconnected from server');
-  }
+  console.error('[close] Disconnected from server');
 };
 
 socket.onerror = (error) => {

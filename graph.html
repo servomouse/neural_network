@@ -41,10 +41,12 @@ document.body.appendChild(renderer.domElement);
 // Orbit controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.25;
+// controls.dampingFactor = 1;
 controls.screenSpacePanning = false;
 controls.maxPolarAngle = Math.PI;
 controls.zoomToCursor = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.0;
 
 // // Function to handle zooming towards the cursor
 // function zoomToCursor(event) {
@@ -122,11 +124,13 @@ createBalls(nodes);
 
 // Camera position
 camera.position.z = 50;
+camera.lookAt(new THREE.Vector3(4.5, 4.5, 4.5));
+controls.target.set(4.5, 4.5, 4.5);
 
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    // controls.update();
+    controls.update();
     renderer.render(scene, camera);
 }
 animate();
@@ -139,65 +143,64 @@ function updateBalls(newNodes) {
 
 // Example of updating the balls after 5 seconds
 // setTimeout(() => {
-//     const newNodes = {
-//         '001': { 'coords': { 'x': 0, 'y': 0, 'z': 0 }, 'color': '0xFFFF00' },
-//         '002': { 'coords': { 'x': 1, 'y': 0, 'z': 0 }, 'color': '0xFF00FF' },
-//         '003': { 'coords': { 'x': 2, 'y': 0, 'z': 0 }, 'color': '0x00FFFF' },
-//         '004': { 'coords': { 'x': 0, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
-//         '005': { 'coords': { 'x': 1, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
-//         '006': { 'coords': { 'x': 2, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
-//         '007': { 'coords': { 'x': 0, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-//         '008': { 'coords': { 'x': 1, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-//         '009': { 'coords': { 'x': 2, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
-//         '010': { 'coords': { 'x': 0, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-//         '011': { 'coords': { 'x': 1, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-//         '012': { 'coords': { 'x': 2, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
-//         '013': { 'coords': { 'x': 0, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-//         '014': { 'coords': { 'x': 1, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-//         '015': { 'coords': { 'x': 2, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
-//         '016': { 'coords': { 'x': 0, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-//         '017': { 'coords': { 'x': 1, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-//         '018': { 'coords': { 'x': 2, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
-//         '019': { 'coords': { 'x': 0, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-//         '020': { 'coords': { 'x': 1, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-//         '021': { 'coords': { 'x': 2, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
-//         '022': { 'coords': { 'x': 0, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-//         '023': { 'coords': { 'x': 1, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-//         '024': { 'coords': { 'x': 2, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
-//         '025': { 'coords': { 'x': 0, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
-//         '026': { 'coords': { 'x': 1, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
-//         '027': { 'coords': { 'x': 2, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
-//     };
+    // const newNodes = {
+    //     '001': { 'coords': { 'x': 0, 'y': 0, 'z': 0 }, 'color': '0xFFFF00' },
+    //     '002': { 'coords': { 'x': 1, 'y': 0, 'z': 0 }, 'color': '0xFF00FF' },
+    //     '003': { 'coords': { 'x': 2, 'y': 0, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '004': { 'coords': { 'x': 0, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '005': { 'coords': { 'x': 1, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '006': { 'coords': { 'x': 2, 'y': 1, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '007': { 'coords': { 'x': 0, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '008': { 'coords': { 'x': 1, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '009': { 'coords': { 'x': 2, 'y': 2, 'z': 0 }, 'color': '0x00FFFF' },
+    //     '010': { 'coords': { 'x': 0, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '011': { 'coords': { 'x': 1, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '012': { 'coords': { 'x': 2, 'y': 0, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '013': { 'coords': { 'x': 0, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '014': { 'coords': { 'x': 1, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '015': { 'coords': { 'x': 2, 'y': 1, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '016': { 'coords': { 'x': 0, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '017': { 'coords': { 'x': 1, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '018': { 'coords': { 'x': 2, 'y': 2, 'z': 1 }, 'color': '0x00FFFF' },
+    //     '019': { 'coords': { 'x': 0, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '020': { 'coords': { 'x': 1, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '021': { 'coords': { 'x': 2, 'y': 0, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '022': { 'coords': { 'x': 0, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '023': { 'coords': { 'x': 1, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '024': { 'coords': { 'x': 2, 'y': 1, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '025': { 'coords': { 'x': 0, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '026': { 'coords': { 'x': 1, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
+    //     '027': { 'coords': { 'x': 2, 'y': 2, 'z': 2 }, 'color': '0x00FFFF' },
+    // };
 //     updateBalls(newNodes);
 // }, 5000);
 
-const ws = new WebSocket('ws://localhost:8765')
+const socket = new WebSocket('ws://localhost:8765');
 
-ws.onopen = () => {
-    console.log('ws opened on browser')
-    ws.send('hello world')
-}
+let receivedChunks = [];
 
-ws.onmessage = function(event) {
-    console.log(`[message] Data received from server: ${event.data}`);
+socket.onopen = () => {
+    console.log('Connected to the server');
+};
+
+socket.onmessage = (event) => {
     const obj = JSON.parse(event.data);
     updateBalls(obj);
 };
 
-ws.onerror = function(error) {
-    alert(`[error]`);
-};
-
-ws.onclose = function(event) {
+socket.onclose = () => {
   if (event.wasClean) {
-    alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+    console.error(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
   } else {
     // e.g. server process killed or network down
     // event.code is usually 1006 in this case
-    alert('[close] Connection died');
+    console.error('[close] Disconnected from server');
   }
 };
 
+socket.onerror = (error) => {
+    console.error('WebSocket error:', error);
+};
 </script>
 </body>
 </html>

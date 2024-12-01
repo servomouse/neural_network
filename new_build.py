@@ -9,7 +9,11 @@ targets = {
     "nanite": {
         "build_files": ["nanite.c", "utils.c"],
         "output_file": "nanite.dll"
-    }
+    },
+    "controller": {
+        "build_files": ["neuron_kapellmeister.c", "utils.c"],
+        "output_file": "controller.dll"
+    },
 }
 
 

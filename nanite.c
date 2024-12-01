@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include "utils.h"
 #include "nanite.h"
 
@@ -26,6 +27,7 @@ double activation_func(double sum) {
 
 DLL_PREFIX
 void init(uint32_t num_inputs) {
+    srand(time(NULL));
     if(params.inputs) {
         free(params.inputs);
     }

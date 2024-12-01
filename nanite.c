@@ -26,8 +26,17 @@ double activation_func(double sum) {
 
 DLL_PREFIX
 void init(uint32_t num_inputs) {
+    if(params.inputs) {
+        free(params.inputs);
+    }
     params.inputs = calloc(num_inputs, sizeof(double));
+    if(params.indices) {
+        free(params.indices);
+    }
     params.indices = calloc(num_inputs, sizeof(uint32_t));
+    if(params.coeffs) {
+        free(params.coeffs);
+    }
     params.coeffs = calloc(num_inputs+1, sizeof(double));
     for(int i=0; i<num_inputs+1; i++) {
         params.coeffs[i] = random_double(-1.0, 1.0);
@@ -69,9 +78,9 @@ void restore_state(char *filename) {
     char *indices_arr_fname = concat_strings("indices_", filename);
     char *coeffs_arr_fname = concat_strings("coeffs_", filename);
     restore_data(&params, sizeof(params), filename);
-    params.inputs = malloc(params.num_inputs * sizeof(double));
-    params.indices = malloc(params.num_inputs * sizeof(uint32_t));
-    params.coeffs = malloc((params.num_inputs+1) * sizeof(double));
+    // params.inputs = malloc(params.num_inputs * sizeof(double));
+    // params.indices = malloc(params.num_inputs * sizeof(uint32_t));
+    // params.coeffs = malloc((params.num_inputs+1) * sizeof(double));
     restore_data(params.inputs, params.num_inputs * sizeof(double), inputs_arr_fname);
     restore_data(params.indices, params.num_inputs * sizeof(uint32_t), indices_arr_fname);
     restore_data(params.coeffs, (params.num_inputs+1) * sizeof(double), coeffs_arr_fname);

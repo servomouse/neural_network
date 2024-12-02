@@ -11,6 +11,10 @@ typedef struct {
     uint32_t *indices;
     double *coeffs;     // bias is coeffs[num_inputs]
     uint32_t num_inputs;
+    double feedback_error;  // Error calculated by neurons connected to the output
+    double global_error;    // Error of the entire network
+    uint32_t last_idx;
+    double last_value;
 } nanite_params_t;
 
 nanite_params_t params;
@@ -58,6 +62,28 @@ double get_output(double *inputs) {
         result += inputs[i] * params.coeffs[i];
     }
     return activation_func(result);
+}
+
+DLL_PREFIX
+void set_feedback_error(double error) {
+    params.feedback_error = error;
+}
+
+DLL_PREFIX
+void set_global_error(double error) {
+    params.global_error = error;
+}
+
+DLL_PREFIX
+void mutate(void) {
+    params.last_idx = random_int(params.num_inputs, params.num_inputs+1);
+    params.last_value = params.coeffs[params.last_idx];
+    params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
+}
+
+DLL_PREFIX
+void restore(void) {
+    params.coeffs[params.last_idx] = params.last_value;
 }
 
 DLL_PREFIX

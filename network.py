@@ -10,6 +10,8 @@ class Nanite:
         self.save_state = get_dll_function(self.nanite, "void save_state(char*)")
         self.restore_state = get_dll_function(self.nanite, "void restore_state(char*)")
         self.get_output = get_dll_function(self.nanite, "double get_output(double*)")
+        self.mutate = get_dll_function(self.nanite, "void mutate(void)")
+        self.restore = get_dll_function(self.nanite, "void restore(void)")
         get_output_func_p = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.POINTER(ctypes.c_double))
         self.get_output_p = get_output_func_p(self.get_output)
         self.init(8)

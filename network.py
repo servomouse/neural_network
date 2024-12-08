@@ -1,5 +1,6 @@
 import ctypes
 from ctypes_wrapper import get_dll_function
+import random
 
 
 class Nanite:
@@ -20,6 +21,7 @@ class Nanite:
 
 class Network:
     def __init__(self, filename, net_map:list, network_depth):
+        """ network_depth: how many times to updat ethe network before getting the result """
         self.network_depth = network_depth
         self.controller = ctypes.CDLL(filename)
         self.init = get_dll_function(self.controller, "void init(uint32_t, uint32_t)")
@@ -69,3 +71,38 @@ class Network:
         for i in range(self.num_neurons - self.num_outputs, self.num_neurons):
             ret_vals.append(self.get_value(i))
         return ret_vals
+
+
+def create_network_map(layers: list, max_neuron_inputs_num: int):
+    """ Set max_neuron_inputs_num to -1 to disable limit of numbers of inputs """
+    network = []
+    counter = 0
+    num_neurons = 0
+    for i in layers:
+        num_neurons += i
+    for layer in layers:
+        network.append([])
+        for i in range(layer):
+            network[-1].append(counter)
+            counter += 1
+    links = {}
+    for i in range(1, len(network)):
+        for j in network[i]:
+            if max_neuron_inputs_num == -1:
+                links[f"{j}"] = network[i-1]
+            else:
+                if len(network[i-1]) > (len(network[i]) * max_neuron_inputs_num):
+                    print(f"Warning: layer {i-1} is too wide or layer {i} is too small: cannot connect all the neurons from layer {i-1} to layer {i}!")
+                if len(network[i-1]) > max_neuron_inputs_num:
+                    links[f"{j}"] = random.sample(network[i-1], max_neuron_inputs_num)
+                else:
+                    links[f"{j}"] = network[i-1]
+    map = []
+    for i in range(layers[0]):
+        map.append({"type": "input", "inputs": [], "id": i})
+    for key, value in links.items():
+        map.append({"type": "hidden", "inputs": value, "id": int(key)})
+    num_outputs = layers[-1]
+    for i in range(num_neurons - num_outputs, num_neurons):
+        map[i]["type"] = "output"
+    return map

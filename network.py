@@ -4,7 +4,8 @@ import random
 
 
 class Nanite:
-    def __init__(self, filename):
+    def __init__(self, filename, num_inputs):
+        print(f"Creating neuron with {num_inputs} inputs")
         self.nanite = ctypes.CDLL(filename)
         self.init = get_dll_function(self.nanite, "void init(uint32_t)")
         self.set_input_idx = get_dll_function(self.nanite, "void set_input_idx(uint32_t, uint32_t)")
@@ -15,8 +16,8 @@ class Nanite:
         self.restore = get_dll_function(self.nanite, "void restore(void)")
         get_output_func_p = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.POINTER(ctypes.c_double))
         self.get_output_p = get_output_func_p(self.get_output)
-        self.init(8)
-        print("Nanite initialized!")
+        self.init(num_inputs)
+        # print("Nanite initialized!")
 
 
 class Network:
@@ -41,6 +42,7 @@ class Network:
         self.num_inputs = 0
         self.num_outputs = 0
         self.neurons = []
+        self.last_mutated_neuron = 0
         for i in range(self.num_neurons):
             if net_map[i]['type'] == 'input':
                 self.num_inputs += 1
@@ -52,7 +54,7 @@ class Network:
             if net_map[i]['type'] == 'input':
                 self.neurons.append(None)
             else:
-                nanite = Nanite("bin/nanite.dll")
+                nanite = Nanite("bin/nanite.dll", len(net_map[i]['inputs']))
                 self.set_output_function(i, nanite.get_output_p)
                 for j in range(len(net_map[i]['inputs'])):
                     nanite.set_input_idx(j, net_map[i]['inputs'][j])
@@ -71,6 +73,18 @@ class Network:
         for i in range(self.num_neurons - self.num_outputs, self.num_neurons):
             ret_vals.append(self.get_value(i))
         return ret_vals
+    
+    def mutate(self):
+        self.last_mutated_neuron = random.randint(self.num_inputs, self.num_neurons-1)
+        try:
+            self.neurons[self.last_mutated_neuron].mutate()
+        except IndexError:
+            print(f"Tried to mutate neuron {self.last_mutated_neuron}!")
+            raise Exception("AAAAAAAAAA!!!!!1")
+    
+    def restore(self):
+        self.neurons[self.last_mutated_neuron].restore()
+
 
 
 def create_network_map(layers: list, max_neuron_inputs_num: int):

@@ -38,7 +38,7 @@ void set_value(uint32_t idx, double value) {
 
 DLL_PREFIX
 double get_value(uint32_t idx) {
-    printf("Getting value of network[%d]: %lf\n", idx, net.arr[net.input_arr][idx]);
+    // printf("Getting value of network[%d]: %lf\n", idx, net.arr[net.input_arr][idx]);
     return net.arr[net.input_arr][idx];
 }
 
@@ -46,11 +46,11 @@ DLL_PREFIX
 void tick_network(void) {
     for(int i=0; i<net.num_inputs; i++) {
         net.arr[net.output_arr][i] = net.arr[net.input_arr][i];
-        printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
+        // printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
     }
     for(int i=net.num_inputs; i<net.net_size; i++) {
         net.arr[net.output_arr][i] = net.output_func[i](net.arr[net.input_arr]);
-        printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
+        // printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
     }
 }
 

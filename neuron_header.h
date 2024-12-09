@@ -10,5 +10,13 @@ typedef struct{
     uint16_t  coeffs_num;
 } config_t;
 
+#ifdef __unix__
+    #define ABI_FUNCTION 
+#elif defined(_WIN32) || defined(WIN32)
+    #define ABI_FUNCTION __declspec(dllexport)
+#endif
+
 void init_neuron(config_t *config);
-void calc_output(void);
+double get_output(void);
+void set_output(double value);
+void set_inputs(double *inputs);

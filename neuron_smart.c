@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "utils.h"
-#include "nanite.h"
+#include "neuron_smart.h"
 
 // Linear nanite
 
@@ -10,6 +10,7 @@ typedef struct {
     double *inputs;
     uint32_t *indices;
     double *coeffs;     // bias is coeffs[num_inputs]
+    uint32_t num_coeffs;
     uint32_t num_inputs;
     double feedback_error;  // Error calculated by neurons connected to the output
     double global_error;    // Error of the entire network
@@ -32,6 +33,8 @@ double activation_func(double sum) {
 DLL_PREFIX
 void init(uint32_t num_inputs) {
     srand(time(NULL));
+    params.num_inputs = num_inputs;
+    params.num_coeffs = 1 << num_inputs;
     if(params.inputs) {
         free(params.inputs);
     }
@@ -43,11 +46,10 @@ void init(uint32_t num_inputs) {
     if(params.coeffs) {
         free(params.coeffs);
     }
-    params.coeffs = calloc(num_inputs+1, sizeof(double));
+    params.coeffs = calloc(params.num_coeffs, sizeof(double));
     for(int i=0; i<num_inputs+1; i++) {
         params.coeffs[i] = random_double(-1.0, 1.0);
     }
-    params.num_inputs = num_inputs;
 }
 
 DLL_PREFIX
@@ -61,10 +63,18 @@ void set_input_idx(uint32_t input_number, uint32_t input_idx) {
 
 DLL_PREFIX
 double get_output(double *inputs) {
-    double result = params.coeffs[params.num_inputs];
-    for(int i=0; i<params.num_inputs; i++) {
+    double result = 0;
+    for(size_t i=0; i<params.num_inputs; i++) {
         params.inputs[i] = inputs[i];
-        result += inputs[i] * params.coeffs[i];
+    }
+    for(size_t i=0; i<params.num_coeffs; i++) {
+        double temp = params.coeffs[i];
+        for(size_t j=0; j<params.num_inputs; j++) {
+            if(((1 << j) & i)> 0) {
+                temp *= inputs[j];
+            }
+        }
+        result += temp;
     }
     return activation_func(result);
 }
@@ -81,7 +91,7 @@ void set_global_error(double error) {
 
 DLL_PREFIX
 void mutate(void) {
-    params.last_idx = random_int(params.num_inputs, params.num_inputs+1);
+    params.last_idx = random_int(0, params.num_coeffs);
     params.last_value = params.coeffs[params.last_idx];
     params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
 }

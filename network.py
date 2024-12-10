@@ -54,7 +54,7 @@ class Network:
             if net_map[i]['type'] == 'input':
                 self.neurons.append(None)
             else:
-                nanite = Nanite("bin/nanite.dll", len(net_map[i]['inputs']))
+                nanite = Nanite("bin/neuron_smart.dll", len(net_map[i]['inputs']))
                 self.set_output_function(i-self.num_inputs, nanite.get_output_p)
                 for j in range(len(net_map[i]['inputs'])):
                     nanite.set_input_idx(j, net_map[i]['inputs'][j])

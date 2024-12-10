@@ -15,15 +15,16 @@ typedef struct {
 network_t net;
 
 DLL_PREFIX
-void init(uint32_t num_inputs, uint32_t num_neurons) {
+void init(uint32_t num_inputs, uint32_t net_size) {
     net.num_inputs = num_inputs;
-    net.num_neurons = num_neurons;
-    net.net_size = num_inputs + num_neurons;
+    net.num_neurons = net_size - num_inputs;
+    net.net_size = net_size;
+    printf("Creating network with %d inputs and %d neurons, total size is %d\n", net.num_inputs, net.num_neurons, net.net_size);
     net.arr[0] = calloc(net.net_size, sizeof(double));
     net.arr[1] = calloc(net.net_size, sizeof(double));
     net.input_arr = 0;
     net.output_arr = 1;
-    net.output_func = calloc(num_neurons, sizeof(get_output_func_t));
+    net.output_func = calloc(net.num_neurons, sizeof(get_output_func_t));
 }
 
 DLL_PREFIX
@@ -45,11 +46,13 @@ double get_value(uint32_t idx) {
 DLL_PREFIX
 void tick_network(void) {
     for(int i=0; i<net.num_inputs; i++) {
+        // printf("Copying inputs: i = %d\n", i);
         net.arr[net.output_arr][i] = net.arr[net.input_arr][i];
         // printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
     }
-    for(int i=net.num_inputs; i<net.net_size; i++) {
-        net.arr[net.output_arr][i] = net.output_func[i](net.arr[net.input_arr]);
+    for(int i=0; i<net.num_neurons; i++) {
+        // printf("Calculating values: i = %d\n", i);
+        net.arr[net.output_arr][net.num_inputs+i] = net.output_func[i](net.arr[net.input_arr]);
         // printf("network[%d] = %lf\n", i, net.arr[net.output_arr][i]);
     }
 }

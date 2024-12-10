@@ -49,13 +49,13 @@ class Network:
             elif net_map[i]['type'] == 'output':
                 self.num_outputs += 1
         print(f"num_inputs = {self.num_inputs}, num_neurons = {self.num_neurons}, num_outputs = {self.num_outputs}")
-        self.init(self.num_inputs, self.num_neurons-self.num_inputs)
+        self.init(self.num_inputs, self.num_neurons)
         for i in range(self.num_neurons):
             if net_map[i]['type'] == 'input':
                 self.neurons.append(None)
             else:
                 nanite = Nanite("bin/nanite.dll", len(net_map[i]['inputs']))
-                self.set_output_function(i, nanite.get_output_p)
+                self.set_output_function(i-self.num_inputs, nanite.get_output_p)
                 for j in range(len(net_map[i]['inputs'])):
                     nanite.set_input_idx(j, net_map[i]['inputs'][j])
                 self.neurons.append(nanite)

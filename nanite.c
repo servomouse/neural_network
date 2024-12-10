@@ -47,11 +47,16 @@ void init(uint32_t num_inputs) {
     for(int i=0; i<num_inputs+1; i++) {
         params.coeffs[i] = random_double(-1.0, 1.0);
     }
+    params.num_inputs = num_inputs;
 }
 
 DLL_PREFIX
 void set_input_idx(uint32_t input_number, uint32_t input_idx) {
-    params.indices[input_number] = input_idx;
+    if(input_number < params.num_inputs) {
+        params.indices[input_number] = input_idx;
+    } else {
+        printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, params.num_inputs);
+    }
 }
 
 DLL_PREFIX

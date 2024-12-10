@@ -71,8 +71,9 @@ def print_error(network, test_dataset):
     error = 0
     for i in range(len(test_dataset)):
         val = network.get_output(test_dataset[i][0])[0]
-        error += (test_dataset[i][1] - val) ** 2
-        print(f"Expected value: {test_dataset[i][1]}, got value: {val}, error: {error}")
+        e = (test_dataset[i][1] - val) ** 2
+        print(f"Expected value: {test_dataset[i][1]}, got value: {val}, error: {e}")
+        error += e
     error /= len(test_dataset)
     print(f"Total error: {error}")
     # return error
@@ -87,17 +88,37 @@ def test_correlations():
         [-0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.3, -0.5, -0.3, -0.2, -0.2, -0.2],
         [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.3, -0.2, -0.1, -0.2, -0.3, -0.4, -0.4]]
 
-    dataset = []
-    for i in arrs[1:]:
-        dataset.append([arrs[0]+i, get_max_correlation(arrs[0], i)])
+    # dataset = []
+    # for i in arrs[1:]:
+    #     dataset.append([arrs[0]+i, get_max_correlation(arrs[0], i)])
     
-    print(dataset)
+    # print(dataset)
+    dataset = [
+        [[0.0, 0.0, 0.0, 0.0], 0.0],
+        [[0.0, 0.0, 0.0, 1.0], 1.0],
+        [[0.0, 0.0, 1.0, 0.0], 1.0],
+        [[0.0, 0.0, 1.0, 1.0], 1.0],
+        [[0.0, 1.0, 0.0, 0.0], 1.0],
+        [[0.0, 1.0, 0.0, 1.0], 1.0],
+        [[0.0, 1.0, 1.0, 0.0], 1.0],
+        [[0.0, 1.0, 1.0, 1.0], 1.0],
+        [[1.0, 0.0, 0.0, 0.0], 1.0],
+        [[1.0, 0.0, 0.0, 1.0], 1.0],
+        [[1.0, 0.0, 1.0, 0.0], 1.0],
+        [[1.0, 0.0, 1.0, 1.0], 1.0],
+        [[1.0, 1.0, 0.0, 0.0], 1.0],
+        [[1.0, 1.0, 0.0, 1.0], 1.0],
+        [[1.0, 1.0, 1.0, 0.0], 1.0],
+        [[1.0, 1.0, 1.0, 1.0], 1.0],
+        [[1.0, 1.0, 1.0, 1.0], 0.0],
+    ]
 
-    net_map = create_network_map([40, 80, 40, 20, 10, 1], 8)
+    net_map = create_network_map([4, 8, 4, 8, 4, 1], -1)
     for i in net_map:
         print(i)
     net = Network("bin/controller.dll", net_map, 5)
     
+    print_error(net, dataset)
     prev_error = get_error(net, dataset)
     print(f"Init error: {prev_error}")
     min_error = 0.055

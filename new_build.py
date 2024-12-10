@@ -35,6 +35,7 @@ def main(target):
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        print("Usage: python new_build.py target_name")
+        for target in targets:
+            main(target)
     else:
         main(sys.argv[1])

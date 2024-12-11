@@ -13,3 +13,4 @@ void set_feedback_error(double error);
 void set_global_error(double error);
 void mutate(void);
 void restore(void);
+void print_coeffs(void);

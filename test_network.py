@@ -113,7 +113,7 @@ def test_correlations():
         [[1.0, 1.0, 1.0, 1.0], 0.0],
     ]
 
-    net_map = create_network_map([4, 1], -1)
+    net_map = create_network_map([4, 2, 2, 1], -1)
     for i in net_map:
         print(i)
     net = Network("bin/controller.dll", net_map, 5)
@@ -121,9 +121,10 @@ def test_correlations():
     print_error(net, dataset)
     prev_error = get_error(net, dataset)
     print(f"Init error: {prev_error}")
+    net.print_coeffs()
     min_error = 0.001
     counter = 0
-    while (prev_error > min_error) and (counter < 100000):
+    while (prev_error > min_error) and (counter < 10):
         net.mutate()
         new_error = get_error(net, dataset)
         if new_error > prev_error:
@@ -134,6 +135,7 @@ def test_correlations():
         time.sleep(0.01)
         counter += 1
     print_error(net, dataset)
+    net.print_coeffs()
     
     # net.save_state()
 

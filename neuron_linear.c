@@ -79,11 +79,27 @@ void set_global_error(double error) {
     params.global_error = error;
 }
 
+uint32_t last_mutation_idx = 0;
+double mutation_step = 0.01;
+
 DLL_PREFIX
 void mutate(void) {
+    // params.last_idx = random_int(0, params.num_inputs+1);
+    // params.last_value = params.coeffs[params.last_idx];
+    // params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
+
     params.last_idx = random_int(0, params.num_inputs+1);
     params.last_value = params.coeffs[params.last_idx];
-    params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
+    double random_val;
+    if(params.last_value == 1) {
+        random_val = random_double(-0.02, 0.0);
+    } else if(params.last_value == -1) {
+        random_val = random_double(0.0, 0.02);
+    } else {
+        random_val = random_double(-0.01, 0.01);
+    }
+    // params.coeffs[params.last_idx] += random_val;
+    params.coeffs[params.last_idx] = activation_func(params.coeffs[params.last_idx] + random_val);
 }
 
 DLL_PREFIX

@@ -1,12 +1,19 @@
 import ctypes
 from ctypes_wrapper import get_dll_function
 import random
+import time
+import shutil
+import os
 
 
 class Nanite:
+    instance_count = 0
     def __init__(self, filename, num_inputs):
         print(f"Creating neuron with {num_inputs} inputs")
-        self.nanite = ctypes.CDLL(filename)
+        self.filename = f"temp/{filename}.copy{Nanite.instance_count}"
+        os.makedirs(os.path.dirname(self.filename), exist_ok=True)
+        shutil.copyfile(filename, self.filename)
+        self.nanite = ctypes.CDLL(self.filename)
         self.init = get_dll_function(self.nanite, "void init(uint32_t)")
         self.set_input_idx = get_dll_function(self.nanite, "void set_input_idx(uint32_t, uint32_t)")
         self.save_state = get_dll_function(self.nanite, "void save_state(char*)")
@@ -14,16 +21,22 @@ class Nanite:
         self.get_output = get_dll_function(self.nanite, "double get_output(double*)")
         self.mutate = get_dll_function(self.nanite, "void mutate(void)")
         self.restore = get_dll_function(self.nanite, "void restore(void)")
+        self.print_coeffs = get_dll_function(self.nanite, "void print_coeffs(void)")
         get_output_func_p = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.POINTER(ctypes.c_double))
         self.get_output_p = get_output_func_p(self.get_output)
         self.init(num_inputs)
         # print("Nanite initialized!")
+        Nanite.instance_count += 1
+    
+    # def __del__(self):
+    #     os.remove(self.filename)
 
 
 class Network:
     def __init__(self, filename, net_map:list, network_depth):
         """ network_depth: how many times to updat ethe network before getting the result """
         self.network_depth = network_depth
+        # self.handle = ctypes.windll.kernel32.LoadLibraryW(filename)
         self.controller = ctypes.CDLL(filename)
         self.init = get_dll_function(self.controller, "void init(uint32_t, uint32_t)")
         
@@ -84,6 +97,15 @@ class Network:
     
     def restore(self):
         self.neurons[self.last_mutated_neuron].restore()
+    
+    def print_coeffs(self):
+        for i in range(self.num_inputs, len(self.neurons)):
+            print(f"Neuron[{i}] coeffs: ", end='', flush=True)
+            self.neurons[i].print_coeffs()
+            time.sleep(0.1)
+    
+    def __del__(self):
+        shutil.rmtree("temp")
 
 
 

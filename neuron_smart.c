@@ -30,6 +30,16 @@ double activation_func(double sum) {
     }
 }
 
+double control_coeffs_func(double coeff) {
+    if(coeff > 1.0) {
+        return 1.0;
+    } else if(coeff < -1.0) {
+        return -1.0;
+    } else {
+        return coeff;
+    }
+}
+
 DLL_PREFIX
 void init(uint32_t num_inputs) {
     srand(time(NULL));
@@ -47,8 +57,8 @@ void init(uint32_t num_inputs) {
         free(params.coeffs);
     }
     params.coeffs = calloc(params.num_coeffs, sizeof(double));
-    for(int i=0; i<num_inputs+1; i++) {
-        params.coeffs[i] = random_double(-1.0, 1.0);
+    for(int i=0; i<params.num_coeffs; i++) {
+        params.coeffs[i] = random_double(-0.1, 0.1);
     }
 }
 
@@ -89,16 +99,66 @@ void set_global_error(double error) {
     params.global_error = error;
 }
 
+uint32_t last_mutation_idx = 0;
+double mutation_step = 0.01;
+uint32_t loops = 0;
+uint32_t restored = 0;
+
 DLL_PREFIX
 void mutate(void) {
-    params.last_idx = random_int(0, params.num_coeffs);
+    params.last_idx = last_mutation_idx;
     params.last_value = params.coeffs[params.last_idx];
-    params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
+    double random_val;
+    if(params.last_value == 1) {
+        random_val = random_double(-2 * mutation_step, 0.0);
+    } else if(params.last_value == -1) {
+        random_val = random_double(0.0, 2 * mutation_step);
+    } else {
+        random_val = random_double(-1 * mutation_step, mutation_step);
+    }
+    // params.coeffs[params.last_idx] += random_val;
+    params.coeffs[params.last_idx] = control_coeffs_func(params.coeffs[params.last_idx] + random_val);
+    last_mutation_idx ++;
+    restored ++;
+    if(last_mutation_idx == params.num_coeffs) {
+        last_mutation_idx = 0;
+        if(restored >= params.num_coeffs) {
+            loops += 1;
+        }
+        if(loops == 100) {
+            mutation_step /= 2;
+        } else if(loops == 100000) {
+            mutation_step = random_double(0.0, 0.5);
+        }
+    }
+
+    // params.last_idx = random_int(0, params.num_coeffs);
+    // params.last_value = params.coeffs[params.last_idx];
+    // double random_val;
+    // if(params.last_value == 1) {
+    //     random_val = random_double(-0.02, 0.0);
+    // } else if(params.last_value == -1) {
+    //     random_val = random_double(0.0, 0.02);
+    // } else {
+    //     random_val = random_double(-0.01, 0.01);
+    // }
+    // // params.coeffs[params.last_idx] += random_val;
+    // params.coeffs[params.last_idx] = activation_func(params.coeffs[params.last_idx] + random_val);
 }
 
 DLL_PREFIX
 void restore(void) {
     params.coeffs[params.last_idx] = params.last_value;
+    restored = 0;
+    loops = 0;
+}
+
+DLL_PREFIX
+void print_coeffs(void) {
+    for(int i=0; i<params.num_coeffs; i++) {
+        printf("%lf, ", params.coeffs[i]);
+    }
+    printf("\n");
 }
 
 DLL_PREFIX

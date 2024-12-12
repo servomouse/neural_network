@@ -1,9 +1,10 @@
 import ctypes
-from ctypes_wrapper import get_dll_function
+from ctypes_wrapper import get_dll_function, free_library
 import random
 import time
 import shutil
 import os
+import gc
 
 
 class Nanite:
@@ -28,8 +29,11 @@ class Nanite:
         # print("Nanite initialized!")
         Nanite.instance_count += 1
     
-    # def __del__(self):
-    #     os.remove(self.filename)
+    def __del__(self):
+        free_library(self.nanite._handle)
+        os.remove(self.filename)
+        # print(f"{os.listdir('temp/bin') = }")
+        # print(f"{os.walk() = }")
 
 
 class Network:
@@ -105,7 +109,10 @@ class Network:
             time.sleep(0.1)
     
     def __del__(self):
-        shutil.rmtree("temp")
+        while len(self.neurons) > 0:
+            del self.neurons[0]
+        gc.collect()
+        os.removedirs("temp/bin")
 
 
 

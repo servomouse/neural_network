@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "neuron_smart.h"
 
-// Linear nanite
+// Linear neuron
 
 typedef struct {
     double *inputs;
@@ -13,12 +13,13 @@ typedef struct {
     uint32_t num_coeffs;
     uint32_t num_inputs;
     double feedback_error;  // Error calculated by neurons connected to the output
+    uint32_t feedback_error_count;
     double global_error;    // Error of the entire network
     uint32_t last_idx;
     double last_value;
-} nanite_params_t;
+} neuron_params_t;
 
-nanite_params_t params;
+neuron_params_t params;
 
 double activation_func(double sum) {
     if(sum > 1.0) {
@@ -91,7 +92,8 @@ double get_output(double *inputs) {
 
 DLL_PREFIX
 void set_feedback_error(double error) {
-    params.feedback_error = error;
+    params.feedback_error += error;
+    params.feedback_error_count += 1;
 }
 
 DLL_PREFIX
@@ -108,55 +110,11 @@ uint8_t mutated = 0;
 
 DLL_PREFIX
 void mutate(void) {
-    params.last_idx = last_mutation_idx;
+    double mutation_step = 0.01;
+    params.last_idx = random_int(0, params.num_coeffs);
     params.last_value = params.coeffs[params.last_idx];
-    double random_val;
-    if(params.last_value == (1.0 * params.num_inputs)) {
-        random_val = random_double(-2 * mutation_step, 0.0);
-    } else if(params.last_value == (-1.0 * params.num_inputs)) {
-        random_val = random_double(0.0, 2 * mutation_step);
-    } else {
-        random_val = random_double(-1 * mutation_step, mutation_step);
-    }
-    // params.coeffs[params.last_idx] += random_val;
+    double random_val = random_double(-1 * mutation_step, mutation_step);
     params.coeffs[params.last_idx] = control_coeffs_func(params.coeffs[params.last_idx] + random_val);
-    last_mutation_idx ++;
-    if(restored == 1) {
-        bad_mutations ++;
-        restored = 0;
-    } else {
-        bad_mutations = 0;
-    }
-    if(bad_mutations > (10 * params.num_coeffs)) {
-        mutation_step *= 0.9;
-        printf("Decreasing mutation step to %lf\n", mutation_step);
-        bad_mutations = 0;
-    }
-    // restored ++;
-    if(last_mutation_idx == params.num_coeffs) {
-        last_mutation_idx = 0;
-    //     if(restored >= params.num_coeffs) {
-    //         loops += 1;
-    //     }
-    //     if(loops == 100) {
-    //         mutation_step *= 0.9;
-    //     // } else if(loops == 100000) {
-    //     //     mutation_step = random_double(0.0, 0.5);
-    //     }
-    }
-
-    // params.last_idx = random_int(0, params.num_coeffs);
-    // params.last_value = params.coeffs[params.last_idx];
-    // double random_val;
-    // if(params.last_value == 1) {
-    //     random_val = random_double(-0.02, 0.0);
-    // } else if(params.last_value == -1) {
-    //     random_val = random_double(0.0, 0.02);
-    // } else {
-    //     random_val = random_double(-0.01, 0.01);
-    // }
-    // // params.coeffs[params.last_idx] += random_val;
-    // params.coeffs[params.last_idx] = activation_func(params.coeffs[params.last_idx] + random_val);
 }
 
 DLL_PREFIX
@@ -193,9 +151,6 @@ void restore_state(char *filename) {
     char *indices_arr_fname = concat_strings("indices_", filename);
     char *coeffs_arr_fname = concat_strings("coeffs_", filename);
     restore_data(&params, sizeof(params), filename);
-    // params.inputs = malloc(params.num_inputs * sizeof(double));
-    // params.indices = malloc(params.num_inputs * sizeof(uint32_t));
-    // params.coeffs = malloc((params.num_inputs+1) * sizeof(double));
     restore_data(params.inputs, params.num_inputs * sizeof(double), inputs_arr_fname);
     restore_data(params.indices, params.num_inputs * sizeof(uint32_t), indices_arr_fname);
     restore_data(params.coeffs, (params.num_inputs+1) * sizeof(double), coeffs_arr_fname);

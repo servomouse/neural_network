@@ -1,31 +1,29 @@
 #pragma once
 
-#include "stdint.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 typedef struct {
-    uint32_t index;
-    uint32_t id;
-} neuron_input_t;
-
-typedef struct{
-    neuron_input_t *inputs;
-    // uint32_t *inputs;
+    double *inputs;
+    uint32_t *indices;
+    double *coeffs;
+    uint32_t num_coeffs;
     uint32_t num_inputs;
-    uint32_t idx;
-    double *coeffitients;
-    uint32_t num_coeffitients;
-    struct {
-        uint32_t idx;
-        double value;
-    } old_coeffitient;
-    double temp_output;
-    double output;
-} neuron_t;
+    double feedback_error;  // Error calculated by neurons connected to the output
+    uint32_t feedback_error_count;
+    double global_error;    // Error of the entire network
+    uint32_t last_idx;
+    double last_value;
+} neuron_params_t;
 
-void init_neuron(neuron_t *neuron, neuron_t *net, uint32_t num_inputs, uint32_t idx);
-void deinit_neuron(neuron_t *neuron);
-void calc_output(neuron_t *neuron, neuron_t *net);
-uint32_t update_output(neuron_t *neuron);
-void random_mutation(neuron_t *neuron);
-void rollback_mutation(neuron_t *neuron);
-void print_coeffs(neuron_t *neuron, neuron_t *net);
+void neuron_init(neuron_params_t * n_params, uint32_t num_inputs);
+void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
+void neuron_save_state(neuron_params_t * n_params, char *filename);
+void neuron_restore_state(neuron_params_t * n_params, char *filename);
+double neuron_get_output(neuron_params_t * n_params, double *inputs);
+void neuron_set_feedback_error(neuron_params_t * n_params, double error);
+void neuron_set_global_error(neuron_params_t * n_params, double error);
+void neuron_mutate(neuron_params_t * n_params);
+void neuron_restore(neuron_params_t * n_params);
+void neuron_print_coeffs(neuron_params_t * n_params);

@@ -22,7 +22,7 @@ class Nanite:
         self.get_output = get_dll_function(self.nanite, "double get_output(double*)")
         self.mutate = get_dll_function(self.nanite, "void mutate(void)")
         self.restore = get_dll_function(self.nanite, "void restore(void)")
-        self.print_coeffs = get_dll_function(self.nanite, "void print_coeffs(void)")
+        # self.print_coeffs = get_dll_function(self.nanite, "void print_coeffs(void)")
         get_output_func_p = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.POINTER(ctypes.c_double))
         self.get_output_p = get_output_func_p(self.get_output)
         self.init(num_inputs)
@@ -49,12 +49,16 @@ class Network:
         self.controller.set_output_function.restype = None
         self.set_output_function = self.controller.set_output_function
 
+        self.init_neuron = get_dll_function(self.controller, "void init_neuron(uint32_t, uint32_t)")
+        self.set_neuron_input_idx = get_dll_function(self.controller, "void set_neuron_input_idx(uint32_t, uint32_t, uint32_t)")
         self.set_value = get_dll_function(self.controller, "void set_value(uint32_t, double)")
         self.get_value = get_dll_function(self.controller, "double get_value(uint32_t)")
         self.tick_network = get_dll_function(self.controller, "void tick_network(void)")
         self.swap_arrays = get_dll_function(self.controller, "void swap_arrays(void)")
         self.save_state = get_dll_function(self.controller, "void save_state(char*)")
         self.restore_state = get_dll_function(self.controller, "void restore_state(char*)")
+        self.mutate = get_dll_function(self.controller, "void mutate(void)")
+        self.restore = get_dll_function(self.controller, "void restore(void)")
         self.num_neurons = len(net_map)
         self.num_inputs = 0
         self.num_outputs = 0
@@ -71,16 +75,17 @@ class Network:
             if net_map[i]['type'] == 'input':
                 self.neurons.append(None)
             else:
-                nanite = Nanite("bin/neuron_smart.dll", len(net_map[i]['inputs']))
-                self.set_output_function(i-self.num_inputs, nanite.get_output_p)
+                # nanite = Nanite("bin/neuron_smart.dll", len(net_map[i]['inputs']))
+                # self.set_output_function(i-self.num_inputs, nanite.get_output_p)
+                self.init_neuron(i-self.num_inputs, len(net_map[i]['inputs']))
                 for j in range(len(net_map[i]['inputs'])):
-                    nanite.set_input_idx(j, net_map[i]['inputs'][j])
-                self.neurons.append(nanite)
+                    self.set_neuron_input_idx(i-self.num_inputs, j, net_map[i]['inputs'][j])
+                    # nanite.set_input_idx(j, net_map[i]['inputs'][j])
+                # self.neurons.append(nanite)
 
     def get_output(self, inputs):
         if len(inputs) != self.num_inputs:
-            print("Error: incorrect inputs len({len(inputs)})!")
-            return 0
+            raise Exception(f"Error: incorrect inputs len({len(inputs)})!")
         for i in range(self.num_inputs):
             self.set_value(i, inputs[i])
         for i in range(self.network_depth):
@@ -92,27 +97,30 @@ class Network:
         return ret_vals
     
     def mutate(self):
-        self.last_mutated_neuron = random.randint(self.num_inputs, self.num_neurons-1)
-        try:
-            self.neurons[self.last_mutated_neuron].mutate()
-        except IndexError:
-            print(f"Tried to mutate neuron {self.last_mutated_neuron}!")
-            raise Exception("AAAAAAAAAA!!!!!1")
+        self.mutate()
+        # self.last_mutated_neuron = random.randint(self.num_inputs, self.num_neurons-1)
+        # try:
+        #     self.neurons[self.last_mutated_neuron].mutate()
+        # except IndexError:
+        #     print(f"Tried to mutate neuron {self.last_mutated_neuron}!")
+        #     raise Exception("AAAAAAAAAA!!!!!1")
     
     def restore(self):
-        self.neurons[self.last_mutated_neuron].restore()
+        self.restore()
+        # self.neurons[self.last_mutated_neuron].restore()
     
     def print_coeffs(self):
-        for i in range(self.num_inputs, len(self.neurons)):
-            print(f"Neuron[{i}] coeffs: ", end='', flush=True)
-            self.neurons[i].print_coeffs()
-            time.sleep(0.1)
+        # for i in range(self.num_inputs, len(self.neurons)):
+        #     print(f"Neuron[{i}] coeffs: ", end='', flush=True)
+        #     self.neurons[i].print_coeffs()
+        #     time.sleep(0.1)
+        pass
     
-    def __del__(self):
-        while len(self.neurons) > 0:
-            del self.neurons[0]
-        gc.collect()
-        os.removedirs("temp/bin")
+    # def __del__(self):
+    #     while len(self.neurons) > 0:
+    #         del self.neurons[0]
+    #     gc.collect()
+    #     os.removedirs("temp/bin")
 
 
 

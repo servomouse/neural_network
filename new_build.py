@@ -15,7 +15,7 @@ targets = {
         "output_file": "neuron_smart.dll"
     },
     "controller": {
-        "build_files": ["neuron_kapellmeister.c", "utils.c"],
+        "build_files": ["neuron_kapellmeister.c", "neuron_smart.c", "utils.c"],
         "output_file": "controller.dll"
     },
 }

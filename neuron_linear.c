@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "neuron_linear.h"
 
-// Linear nanite
+// Linear neuron
 
 typedef struct {
     double *inputs;
@@ -15,9 +15,9 @@ typedef struct {
     double global_error;    // Error of the entire network
     uint32_t last_idx;
     double last_value;
-} nanite_params_t;
+} neuron_params_t;
 
-nanite_params_t params;
+neuron_params_t params;
 
 double activation_func(double sum) {
     if(sum > 1.0) {
@@ -84,9 +84,6 @@ double mutation_step = 0.01;
 
 DLL_PREFIX
 void mutate(void) {
-    // params.last_idx = random_int(0, params.num_inputs+1);
-    // params.last_value = params.coeffs[params.last_idx];
-    // params.coeffs[params.last_idx] += random_double(-0.01, 0.01);
 
     params.last_idx = random_int(0, params.num_inputs+1);
     params.last_value = params.coeffs[params.last_idx];
@@ -98,7 +95,6 @@ void mutate(void) {
     } else {
         random_val = random_double(-0.01, 0.01);
     }
-    // params.coeffs[params.last_idx] += random_val;
     params.coeffs[params.last_idx] = activation_func(params.coeffs[params.last_idx] + random_val);
 }
 

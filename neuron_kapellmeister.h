@@ -12,3 +12,5 @@ void tick_network(void);
 void swap_arrays(void);
 void save_state(char *filename);
 void restore_state(char *filename);
+void mutate(void);
+void restore(void);

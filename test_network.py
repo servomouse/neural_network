@@ -2,6 +2,7 @@ import ctypes
 from network import Network, create_network_map
 from pearson import get_correlation, get_max_correlation
 import time
+import test_dataset
 
 
 neuron_ids = {
@@ -61,7 +62,12 @@ def get_error(network, test_dataset):
     # output = net.get_output(inputs)
     error = 0
     for i in range(len(test_dataset)):
-        error += (test_dataset[i][1] - network.get_output(test_dataset[i][0])[0]) ** 2
+        temp_error = 0
+        output = network.get_output(test_dataset[i][0])
+        for j in range(len(test_dataset[i][1])):
+            temp_error += (test_dataset[i][1][j] - output[j]) ** 2
+        error += temp_error / len(test_dataset[i][1])
+        # error += (test_dataset[i][1] - network.get_output(test_dataset[i][0])[0]) ** 2
     error /= len(test_dataset)
     return error
 
@@ -70,13 +76,24 @@ def print_error(network, test_dataset):
     # output = net.get_output(inputs)
     error = 0
     for i in range(len(test_dataset)):
-        val = network.get_output(test_dataset[i][0])[0]
-        e = (test_dataset[i][1] - val) ** 2
-        print(f"Expected value: {test_dataset[i][1]}, got value: {val}, error: {e}")
+        temp_error = 0
+        output = network.get_output(test_dataset[i][0])
+        # print(f"Inputs: {test_dataset[i][0]}")
+        # print(f"Expected outputs: {test_dataset[i][1]}")
+        # print(f"Real outputs    : {output}")
+        for j in range(len(test_dataset[i][1])):
+            temp_error += (test_dataset[i][1][j] - output[j]) ** 2
+        e = temp_error / len(test_dataset[i][1])
         error += e
+        print(f"Expected value: {test_dataset[i][1]}, got value: {output}, error: {e}")
     error /= len(test_dataset)
     print(f"Total error: {error}")
     # return error
+
+
+def xor(a, b, c, d):
+    output = a + b + c + d - (4 * a * b * c * d)
+    return output
 
 
 def test_correlations():
@@ -94,26 +111,40 @@ def test_correlations():
     
     # print(dataset)
     dataset = [
-        [[0.0, 0.0, 0.0, 0.0], 0.0],
-        [[0.0, 0.0, 0.0, 1.0], 1.0],
-        [[0.0, 0.0, 1.0, 0.0], 1.0],
-        [[0.0, 0.0, 1.0, 1.0], 1.0],
-        [[0.0, 1.0, 0.0, 0.0], 1.0],
-        [[0.0, 1.0, 0.0, 1.0], 1.0],
-        [[0.0, 1.0, 1.0, 0.0], 1.0],
-        [[0.0, 1.0, 1.0, 1.0], 1.0],
-        [[1.0, 0.0, 0.0, 0.0], 1.0],
-        [[1.0, 0.0, 0.0, 1.0], 1.0],
-        [[1.0, 0.0, 1.0, 0.0], 1.0],
-        [[1.0, 0.0, 1.0, 1.0], 1.0],
-        [[1.0, 1.0, 0.0, 0.0], 1.0],
-        [[1.0, 1.0, 0.0, 1.0], 1.0],
-        [[1.0, 1.0, 1.0, 0.0], 1.0],
-        [[1.0, 1.0, 1.0, 1.0], 1.0],
-        [[1.0, 1.0, 1.0, 1.0], 0.0],
+        [[0.0, 0.0, 0.0, 0.0], [0.0]],
+        [[0.0, 0.0, 0.0, 1.0], [1.0]],
+        [[0.0, 0.0, 1.0, 0.0], [1.0]],
+        [[0.0, 0.0, 1.0, 1.0], [1.0]],
+        [[0.0, 1.0, 0.0, 0.0], [1.0]],
+        [[0.0, 1.0, 0.0, 1.0], [1.0]],
+        [[0.0, 1.0, 1.0, 0.0], [1.0]],
+        [[0.0, 1.0, 1.0, 1.0], [1.0]],
+        [[1.0, 0.0, 0.0, 0.0], [1.0]],
+        [[1.0, 0.0, 0.0, 1.0], [1.0]],
+        [[1.0, 0.0, 1.0, 0.0], [1.0]],
+        [[1.0, 0.0, 1.0, 1.0], [1.0]],
+        [[1.0, 1.0, 0.0, 0.0], [1.0]],
+        [[1.0, 1.0, 0.0, 1.0], [1.0]],
+        [[1.0, 1.0, 1.0, 0.0], [1.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
+        [[1.0, 1.0, 1.0, 1.0], [0.0]],
     ]
+    # dataset = []
+    # for i in range(256):
+    #     dataset.append(test_dataset.get_example(i))
 
-    net_map = create_network_map([4, 2, 2, 1], -1)
+    # for i in dataset:
+    #     print(f"{i[0]}: {xor(i[0][0], i[0][1], i[0][2], i[0][3])}")
+    # return
+
+    net_map = create_network_map([4, 4, 1], -1)
     for i in net_map:
         print(i)
     net = Network("bin/controller.dll", net_map, 5)
@@ -121,10 +152,10 @@ def test_correlations():
     print_error(net, dataset)
     prev_error = get_error(net, dataset)
     print(f"Init error: {prev_error}")
-    net.print_coeffs()
-    min_error = 0.001
+    # net.print_coeffs()
+    min_error = 0.1
     counter = 0
-    while (prev_error > min_error) and (counter < 10):
+    while (prev_error > min_error) and (counter < 10000):
         net.mutate()
         new_error = get_error(net, dataset)
         if new_error > prev_error:
@@ -135,17 +166,9 @@ def test_correlations():
         time.sleep(0.01)
         counter += 1
     print_error(net, dataset)
-    net.print_coeffs()
+    # net.print_coeffs()
     
     # net.save_state()
-
-    # for i in arrs[1:]:
-    #     c = get_max_correlation(arrs[0], i)
-    #     # print(i, ", max_correlation: ", get_max_correlation(arrs[0], i))
-    #     inputs = arrs[0] + i
-    #     print(inputs)
-    #     output = net.get_output(inputs)
-    #     print(f"Output = {output[0]}")
 
 
 if __name__ == '__main__':

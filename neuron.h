@@ -1,21 +1,9 @@
 #pragma once
-
+// python new_build.py controller
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-typedef struct {
-    double *inputs;
-    uint32_t *indices;
-    double *coeffs;
-    uint32_t num_coeffs;
-    uint32_t num_inputs;
-    double feedback_error;  // Error calculated by neurons connected to the output
-    uint32_t feedback_error_count;
-    double global_error;    // Error of the entire network
-    uint32_t last_idx;
-    double last_value;
-} neuron_params_t;
+#include "neuron_types.h"
 
 void neuron_init(neuron_params_t * n_params, uint32_t num_inputs);
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);

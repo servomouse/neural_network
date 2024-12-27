@@ -38,9 +38,8 @@ def main(target):
         os.remove(fname)
     srcs = ' '.join(targets[target]["build_files"])
     flags = ' '.join(targets[target]["build_flags"])
-    cmd = f"gcc {flags} {srcs} -o {fname}"
-    print(cmd)
     print(f"Building {target} . . . ", end='', flush=True)
+    cmd = f"gcc {flags} {srcs} -o {fname}"
     output = subprocess.getoutput(cmd)
     if len(output) == 0:
         print("Done")

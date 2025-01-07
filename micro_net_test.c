@@ -75,7 +75,7 @@ int main(void) {
     double current_error = get_error(&config, dataset, sizeof_arr(dataset), 1);
     printf("Init error: %f\n", current_error);
     size_t counter = 0;
-    while((current_error > 0.01) && (counter++ < 10000)) {
+    while((current_error > 0.001) && (counter++ < 10000)) {
         micronet_mutate(&config);
         double new_error = get_error(&config, dataset, sizeof_arr(dataset), 0);
         // printf("New error: %f\n", new_error);

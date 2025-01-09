@@ -78,3 +78,9 @@ void micronet_mutate(micro_network_t * config) {
 void micronet_rollback(micro_network_t * config) {
     neuron_restore(&config->neurons[config->mutated_neuron_idx]);
 }
+
+void micronet_print_coeffs(micro_network_t * config) {
+    for(int i=config->num_inputs; i<config->net_size; i++) {
+        neuron_print_coeffs(&config->neurons[i-config->num_inputs]);
+    }
+}

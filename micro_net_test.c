@@ -12,6 +12,11 @@ typedef struct {
 
 dataset_entry_t dataset[] = {
     {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.0},
     {.inputs = {0.0, 0.0, 0.0, 1.0}, .output = 1.0},
     {.inputs = {0.0, 0.0, 1.0, 0.0}, .output = 1.0},
     {.inputs = {0.0, 0.0, 1.0, 1.0}, .output = 1.0},
@@ -91,6 +96,8 @@ int main(void) {
             current_error = new_error;
         }
     }
+    
+    micronet_print_coeffs(&config);
     get_error(&config, dataset, sizeof_arr(dataset), 1);
     printf("Final error: %f, counter = %lld\n", current_error, counter);
     return 0;

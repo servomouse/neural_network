@@ -15,3 +15,6 @@ void neuron_set_global_error(neuron_params_t * n_params, double error);
 void neuron_mutate(neuron_params_t * n_params);
 void neuron_restore(neuron_params_t * n_params);
 void neuron_print_coeffs(neuron_params_t * n_params);
+uint32_t neuron_get_num_outputs(neuron_params_t * n_params);
+void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value);
+void neuron_update_coeffs(neuron_params_t * n_params, micro_network_t *micronet);

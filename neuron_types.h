@@ -92,4 +92,6 @@ typedef struct {
     double *outputs;
     neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
+    micro_network_t coeffs_micronet;
+    micro_network_t feedback_micronet;
 } network_t;

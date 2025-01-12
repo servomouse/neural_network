@@ -1,5 +1,5 @@
 #include <stdlib.h>
-// #include "micro_net.h"
+#include "micro_net.h"
 #include "network_new.h"
 #include "neuron.h" // includes neuron_types.h
 #include "utils.h"
@@ -80,9 +80,9 @@ void network_init(network_t * config, network_map_t *net_map) {
         }
         offset += num_inputs + 3;
     }
-    // // Init micronets:
-    // micronet_init(&config->feedback_micronet, &feedback_micronet_map);
-    // micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
+    // Init micronets:
+    micronet_init(&config->feedback_micronet, &feedback_micronet_map);
+    micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
 }
 
 double* network_get_outputs(network_t * config, double *inputs) {

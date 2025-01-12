@@ -18,9 +18,11 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map) {
     config->num_neurons = net_map->num_neurons;
     config->net_size = net_map->net_size;
     config->output_idx = net_map->output_idx;
-    printf("Creating network with %d inputs and %d neurons, total size is %d\n", config->num_inputs, 
-                                                                                 config->num_neurons,
-                                                                                 config->net_size);
+    printf("Creating micro network with:\n");
+    printf("\t%d inputs;\n", config->num_inputs);
+    printf("\t%d neurons;\n", config->num_neurons);
+    printf("\ttotal size is %d\n", config->net_size);
+
     config->arr = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
     for(size_t i=0; i<config->num_neurons; i++) {

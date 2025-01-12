@@ -10,6 +10,10 @@ double random_double(double min, double max) {
     return min + (rand() / div);
 }
 
+uint8_t random_bit(void) {
+    return rand() & 1;
+}
+
 uint32_t random_int(uint32_t min, uint32_t max) {
     uint32_t range = (max - min); 
     // uint32_t div = RAND_MAX / range;

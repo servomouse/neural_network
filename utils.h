@@ -11,6 +11,7 @@
 #endif
 
 double random_double(double min, double max);
+uint8_t random_bit(void);
 uint32_t random_int(uint32_t min, uint32_t max);
 int store_data(void *data, size_t size, char *filename);
 int restore_data(void *data, size_t size, char *filename);

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "micro_net.h"
 #include "network_new.h"
 #include "neuron.h" // includes neuron_types.h
@@ -45,6 +46,9 @@ micronet_map_t coeffs_micronet_map = {
     .output_idx = 12
 };
 
+neuron_params_t *neurons_backup;
+double *arr_backup;
+
 void network_init(network_t * config, network_map_t *net_map) {
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
@@ -57,7 +61,9 @@ void network_init(network_t * config, network_map_t *net_map) {
     printf("\ttotal size is %d\n", config->net_size);
     
     config->arr = calloc(config->net_size, sizeof(double));
+    arr_backup = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
+    neurons_backup = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->output_indices = calloc(config->num_outputs, sizeof(uint32_t));
     config->outputs = calloc(config->num_outputs, sizeof(double));
     
@@ -85,6 +91,16 @@ void network_init(network_t * config, network_map_t *net_map) {
     micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
 }
 
+void network_backup(network_t * config) {
+    memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
+    memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
+}
+
+void network_restore(network_t * config) {
+    memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
+    memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
+}
+
 double* network_get_outputs(network_t * config, double *inputs) {
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
@@ -105,14 +121,14 @@ void network_set_global_error(network_t *config, double error) {
     }
 }
 
-void network_save(network_t * config, char *filename) {
+void network_save_to_file(network_t * config, char *filename) {
     char *arr_fname = concat_strings("arr_", filename);
     store_data(&config, sizeof(config), filename);
     store_data(&config->arr, config->net_size * sizeof(double), arr_fname);
     free(arr_fname);
 }
 
-void network_restore(network_t * config, char *filename) {
+void network_restore_from_file(network_t * config, char *filename) {
     if(!config->neurons) {
         printf("Call init() before calling restore_state()!");
         exit(1);
@@ -135,6 +151,15 @@ void network_mutate(network_t * config) {
 }
 
 void network_rollback(network_t * config) {
+    neuron_restore(&config->neurons[config->mutated_neuron_idx]);
+}
+
+void network_mutate_micronet(network_t * config) {
+    config->last_mutated_micronet = random_bit();
+    neuron_mutate(&config->feedback_micronet);
+}
+
+void network_rollback_micronet(network_t * config) {
     neuron_restore(&config->neurons[config->mutated_neuron_idx]);
 }
 

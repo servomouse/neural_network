@@ -28,6 +28,7 @@ double control_coeffs_func(double coeff) {
 
 void neuron_init(neuron_params_t * n_params, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
+    printf("Creating neuron with %d inputs\n", num_inputs);
     n_params->num_inputs = num_inputs;
     n_params->num_coeffs = 1 << num_inputs;
     n_params->num_outputs = 0;
@@ -60,6 +61,15 @@ void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uin
     } else {
         printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
     }
+}
+
+void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx) {
+    printf("Setting output index to %d\n", output_idx == NOT_OUTPUT? -1: output_idx);
+    n_params->output_idx = output_idx;
+}
+
+uint32_t neuron_get_output_idx(neuron_params_t * n_params) {
+    return n_params->output_idx;
 }
 
 double neuron_get_output(neuron_params_t * n_params, double *inputs) {
@@ -98,8 +108,9 @@ uint32_t neuron_get_num_outputs(neuron_params_t * n_params) {
     return n_params->num_outputs;
 }
 
-void neuron_update_coeffs(neuron_params_t * n_params) {
+void neuron_update_coeffs(neuron_params_t * n_params, micro_network_t *micronet) {
     for(size_t i=0; i<n_params->num_coeffs; i++) {
+        ;
     }
 }
 

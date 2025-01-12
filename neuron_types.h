@@ -23,15 +23,17 @@ typedef struct {
 typedef struct {
     uint32_t idx;
     uint32_t num_inputs;    // Also used as a size of the indices array
-    int32_t output_idx;     // Map this neuron to the outputs array with output_idx index
-    uint32_t *indices;
+    uint32_t output_idx;    // Map this neuron to the outputs array with output_idx index, set to 0xFFFFFFFF if the neuron is not output
+    uint32_t indices[];     // Which neurons are used as inputs for this neuron
 } neuron_desc_t;
+
+#define NOT_OUTPUT 0xFFFFFFFF
 
 typedef struct {
     uint32_t num_inputs;
     uint32_t net_size;      // Total net size, including inputs
     uint32_t num_outputs;
-    neuron_desc_t *neurons;
+    uint32_t neurons[];    // neuron_desc_t is used here
 } network_map_t;
 
 typedef struct {
@@ -49,6 +51,7 @@ typedef struct {
     double last_value;
     double output;
     uint32_t num_outputs;
+    int32_t output_idx;     // Index in the output array where this neuron is mapped. Set to -1 if not mapped
     uint32_t num_feedbacks_received;
 } neuron_params_t;
 

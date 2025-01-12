@@ -31,6 +31,11 @@ targets = {
         "build_files": ["network_new.c", "neuron_smart.c", "micro_net.c", "utils.c"],
         "output_file": "bin/network.dll"
     },
+    "network_test": {
+        "build_flags": common_flags,
+        "build_files": ["network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c"],
+        "output_file": "bin/network_test.exe"
+    },
 }
 
 

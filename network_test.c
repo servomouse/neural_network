@@ -60,6 +60,7 @@ network_map_t network_map = {
 double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
     // Works only with single output networks
     double error = 0;
+    network_reset_counters(config);
     for(size_t i=0; i<dataset_size; i++) {
         double *outputs = network_get_outputs(config, dataset[i].inputs);
         double e = 0;
@@ -75,7 +76,7 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
             for(uint32_t j=0; j<num_outputs; j++) {
                 printf("%f, ", dataset[i].output[j]);
             }
-            printf("]; real output: [");
+            printf("]; real outputs: [");
             for(uint32_t j=0; j<num_outputs; j++) {
                 printf("%f, ", outputs[j]);
             }
@@ -86,13 +87,30 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
     return error / dataset_size;
 }
 
+// get init results
+// save network state
+// mutate micronet
+// train network
+// get new results
+// compare with init
+// if results are worse: rollback the mutation, restore the network
+
+
 int main(void) {
     srand(time(NULL));
     network_t config;
-    network_init(&config, &network_map);
+    network_init(&config, &network_map, sizeof_arr(dataset));
     printf("Network initialised!\n");
     double current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
     printf("Init error: %f\n", current_error);
+    network_backup(&config);
+    network_mutate_micronet(&config);
+    network_update(&config);
+    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
+    printf("Error after mutation: %f\n", current_error);
+    network_restore(&config);
+    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
+    printf("Error after rollback: %f\n", current_error);
     // size_t counter = 0;
     // while((current_error > 0.001) && (counter++ < 10000)) {
     //     micronet_mutate(&config);

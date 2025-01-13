@@ -28,7 +28,7 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map) {
     for(size_t i=0; i<config->num_neurons; i++) {
         uint8_t idx = net_map->neurons[i].idx - config->num_inputs;
         uint8_t num_inputs = net_map->neurons[i].num_inputs;
-        neuron_init(&config->neurons[idx], num_inputs);
+        neuron_init(&config->neurons[idx], num_inputs, 1);
         for(size_t j=0; j<net_map->neurons[i].num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, net_map->neurons[i].indices[j]);
             if(j >= config->num_inputs) {
@@ -40,13 +40,19 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map) {
 }
 
 double micronet_get_output(micro_network_t * config, double *inputs) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_reset_output_counter(&config->neurons[i]);
+    }
+    // printf("Micronet array: ");
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
             config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
         }
+        // printf("%f, ", config->arr[i]);
     }
+    // printf("\n");
     return config->arr[config->output_idx];
 }
 

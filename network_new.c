@@ -15,41 +15,39 @@
 //          - sum of other coeffs * input values
 
 micronet_map_t feedback_micronet_map = {
-    .num_inputs = 6,
-    .num_neurons = 7,
-    .net_size = 13,
+    .num_inputs = 5,
+    .num_neurons = 6,
+    .net_size = 11,
     .neurons = {
-        {.idx = 6, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 7, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 8, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 9, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 10, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 11, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 12, .num_inputs = 6, .indices = {6, 7, 8, 9, 10, 11, 0, 0}},
+        {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 7, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
     },
-    .output_idx = 12
+    .output_idx = 10
 };
 
 micronet_map_t coeffs_micronet_map = {
-    .num_inputs = 6,
-    .num_neurons = 7,
-    .net_size = 13,
+    .num_inputs = 5,
+    .num_neurons = 6,
+    .net_size = 11,
     .neurons = {
-        {.idx = 6, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 7, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 8, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 9, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 10, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 11, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
-        {.idx = 12, .num_inputs = 6, .indices = {6, 7, 8, 9, 10, 11, 0, 0}},
+        {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 7, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
+        {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
     },
-    .output_idx = 12
+    .output_idx = 10
 };
 
 neuron_params_t *neurons_backup;
 double *arr_backup;
 
-void network_init(network_t * config, network_map_t *net_map) {
+void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size) {
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
     config->net_size = net_map->net_size;
@@ -72,7 +70,7 @@ void network_init(network_t * config, network_map_t *net_map) {
         neuron_desc_t *neuron = (neuron_desc_t *)&net_map->neurons[offset];
         uint8_t idx = neuron->idx - config->num_inputs;
         uint8_t num_inputs = neuron->num_inputs;
-        neuron_init(&config->neurons[idx], num_inputs);
+        neuron_init(&config->neurons[idx], num_inputs, dataset_size);
         neuron_set_output_idx(&config->neurons[idx], neuron->output_idx);
         for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, neuron->indices[j]);
@@ -113,6 +111,12 @@ double* network_get_outputs(network_t * config, double *inputs) {
         config->outputs[i] = config->arr[config->output_indices[i]];
     }
     return config->outputs;
+}
+
+void network_reset_counters(network_t *config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_reset_output_counter(&config->neurons[i]);
+    }
 }
 
 void network_set_global_error(network_t *config, double error) {
@@ -156,11 +160,19 @@ void network_rollback(network_t * config) {
 
 void network_mutate_micronet(network_t * config) {
     config->last_mutated_micronet = random_bit();
-    neuron_mutate(&config->feedback_micronet);
+    if(config->last_mutated_micronet) {
+        micronet_mutate(&config->feedback_micronet);
+    } else {
+        micronet_mutate(&config->coeffs_micronet);
+    }
 }
 
 void network_rollback_micronet(network_t * config) {
-    neuron_restore(&config->neurons[config->mutated_neuron_idx]);
+    if(config->last_mutated_micronet) {
+        micronet_rollback(&config->feedback_micronet);
+    } else {
+        micronet_rollback(&config->coeffs_micronet);
+    }
 }
 
 void network_print_coeffs(network_t * config) {

@@ -101,16 +101,31 @@ int main(void) {
     network_t config;
     network_init(&config, &network_map, sizeof_arr(dataset));
     printf("Network initialised!\n");
-    double current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
+    double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
+    double current_error = init_error;
     printf("Init error: %f\n", current_error);
     network_backup(&config);
-    network_mutate_micronet(&config);
-    network_update(&config);
+    // double error_delta = 0;
+    size_t counter = 0;
+    while((current_error > 0.001) && (counter++ < 10000)) {
+        network_set_global_error(&config, current_error);
+        network_mutate_micronet(&config);
+        network_update(&config);
+        network_reset_counters(&config);
+        double new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+        // printf("Error after mutation: %f\n", current_error);
+        if(new_error > current_error) {
+            network_restore(&config);
+            network_rollback_micronet(&config);
+        } else if((0.000001 + new_error) < current_error) {
+            current_error = new_error;
+            // error_delta = init_error - current_error;
+            printf("Current error: %f\n", current_error);
+            network_backup(&config);
+        }
+    }
     current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
-    printf("Error after mutation: %f\n", current_error);
-    network_restore(&config);
-    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
-    printf("Error after rollback: %f\n", current_error);
+    printf("Error after evolution: %f\n", current_error);
     // size_t counter = 0;
     // while((current_error > 0.001) && (counter++ < 10000)) {
     //     micronet_mutate(&config);

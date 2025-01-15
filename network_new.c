@@ -16,8 +16,8 @@
 
 micronet_map_t feedback_micronet_map = {
     .num_inputs = 5,
-    .num_neurons = 6,
-    .net_size = 11,
+    .num_neurons = 11,
+    .net_size = 16,
     .neurons = {
         {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
@@ -25,8 +25,13 @@ micronet_map_t feedback_micronet_map = {
         {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
+        {.idx = 11, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
+        {.idx = 12, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
+        {.idx = 13, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
+        {.idx = 14, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
+        {.idx = 15, .num_inputs = 5, .indices = {10, 11, 12, 13, 14, 0, 0, 0}},
     },
-    .output_idx = 10
+    .output_idx = 15
 };
 
 micronet_map_t coeffs_micronet_map = {
@@ -90,6 +95,9 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
 }
 
 void network_backup(network_t * config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_backup(&config->neurons[i]);
+    }
     memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
     memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
 }
@@ -97,6 +105,9 @@ void network_backup(network_t * config) {
 void network_restore(network_t * config) {
     memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
     memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_restore(&config->neurons[i]);
+    }
 }
 
 double* network_get_outputs(network_t * config, double *inputs) {
@@ -155,7 +166,7 @@ void network_mutate(network_t * config) {
 }
 
 void network_rollback(network_t * config) {
-    neuron_restore(&config->neurons[config->mutated_neuron_idx]);
+    neuron_rollback(&config->neurons[config->mutated_neuron_idx]);
 }
 
 void network_mutate_micronet(network_t * config) {

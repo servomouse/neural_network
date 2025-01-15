@@ -50,6 +50,13 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
     for(int i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.01, 0.01);
     }
+    if(n_params->backup_coeffs) {
+        free(n_params->backup_coeffs);
+    }
+    n_params->backup_coeffs = calloc(n_params->num_coeffs, sizeof(double));
+    for(int i=0; i<n_params->num_coeffs; i++) {
+        n_params->backup_coeffs[i] = n_params->coeffs[i];
+    }
     if(n_params->part_values) {
         free(n_params->part_values);
     }
@@ -66,6 +73,18 @@ void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uin
         n_params->indices[input_number] = input_idx;
     } else {
         printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
+    }
+}
+
+void neuron_backup(neuron_params_t *n_params) {
+    for(int i=0; i<n_params->num_coeffs; i++) {
+        n_params->backup_coeffs[i] = n_params->coeffs[i];
+    }
+}
+
+void neuron_restore(neuron_params_t *n_params) {
+    for(int i=0; i<n_params->num_coeffs; i++) {
+        n_params->coeffs[i] = n_params->backup_coeffs[i];
     }
 }
 
@@ -172,7 +191,7 @@ void neuron_mutate(neuron_params_t * n_params) {
     n_params->coeffs[n_params->last_idx] = control_coeffs_func(n_params->coeffs[n_params->last_idx] + random_val);
 }
 
-void neuron_restore(neuron_params_t * n_params) {
+void neuron_rollback(neuron_params_t * n_params) {
     n_params->coeffs[n_params->last_idx] = n_params->last_value;
 }
 

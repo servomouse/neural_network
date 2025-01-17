@@ -48,7 +48,7 @@ double micronet_get_output(micro_network_t * config, double *inputs) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, 0);
         }
         // printf("%f, ", config->arr[i]);
     }

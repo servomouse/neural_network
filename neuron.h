@@ -9,7 +9,7 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
 void neuron_save_state(neuron_params_t * n_params, char *filename);
 void neuron_restore_state(neuron_params_t * n_params, char *filename);
-double neuron_get_output(neuron_params_t * n_params, double *inputs);
+double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to_print);
 void neuron_set_feedback_error(neuron_params_t * n_params, double error);
 void neuron_reset_feedback_error(neuron_params_t * n_params);
 void neuron_set_global_error(neuron_params_t * n_params, double error);

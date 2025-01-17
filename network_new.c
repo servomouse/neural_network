@@ -110,12 +110,12 @@ void network_restore(network_t * config) {
     }
 }
 
-double* network_get_outputs(network_t * config, double *inputs) {
+double* network_get_outputs(network_t * config, double *inputs, uint32_t to_print) {
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, to_print);
         }
     }
     for(size_t i=0; i<config->num_outputs; i++) {

@@ -4,7 +4,7 @@
 #include "neuron_types.h"
 
 void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size);
-double *network_get_outputs(network_t * config, double *inputs);
+double *network_get_outputs(network_t * config, double *inputs, uint32_t to_print);
 void network_set_global_error(network_t * config, double error);
 void network_backup(network_t * config);
 void network_restore(network_t * config);

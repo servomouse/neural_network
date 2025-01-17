@@ -1,6 +1,7 @@
 #include  <time.h>
 #include <string.h>
 #include "utils.h"
+#include <math.h>
 
 /* generate a random double number from min to max */
 double random_double(double min, double max) {
@@ -18,6 +19,27 @@ uint32_t random_int(uint32_t min, uint32_t max) {
     uint32_t range = (max - min); 
     // uint32_t div = RAND_MAX / range;
     return min + (rand() % range);
+}
+
+// Generates a random vector of given length in an n-dimensional space
+void gen_vector(uint32_t n, double len, double* result) {
+    // Generate random components
+    double sum_of_squares = 0.0;
+    for (uint32_t i = 0; i < n; ++i) {
+        result[i] = ((double)rand() / RAND_MAX) * 2.0 - 1.0; // Random number between -1 and 1
+        sum_of_squares += result[i] * result[i];
+    }
+
+    // Normalize the vector to have unit length
+    double norm = sqrt(sum_of_squares);
+    for (uint32_t i = 0; i < n; ++i) {
+        result[i] /= norm;
+    }
+
+    // Scale the vector to the desired length
+    for (uint32_t i = 0; i < n; ++i) {
+        result[i] *= len;
+    }
 }
 
 uint64_t get_hash(uint8_t *data, size_t size) {

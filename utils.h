@@ -16,3 +16,4 @@ uint32_t random_int(uint32_t min, uint32_t max);
 int store_data(void *data, size_t size, char *filename);
 int restore_data(void *data, size_t size, char *filename);
 char *concat_strings(const char *s1, const char *s2);
+void gen_vector(uint32_t n, double len, double* result);

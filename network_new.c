@@ -137,10 +137,17 @@ void network_set_global_error(network_t *config, double error) {
 }
 
 void network_save_to_file(network_t * config, char *filename) {
-    char *arr_fname = concat_strings("arr_", filename);
-    store_data(&config, sizeof(config), filename);
-    store_data(&config->arr, config->net_size * sizeof(double), arr_fname);
-    free(arr_fname);
+    // char *arr_fname = concat_strings("arr_", filename);
+    // store_data(&config, sizeof(config), filename);
+    // store_data(&config->arr, config->net_size * sizeof(double), arr_fname);
+    // free(arr_fname);
+    char filename_buf[] = "data/neurons_structures.h";
+    neuron_prepare_file(filename_buf);
+    for(uint32_t i=0; i<config->num_neurons; i++) {
+        // snprintf(&filename_buf[0], 20, "data/neurons.h", i);
+        neuron_save_data(&config->neurons[i], filename_buf, i);
+    }
+    neuron_complete_file(filename_buf, config->num_neurons);
 }
 
 void network_restore_from_file(network_t * config, char *filename) {

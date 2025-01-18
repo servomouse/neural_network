@@ -237,10 +237,10 @@ int main(void) {
         if(new_error > current_error) {
             network_rollback(&config);
         } else {
-            // if(new_error < current_error) {
-            //     printf("New error: %f\n", new_error);
-            // }
-            printf("New error: %f\n", new_error);
+            if(new_error < current_error) {
+                printf("New error: %f\n", new_error);
+            }
+            // printf("New error: %f\n", new_error);
             // if((counter % 1000) == 0) {
             //     printf("New error: %f\n", new_error);
             // }
@@ -251,5 +251,6 @@ int main(void) {
     // network_print_coeffs(&config);
     get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
     printf("Final error: %f, counter = %lld\n", current_error, counter);
+    network_save_to_file(&config, "lalala");
     return 0;
 }

@@ -26,6 +26,86 @@ double control_coeffs_func(double coeff) {
     }
 }
 
+#define BUF_SIZE 2048
+
+void neuron_prepare_file(const char *filename) {
+    char buffer[BUF_SIZE] = {0};
+    uint32_t idx = 0;
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "#include <stdint.h>\n\n");
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "typedef struct {\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tuint32_t num_inputs;\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tuint32_t num_coeffs;\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tuint32_t dataset_size;\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tdouble *coeffs;\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tuint32_t *indices;\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "}neuron_min_desc_t;\n\n");
+
+    FILE *file = fopen(filename, "wb");
+    if ((file != NULL) && (idx < BUF_SIZE)) {
+        fprintf (file, "%s", buffer);
+        fclose(file);
+    } else {
+        printf("File write error!");
+    }
+}
+
+void neuron_save_data(neuron_params_t * n_params, const char *filename, uint32_t neuron_idx) {
+    char buffer[BUF_SIZE] = {0};
+    uint32_t idx = 0;
+
+    // Write coeffs:
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double coeffs_%d[%d] = {\n", neuron_idx, n_params->num_coeffs);
+    for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t%f,\n", n_params->coeffs[i]);
+    }
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t%f\n};\n\n", n_params->coeffs[n_params->num_coeffs-1]);
+
+    // Write indices:
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "uint32_t indices_%d[%d] = {", neuron_idx, n_params->num_inputs);
+    for(uint32_t i=0; i<n_params->num_inputs-1; i++) {
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "%d, ", n_params->indices[i]);
+    }
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "%d};\n\n", n_params->indices[n_params->num_inputs-1]);
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "neuron_min_desc_t neuron_%d = {\n", neuron_idx);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t.num_inputs = %d,\n", n_params->num_inputs);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t.num_coeffs = %d,\n", n_params->num_coeffs);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t.dataset_size = %d,\n", n_params->dataset_size);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t.coeffs = coeffs_%d,\n", neuron_idx);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t.indices = indices_%d,\n", neuron_idx);
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n\n");
+
+    FILE *file = fopen(filename, "ab");
+    if ((file != NULL) && (idx < BUF_SIZE)) {
+        fprintf (file, "%s", buffer);
+        fclose(file);
+    } else {
+        printf("File write error, here are coeffs: %s", buffer);
+    }
+}
+
+void neuron_complete_file(const char *filename, uint32_t num_neurons) {
+    char buffer[BUF_SIZE] = {0};
+    uint32_t idx = 0;
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "neuron_min_desc_t *neurons[] = {\n");
+    for(uint32_t i=0; i<num_neurons-1; i++) {
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t&neuron_%d,\n", i);
+    }
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t&neuron_%d\n};\n", num_neurons-1);
+
+    FILE *file = fopen(filename, "ab");
+    if ((file != NULL) && (idx < BUF_SIZE)) {
+        fprintf (file, "%s", buffer);
+        fclose(file);
+    } else {
+        printf("File write error!");
+    }
+}
+
 void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t dataset_size) {
     // srand(time(NULL));   // Should be called by controller
     printf("Creating neuron with %d inputs\n", num_inputs);
@@ -49,7 +129,7 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
     }
     n_params->coeffs = calloc(n_params->num_coeffs, sizeof(double));
     for(int i=0; i<n_params->num_coeffs; i++) {
-        n_params->coeffs[i] = random_double(-0.01, 0.01);
+        n_params->coeffs[i] = random_double(-0.1, 0.1);
     }
 
     if(n_params->backup_coeffs) {
@@ -222,7 +302,13 @@ void neuron_mutate(neuron_params_t * n_params) {
     if(n_params->mutated == 1) {    // If previuos mutation was successfull, keep going in the same direction
         n_params->bad_mutations_counter = 0;
     } else {
-        gen_vector(n_params->num_coeffs, n_params->mutation_step, n_params->rand_vector);
+        if(n_params->bad_mutations_counter >= 10000) {
+            gen_vector(n_params->num_coeffs, random_double(0, 1), n_params->rand_vector);
+            // n_params->bad_mutations_counter = 0;
+            // printf("Giant mutation\n");
+        } else {
+            gen_vector(n_params->num_coeffs, random_double(0, n_params->mutation_step), n_params->rand_vector);
+        }
     }
     for(int32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = control_coeffs_func(n_params->coeffs[i] + n_params->rand_vector[i]);

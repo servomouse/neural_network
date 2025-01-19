@@ -114,6 +114,7 @@ void network_restore(network_t * config) {
     for(int i=0; i<config->num_neurons; i++) {
         neuron_restore(&config->neurons[i]);
     }
+    printf("Network restored!\n");
 }
 
 double* network_get_outputs(network_t * config, double *inputs, uint32_t to_print) {

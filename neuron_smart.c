@@ -7,12 +7,6 @@
 #include "micro_net.h"
 #include "neurons_structures.h"
 
-#ifndef NEURONS_SAVED_DATA
-    #define NEURONS_SAVED_DATA 0
-#endif
-
-// extern neuron_min_desc_t *saved_neurons[];
-
 double activation_func(double sum) {
     if(sum > 1.0) {
         return 1.0;
@@ -60,6 +54,9 @@ void neuron_prepare_file(const char *filename) {
 
 void neuron_save_data(neuron_params_t * n_params, const char *filename, uint32_t neuron_idx) {
     char buffer[BUF_SIZE] = {0};
+    snprintf(buffer, BUF_SIZE, "data/neuron_%d_coeffs.bin", neuron_idx);
+    store_data(n_params->coeffs, n_params->num_coeffs * sizeof(double), buffer);
+
     uint32_t idx = 0;
 
     // Write coeffs:
@@ -103,7 +100,7 @@ void neuron_complete_file(const char *filename, uint32_t num_neurons) {
         idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t&neuron_%d,\n", i);
     }
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t&neuron_%d\n};\n", num_neurons-1);
-    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "#define NEURONS_SAVED_DATA 1\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "uint8_t restore_from_header =  0;\t // Set to 1 to restore these values\n");
 
     FILE *file = fopen(filename, "ab");
     if ((file != NULL) && (idx < BUF_SIZE)) {
@@ -115,16 +112,24 @@ void neuron_complete_file(const char *filename, uint32_t num_neurons) {
 }
 
 void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx) {
-    neuron_min_desc_t *neuron = saved_neurons[neuron_idx];
-    // n_params->num_inputs = neuron->num_inputs;
-    // n_params->num_coeffs = neuron->num_coeffs;
-    // n_params->dataset_size = neuron->dataset_size;
-    for(int i=0; i<n_params->num_coeffs; i++) {
-        n_params->coeffs[i] = neuron->coeffs[i];
+    if(restore_from_header) {
+        printf("Restoring neuron %d from header\n", neuron_idx);
+        neuron_min_desc_t *neuron = saved_neurons[neuron_idx];
+        // n_params->num_inputs = neuron->num_inputs;
+        // n_params->num_coeffs = neuron->num_coeffs;
+        // n_params->dataset_size = neuron->dataset_size;
+        for(int i=0; i<n_params->num_coeffs; i++) {
+            n_params->coeffs[i] = neuron->coeffs[i];
+        }
+        // for(size_t i=0; i<n_params->num_inputs; i++) {
+        //    n_params->indices[i] = neuron->indices[i];
+        // }
+    } else {
+        printf("Restoring neuron %d from binary\n", neuron_idx);
+        char buffer[BUF_SIZE] = {0};
+        snprintf(buffer, BUF_SIZE, "data/neuron_%d_coeffs.bin", neuron_idx);
+        restore_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), buffer);
     }
-    // for(size_t i=0; i<n_params->num_inputs; i++) {
-    //    n_params->indices[i] = neuron->indices[i];
-    // }
 }
 
 void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t dataset_size) {

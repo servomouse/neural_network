@@ -219,12 +219,12 @@ int main(void) {
     network_t config;
     network_init(&config, &network_map, sizeof_arr(dataset));
     printf("Network initialised!\n");
-    network_restore_data(&config, "lalala");
-    printf("Network restored!\n");
+    // network_restore_data(&config, "lalala");
+
     double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
     double current_error = init_error;
     printf("Init error: %f\n", current_error);
-    return 0;
+    // return 0;
     network_backup(&config);
 
     // size_t counter = 0;
@@ -270,12 +270,12 @@ int main(void) {
     // network_print_coeffs(&config);
     current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
     printf("Final error: %f, counter = %lld\n", current_error, counter);
+    network_backup(&config);
     network_save_data(&config, "lalala");
-    // network_backup(&config);
-    // network_restore_data(&config, "lalala");
-    // network_check_backup(&config);
-    // printf("Network restored!\n");
-    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
-    // printf("Error after restoring: %f\n", current_error);
+    network_restore_data(&config, "lalala");
+    network_check_backup(&config);
+    printf("Network restored!\n");
+    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
+    printf("Error after restoring: %f\n", current_error);
     return 0;
 }

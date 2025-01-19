@@ -125,13 +125,30 @@ int test_save_restore(neuron_params_t *n) {
     return EXIT_SUCCESS;
 }
 
-void test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_name) {
+int test_output(neuron_params_t *n) {
+    neuron_stash_state(n);
+    for(uint32_t i=0; i<16; i++) {
+        // printf("Setting coeff[%d] to %f\n", i, 0.02 * i);
+        neuron_set_coeff(n, i, 0.02 * i+1);
+    }
+    double error = get_error(n, dataset, sizeof_arr(dataset), 0);
+    neuron_rollback(n);
+    // printf("Error after setting coeffs = %f;\n", error);
+    if(round_to_precision(error, 6) == 0.517241) {
+        return EXIT_SUCCESS;
+    }
+    printf("Error: error value differs from expected!");
+    return EXIT_FAILURE;
+}
+
+int test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_name) {
     printf("Testing %s . . . ", test_name);
     if(foo(n) == EXIT_FAILURE) {
         printf(" ERROR!\n");
-        return;
+        return EXIT_FAILURE;
     }
     printf("SUCCESS!\n");
+    return EXIT_SUCCESS;
 }
 
 int main() {
@@ -141,9 +158,11 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&test_neuron, j, j);
     }
-    test_func(test_mutation,     &test_neuron, "mutations");
-    test_func(test_rollback,     &test_neuron, "rollback");
-    test_func(test_save_restore, &test_neuron, "save-restore");
-
-    return 0;
+    if(test_func(test_output, &test_neuron, "output") ||
+       test_func(test_mutation,     &test_neuron, "mutations")||
+       test_func(test_rollback,     &test_neuron, "rollback")||
+       test_func(test_save_restore, &test_neuron, "save-restore")) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }

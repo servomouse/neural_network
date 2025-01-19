@@ -8,7 +8,7 @@ double random_double(double min, double max) {
     // Make sure you have called srand(time(NULL));
     double range = (max - min); 
     double div = RAND_MAX / range;
-    return min + (rand() / div);
+    return round_to_precision(min + (rand() / div), 5);
 }
 
 uint8_t random_bit(void) {
@@ -40,6 +40,17 @@ void gen_vector(uint32_t n, double len, double* result) {
     for (uint32_t i = 0; i < n; ++i) {
         result[i] *= len;
     }
+
+    // Cut off the trailing digits
+    for (uint32_t i = 0; i < n; ++i) {
+        result[i] = round_to_precision(result[i], 5);
+    }
+}
+
+// Precision is how many digits after the decimal point
+double round_to_precision(double value, uint32_t precision) {
+    double factor = pow(10.0, precision);
+    return round(value*factor)/factor;
 }
 
 uint64_t get_hash(uint8_t *data, size_t size) {

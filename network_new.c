@@ -102,6 +102,12 @@ void network_backup(network_t * config) {
     memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
 }
 
+void network_check_backup(network_t * config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_check_backup(&config->neurons[i]);
+    }
+}
+
 void network_restore(network_t * config) {
     memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
     memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
@@ -136,12 +142,12 @@ void network_set_global_error(network_t *config, double error) {
     }
 }
 
-void network_save_to_file(network_t * config, char *filename) {
+void network_save_data(network_t * config, char *filename) {
     // char *arr_fname = concat_strings("arr_", filename);
     // store_data(&config, sizeof(config), filename);
     // store_data(&config->arr, config->net_size * sizeof(double), arr_fname);
     // free(arr_fname);
-    char filename_buf[] = "data/neurons_structures.h";
+    char filename_buf[] = "neurons_structures.h";
     neuron_prepare_file(filename_buf);
     for(uint32_t i=0; i<config->num_neurons; i++) {
         // snprintf(&filename_buf[0], 20, "data/neurons.h", i);
@@ -150,15 +156,18 @@ void network_save_to_file(network_t * config, char *filename) {
     neuron_complete_file(filename_buf, config->num_neurons);
 }
 
-void network_restore_from_file(network_t * config, char *filename) {
-    if(!config->neurons) {
-        printf("Call init() before calling restore_state()!");
-        exit(1);
+void network_restore_data(network_t * config, char *filename) {
+    // if(!config->neurons) {
+    //     printf("Call init() before calling restore_state()!");
+    //     exit(1);
+    // }
+    // char *arr_fname = concat_strings("arr_", filename);
+    // restore_data(&config, sizeof(config), filename);
+    // restore_data(config->arr, config->net_size * sizeof(double), arr_fname);
+    // free(arr_fname);
+    for(uint32_t i=0; i<config->num_neurons; i++) {
+        neuron_restore_data(&config->neurons[i], i);
     }
-    char *arr_fname = concat_strings("arr_", filename);
-    restore_data(&config, sizeof(config), filename);
-    restore_data(config->arr, config->net_size * sizeof(double), arr_fname);
-    free(arr_fname);
 }
 
 void network_update(network_t * config) {

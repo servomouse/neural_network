@@ -158,7 +158,7 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&test_neuron, j, j);
     }
-    if(test_func(test_output, &test_neuron, "output") ||
+    if(test_func(test_output,       &test_neuron, "output") ||
        test_func(test_mutation,     &test_neuron, "mutations")||
        test_func(test_rollback,     &test_neuron, "rollback")||
        test_func(test_save_restore, &test_neuron, "save-restore")) {

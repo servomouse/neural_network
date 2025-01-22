@@ -3,8 +3,6 @@
 #include <time.h>
 #include "network_new.h"
 
-#define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
-
 typedef struct {
     double inputs[4];
     double output[1];
@@ -78,77 +76,77 @@ typedef struct {
 //     {.inputs = {1.0, 1.0, 1.0, 1.0}, .output = {0.0}},
 // };
 
-dataset_entry_t dataset[] = {
-    {.inputs = {-1, 1.0, -1, 1.0}, .output = {1.0}},
-    // {.inputs = {-1, 1.0, 0.9, 0.8}, .output = {-0.3732}},
-    // {.inputs = {-0.9, -0.6, 0.9, 1.0}, .output = {0.1148}},
-    // {.inputs = {0.9, 0.8, -1, 0.7}, .output = {-0.128}},
-    // {.inputs = {0.9, -0.8, 1.0, -0.9}, .output = {0.2721}},
-    // {.inputs = {-1, -0.8, -0.7, 1.0}, .output = {-0.1756}},
-    // {.inputs = {0.7, -0.8, 1.0, 1.0}, .output = {-0.1756}},
-    // {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
-    // {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
-    // {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
-};
-
 // dataset_entry_t dataset[] = {
 //     {.inputs = {-1, 1.0, -1, 1.0}, .output = {1.0}},
-//     {.inputs = {-1, 1.0, 0.9, 0.8}, .output = {-0.3732}},
-//     {.inputs = {-0.9, -0.6, 0.9, 1.0}, .output = {0.1148}},
-//     {.inputs = {0.9, 0.8, -1, 0.7}, .output = {-0.128}},
-//     {.inputs = {0.9, -0.8, 1.0, -0.9}, .output = {0.2721}},
-//     {.inputs = {-1, -0.8, -0.7, 1.0}, .output = {-0.1756}},
-//     {.inputs = {0.7, -0.8, 1.0, 1.0}, .output = {-0.1756}},
-//     {.inputs = {0.9, -0.8, 1.0, 0.9}, .output = {-0.2721}},
-//     {.inputs = {-1, -0.8, 1.0, -0.7}, .output = {-0.1756}},
-//     {.inputs = {-1, -1, 0.9, 1.0}, .output = {0.729}},
-//     {.inputs = {-0.8, -0.9, -1, -0.9}, .output = {0.2721}},
-//     {.inputs = {-0.9, 0.8, 1.0, 0.8}, .output = {-0.1911}},
-//     {.inputs = {-0.9, 0.9, -0.8, -1}, .output = {-0.2721}},
-//     {.inputs = {1.0, 1.0, 0.9, -0.9}, .output = {-0.5314}},
-//     {.inputs = {1.0, 1.0, -0.6, 0.8}, .output = {-0.1106}},
-//     {.inputs = {0.8, 0.9, -1, 0.7}, .output = {-0.128}},
-//     {.inputs = {1.0, 0.8, -0.8, -0.9}, .output = {0.1911}},
-//     {.inputs = {-0.8, 0.9, 1.0, -0.9}, .output = {0.2721}},
-//     {.inputs = {-1, -1, -1, -0.6}, .output = {0.216}},
-//     {.inputs = {-0.6, -1, -1, 1.0}, .output = {-0.216}},
-//     {.inputs = {1.0, 0.6, -0.9, -0.9}, .output = {0.1148}},
-//     {.inputs = {-1, 0.8, -0.9, 0.7}, .output = {0.128}},
-//     {.inputs = {0.8, 0.8, 1.0, 0.9}, .output = {0.1911}},
-//     {.inputs = {1.0, 1.0, 1.0, 0.5}, .output = {0.125}},
-//     {.inputs = {0.8, -0.7, -1, 0.9}, .output = {0.128}},
-//     {.inputs = {0.9, -1, -0.8, 0.9}, .output = {0.2721}},
-//     {.inputs = {-0.7, 0.9, 1.0, 0.8}, .output = {-0.128}},
-//     {.inputs = {-0.7, -0.8, 1.0, 1.0}, .output = {0.1756}},
-//     {.inputs = {-1, -1, -0.8, -0.9}, .output = {0.3732}},
-//     {.inputs = {-1, -1, -0.9, 0.8}, .output = {-0.3732}},
-//     {.inputs = {1.0, -1, -0.8, 0.7}, .output = {0.1756}},
-//     {.inputs = {-0.9, -0.6, -1, 0.9}, .output = {-0.1148}},
-//     {.inputs = {-1, 1.0, 0.9, -0.7}, .output = {0.25}},
-//     {.inputs = {-1, -1, 0.6, -0.9}, .output = {-0.1575}},
-//     {.inputs = {1.0, -1, 0.9, -1}, .output = {0.729}},
-//     {.inputs = {-0.9, 0.7, -1, -0.9}, .output = {-0.1823}},
-//     {.inputs = {-0.8, -1, 0.8, 0.8}, .output = {0.1342}},
-//     {.inputs = {0.7, -1, 1.0, 1.0}, .output = {-0.343}},
-//     {.inputs = {0.9, -1, 1.0, 1.0}, .output = {-0.729}},
-//     {.inputs = {-0.9, 0.6, -1, 1.0}, .output = {0.1575}},
-//     {.inputs = {-0.9, 0.8, -0.9, -1}, .output = {-0.2721}},
-//     {.inputs = {-0.6, 0.8, -1, -1}, .output = {-0.1106}},
-//     {.inputs = {-0.9, 0.8, 0.9, 0.8}, .output = {-0.1393}},
-//     {.inputs = {-0.9, -0.8, 1.0, 0.9}, .output = {0.2721}},
-//     {.inputs = {1.0, 0.7, 0.7, 1.0}, .output = {0.1176}},
-//     {.inputs = {0.9, 0.7, -0.9, 0.9}, .output = {-0.1329}},
-//     {.inputs = {-0.9, 1.0, 0.9, 1.0}, .output = {-0.5314}},
-//     {.inputs = {0.9, -0.9, -0.6, 1.0}, .output = {0.1148}},
-//     {.inputs = {0.6, 0.9, 1.0, -1}, .output = {-0.1575}},
-//     {.inputs = {0.7, 1.0, -1, 0.8}, .output = {-0.1756}},
-//     {.inputs = {0.7, 0.7, 1.0, -1}, .output = {-0.1176}},
-//     {.inputs = {-1, 0.9, -1, -0.7}, .output = {-0.25}},
-//     {.inputs = {0.8, 1.0, 0.9, -1}, .output = {-0.3732}},
-//     {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
-//     {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
-//     {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
+//     // {.inputs = {-1, 1.0, 0.9, 0.8}, .output = {-0.3732}},
+//     // {.inputs = {-0.9, -0.6, 0.9, 1.0}, .output = {0.1148}},
+//     // {.inputs = {0.9, 0.8, -1, 0.7}, .output = {-0.128}},
+//     // {.inputs = {0.9, -0.8, 1.0, -0.9}, .output = {0.2721}},
+//     // {.inputs = {-1, -0.8, -0.7, 1.0}, .output = {-0.1756}},
+//     // {.inputs = {0.7, -0.8, 1.0, 1.0}, .output = {-0.1756}},
+//     // {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
+//     // {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
+//     // {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
 // };
+
+dataset_entry_t dataset[] = {
+    {.inputs = {-1, 1.0, -1, 1.0}, .output = {1.0}},
+    {.inputs = {-1, 1.0, 0.9, 0.8}, .output = {-0.3732}},
+    {.inputs = {-0.9, -0.6, 0.9, 1.0}, .output = {0.1148}},
+    {.inputs = {0.9, 0.8, -1, 0.7}, .output = {-0.128}},
+    {.inputs = {0.9, -0.8, 1.0, -0.9}, .output = {0.2721}},
+    {.inputs = {-1, -0.8, -0.7, 1.0}, .output = {-0.1756}},
+    {.inputs = {0.7, -0.8, 1.0, 1.0}, .output = {-0.1756}},
+    {.inputs = {0.9, -0.8, 1.0, 0.9}, .output = {-0.2721}},
+    {.inputs = {-1, -0.8, 1.0, -0.7}, .output = {-0.1756}},
+    {.inputs = {-1, -1, 0.9, 1.0}, .output = {0.729}},
+    {.inputs = {-0.8, -0.9, -1, -0.9}, .output = {0.2721}},
+    {.inputs = {-0.9, 0.8, 1.0, 0.8}, .output = {-0.1911}},
+    {.inputs = {-0.9, 0.9, -0.8, -1}, .output = {-0.2721}},
+    {.inputs = {1.0, 1.0, 0.9, -0.9}, .output = {-0.5314}},
+    {.inputs = {1.0, 1.0, -0.6, 0.8}, .output = {-0.1106}},
+    {.inputs = {0.8, 0.9, -1, 0.7}, .output = {-0.128}},
+    {.inputs = {1.0, 0.8, -0.8, -0.9}, .output = {0.1911}},
+    {.inputs = {-0.8, 0.9, 1.0, -0.9}, .output = {0.2721}},
+    {.inputs = {-1, -1, -1, -0.6}, .output = {0.216}},
+    {.inputs = {-0.6, -1, -1, 1.0}, .output = {-0.216}},
+    {.inputs = {1.0, 0.6, -0.9, -0.9}, .output = {0.1148}},
+    {.inputs = {-1, 0.8, -0.9, 0.7}, .output = {0.128}},
+    {.inputs = {0.8, 0.8, 1.0, 0.9}, .output = {0.1911}},
+    {.inputs = {1.0, 1.0, 1.0, 0.5}, .output = {0.125}},
+    {.inputs = {0.8, -0.7, -1, 0.9}, .output = {0.128}},
+    {.inputs = {0.9, -1, -0.8, 0.9}, .output = {0.2721}},
+    {.inputs = {-0.7, 0.9, 1.0, 0.8}, .output = {-0.128}},
+    {.inputs = {-0.7, -0.8, 1.0, 1.0}, .output = {0.1756}},
+    {.inputs = {-1, -1, -0.8, -0.9}, .output = {0.3732}},
+    {.inputs = {-1, -1, -0.9, 0.8}, .output = {-0.3732}},
+    {.inputs = {1.0, -1, -0.8, 0.7}, .output = {0.1756}},
+    {.inputs = {-0.9, -0.6, -1, 0.9}, .output = {-0.1148}},
+    {.inputs = {-1, 1.0, 0.9, -0.7}, .output = {0.25}},
+    {.inputs = {-1, -1, 0.6, -0.9}, .output = {-0.1575}},
+    {.inputs = {1.0, -1, 0.9, -1}, .output = {0.729}},
+    {.inputs = {-0.9, 0.7, -1, -0.9}, .output = {-0.1823}},
+    {.inputs = {-0.8, -1, 0.8, 0.8}, .output = {0.1342}},
+    {.inputs = {0.7, -1, 1.0, 1.0}, .output = {-0.343}},
+    {.inputs = {0.9, -1, 1.0, 1.0}, .output = {-0.729}},
+    {.inputs = {-0.9, 0.6, -1, 1.0}, .output = {0.1575}},
+    {.inputs = {-0.9, 0.8, -0.9, -1}, .output = {-0.2721}},
+    {.inputs = {-0.6, 0.8, -1, -1}, .output = {-0.1106}},
+    {.inputs = {-0.9, 0.8, 0.9, 0.8}, .output = {-0.1393}},
+    {.inputs = {-0.9, -0.8, 1.0, 0.9}, .output = {0.2721}},
+    {.inputs = {1.0, 0.7, 0.7, 1.0}, .output = {0.1176}},
+    {.inputs = {0.9, 0.7, -0.9, 0.9}, .output = {-0.1329}},
+    {.inputs = {-0.9, 1.0, 0.9, 1.0}, .output = {-0.5314}},
+    {.inputs = {0.9, -0.9, -0.6, 1.0}, .output = {0.1148}},
+    {.inputs = {0.6, 0.9, 1.0, -1}, .output = {-0.1575}},
+    {.inputs = {0.7, 1.0, -1, 0.8}, .output = {-0.1756}},
+    {.inputs = {0.7, 0.7, 1.0, -1}, .output = {-0.1176}},
+    {.inputs = {-1, 0.9, -1, -0.7}, .output = {-0.25}},
+    {.inputs = {0.8, 1.0, 0.9, -1}, .output = {-0.3732}},
+    {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
+    {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
+    {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
+};
 
 network_map_t network_map = {
     .num_inputs = 4,
@@ -219,9 +217,16 @@ int main(void) {
     network_t config;
     network_init(&config, &network_map, sizeof_arr(dataset));
     printf("Network initialised!\n");
-    // network_restore_data(&config, "lalala");
+    network_restore_data(&config, "lalala");
 
     double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    // network_mutate(&config);
+    // network_rollback(&config);
+    // double current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    // if(init_error != current_error) {
+    //     printf("New error != current error after rollback!: new_error = %f, current_error = %f\n", init_error, current_error);
+    //     return 0;
+    // }
     double current_error = init_error;
     printf("Init error: %f\n", current_error);
     // return 0;
@@ -249,33 +254,43 @@ int main(void) {
     // printf("Error after evolution: %f\n", current_error);
 
     size_t counter = 0;
-    while((current_error > 0.001) && (counter++ < 100)) {
+    double new_error = 0;
+    while((current_error > 0.001) && (counter++ < 10000)) {
         network_mutate(&config);
-        double new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+        new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
         // printf("New error: %f\n", new_error);
         if(new_error > current_error) {
+            // network_restore(&config);
             network_rollback(&config);
-        } else if(new_error < current_error) {
-            // if(new_error < current_error) {
-            //     printf("New error: %f\n", new_error);
-            // }
-            printf("New error: %f\n", new_error);
-            // if((counter % 1000) == 0) {
-            //     printf("New error: %f\n", new_error);
-            // }
-            current_error = new_error;
+            new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+            if(new_error != current_error) {
+                printf("New error != current error after rollback!: new_error = %f, current_error = %f\n", new_error, current_error);
+            }
+        } else {
+            network_backup(&config);
+            if(new_error < current_error) {
+                // if(new_error < current_error) {
+                //     printf("New error: %f\n", new_error);
+                // }
+                printf("New error: %f\n", new_error);
+                // if((counter % 1000) == 0) {
+                //     printf("New error: %f\n", new_error);
+                // }
+                current_error = new_error;
+            }
         }
     }
     
     // network_print_coeffs(&config);
-    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
+    printf("Final error: %f, counter = %lld\n", current_error, counter);
+    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
     printf("Final error: %f, counter = %lld\n", current_error, counter);
     network_backup(&config);
     network_save_data(&config, "lalala");
-    network_restore_data(&config, "lalala");
-    network_check_backup(&config);
-    printf("Network restored!\n");
-    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
-    printf("Error after restoring: %f\n", current_error);
+    // network_restore_data(&config, "lalala");
+    // network_check_backup(&config);
+    // printf("Network restored!\n");
+    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
+    // printf("Error after restoring: %f\n", current_error);
     return 0;
 }

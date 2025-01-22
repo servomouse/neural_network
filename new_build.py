@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 # build_files = ["nanite.c", "utils.c"]
-common_flags = ["-lm", "-g", "-Wall", "-lws2_32"]
+common_flags = ["-lm", "-g", "-Wall", "-lws2_32", "-I."]
 
 targets = {
     "neuron_linear": {
@@ -16,6 +16,11 @@ targets = {
         "build_files": ["neuron_smart.c", "utils.c"],
         "output_file": "bin/neuron_smart.dll"
     },
+    "neuron_test": {
+        "build_flags": common_flags,
+        "build_files": ["test/neuron_test.c", "neuron_smart.c", "utils.c"],
+        "output_file": "bin/neuron_test.exe"
+    },
     "controller": {
         "build_flags": common_flags + ["-shared"],
         "build_files": ["neuron_kapellmeister.c", "neuron_smart.c", "micro_net.c", "utils.c"],
@@ -23,7 +28,7 @@ targets = {
     },
     "micronet_test": {
         "build_flags": common_flags,
-        "build_files": ["micro_net_test.c", "neuron_smart.c", "micro_net.c", "utils.c"],
+        "build_files": ["tests/micro_net_test.c", "neuron_smart.c", "micro_net.c", "utils.c"],
         "output_file": "bin/micronet_test.exe"
     },
     "network": {
@@ -33,7 +38,7 @@ targets = {
     },
     "network_test": {
         "build_flags": common_flags,
-        "build_files": ["network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c"],
+        "build_files": ["tests/network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c"],
         "output_file": "bin/network_test.exe"
     },
 }

@@ -15,6 +15,7 @@ uint8_t random_bit(void) {
     return rand() & 1;
 }
 
+// Returns a random integer, min values is min, max value is max-1
 uint32_t random_int(uint32_t min, uint32_t max) {
     uint32_t range = (max - min); 
     // uint32_t div = RAND_MAX / range;

@@ -10,6 +10,8 @@
     #define DLL_PREFIX __declspec(dllexport)
 #endif
 
+#define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
+
 double random_double(double min, double max);
 uint8_t random_bit(void);
 uint32_t random_int(uint32_t min, uint32_t max);

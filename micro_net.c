@@ -18,6 +18,7 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map) {
     config->num_neurons = net_map->num_neurons;
     config->net_size = net_map->net_size;
     config->output_idx = net_map->output_idx;
+    config->mutated_neuron_idx = 0;
     printf("Creating micro network with:\n");
     printf("\t%d inputs;\n", config->num_inputs);
     printf("\t%d neurons;\n", config->num_neurons);
@@ -81,12 +82,16 @@ void micronet_restore(micro_network_t * config, char *filename) {
 }
 
 void micronet_mutate(micro_network_t * config) {
-    config->mutated_neuron_idx = random_int(0, config->num_neurons);
+    // config->mutated_neuron_idx = random_int(0, config->num_neurons);
+    config->mutated_neuron_idx++;
+    if(config->mutated_neuron_idx == config->num_neurons) {
+        config->mutated_neuron_idx = 0;
+    }
     neuron_mutate(&config->neurons[config->mutated_neuron_idx]);
 }
 
 void micronet_rollback(micro_network_t * config) {
-    neuron_restore(&config->neurons[config->mutated_neuron_idx]);
+    neuron_rollback(&config->neurons[config->mutated_neuron_idx]);
 }
 
 void micronet_print_coeffs(micro_network_t * config) {

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "utils.h"
 #include "network_new.h"
 
 typedef struct {
@@ -210,74 +211,54 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
 // compare with init
 // if results are worse: rollback the mutation, restore the network
 
-// Final error: 0.223623
+int test_mutations(network_t *config) {
+    double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    printf("Error before mutation: %f\n", init_error);
+
+    network_mutate(config);
+    double current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    printf("Error after mutation: %f\n", current_error);
+
+    network_rollback(config);
+    double final_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    printf("Error after rollback: %f\n", final_error);
+
+    if(final_error != init_error) {
+        printf("Error: final_error != int_error!!: final_error = %f, init_error = %f\n", final_error, init_error);
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
 
 int main(void) {
     srand(time(NULL));
     network_t config;
     network_init(&config, &network_map, sizeof_arr(dataset));
     printf("Network initialised!\n");
-    network_restore_data(&config, "lalala");
+    test_mutations(&config);
+    return 0;
 
     double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    // network_mutate(&config);
-    // network_rollback(&config);
-    // double current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    // if(init_error != current_error) {
-    //     printf("New error != current error after rollback!: new_error = %f, current_error = %f\n", init_error, current_error);
-    //     return 0;
-    // }
     double current_error = init_error;
     printf("Init error: %f\n", current_error);
-    // return 0;
-    network_backup(&config);
-
-    // size_t counter = 0;
-    // while((current_error > 0.001) && (counter++ < 10000)) {
-    //     // network_set_global_error(&config, current_error);
-    //     network_mutate_micronet(&config);
-    //     network_update(&config);
-    //     // network_reset_counters(&config);
-    //     double new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    //     // printf("Error after mutation: %f\n", current_error);
-    //     if(new_error > current_error) {
-    //         network_restore(&config);
-    //         network_rollback_micronet(&config);
-    //     } else if((0.000001 + new_error) < current_error) {
-    //         current_error = new_error;
-    //         // error_delta = init_error - current_error;
-    //         printf("Current error: %f\n", current_error);
-    //         network_backup(&config);
-    //     }
-    // }
-    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);
-    // printf("Error after evolution: %f\n", current_error);
 
     size_t counter = 0;
     double new_error = 0;
     while((current_error > 0.001) && (counter++ < 10000)) {
         network_mutate(&config);
         new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-        // printf("New error: %f\n", new_error);
         if(new_error > current_error) {
-            // network_restore(&config);
             network_rollback(&config);
             new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
             if(new_error != current_error) {
                 printf("New error != current error after rollback!: new_error = %f, current_error = %f\n", new_error, current_error);
+                return 1;
             }
         } else {
-            network_backup(&config);
             if(new_error < current_error) {
-                // if(new_error < current_error) {
-                //     printf("New error: %f\n", new_error);
-                // }
                 printf("New error: %f\n", new_error);
-                // if((counter % 1000) == 0) {
-                //     printf("New error: %f\n", new_error);
-                // }
-                current_error = new_error;
             }
+            current_error = new_error;
         }
     }
     
@@ -285,8 +266,9 @@ int main(void) {
     printf("Final error: %f, counter = %lld\n", current_error, counter);
     current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
     printf("Final error: %f, counter = %lld\n", current_error, counter);
-    network_backup(&config);
-    network_save_data(&config, "lalala");
+    // network_backup(&config);
+    // network_save_data(&config, "lalala");
+
     // network_restore_data(&config, "lalala");
     // network_check_backup(&config);
     // printf("Network restored!\n");

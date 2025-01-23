@@ -53,6 +53,7 @@ neuron_params_t *neurons_backup;
 double *arr_backup;
 
 void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size) {
+    srand(time(NULL));
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
     config->net_size = net_map->net_size;
@@ -90,16 +91,16 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
         offset += num_inputs + 3;
     }
     // Init micronets:
-    micronet_init(&config->feedback_micronet, &feedback_micronet_map);
-    micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
+    // micronet_init(&config->feedback_micronet, &feedback_micronet_map);
+    // micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
 }
 
 void network_backup(network_t * config) {
     for(int i=0; i<config->num_neurons; i++) {
         neuron_backup(&config->neurons[i]);
     }
-    memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
-    memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
+    // memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
+    // memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
 }
 
 void network_check_backup(network_t * config) {
@@ -109,8 +110,8 @@ void network_check_backup(network_t * config) {
 }
 
 void network_restore(network_t * config) {
-    memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
-    memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
+    // memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
+    // memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
     for(int i=0; i<config->num_neurons; i++) {
         neuron_restore(&config->neurons[i]);
     }
@@ -172,9 +173,9 @@ void network_restore_data(network_t * config, char *filename) {
 }
 
 void network_update(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
-        neuron_update_coeffs(&config->neurons[i], &config->coeffs_micronet);
-    }
+    // for(int i=0; i<config->num_neurons; i++) {
+    //     neuron_update_coeffs(&config->neurons[i], &config->coeffs_micronet);
+    // }
 }
 
 void network_mutate(network_t * config) {

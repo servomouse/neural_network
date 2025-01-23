@@ -7,8 +7,14 @@
 
 void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t dataset_size);
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
+void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value);
 void neuron_save_state(neuron_params_t * n_params, char *filename);
 
+void neuron_stash_state(neuron_params_t * n_params);
+void neuron_mutate(neuron_params_t * n_params);
+void neuron_rollback(neuron_params_t * n_params);
+
+void neuron_save_coeffs(neuron_params_t * n_params, uint32_t neuron_idx);
 void neuron_prepare_file(const char *filename);
 void neuron_save_data(neuron_params_t * n_params, const char *filename, uint32_t neuron_idx);
 void neuron_complete_file(const char *filename, uint32_t num_neurons);
@@ -20,8 +26,6 @@ void neuron_set_feedback_error(neuron_params_t * n_params, double error);
 void neuron_reset_feedback_error(neuron_params_t * n_params);
 void neuron_set_global_error(neuron_params_t * n_params, double error);
 
-void neuron_mutate(neuron_params_t * n_params);
-void neuron_rollback(neuron_params_t * n_params);
 
 void neuron_backup(neuron_params_t *n_params);
 void neuron_check_backup(neuron_params_t *n_params);

@@ -28,7 +28,7 @@ targets = {
     },
     "micronet_test": {
         "build_flags": common_flags,
-        "build_files": ["tests/micro_net_test.c", "neuron_smart.c", "micro_net.c", "utils.c"],
+        "build_files": ["tests/micronet_test.c", "neuron_smart.c", "micro_net.c", "utils.c"],
         "output_file": "bin/micronet_test.exe"
     },
     "network": {

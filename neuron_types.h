@@ -106,4 +106,5 @@ typedef struct {
     uint32_t last_mutated_micronet;
     micro_network_t coeffs_micronet;
     micro_network_t feedback_micronet;
+    network_map_t *map;
 } network_t;

@@ -203,6 +203,25 @@ void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uin
     }
 }
 
+void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs) {
+    for(int i=0; i<n_params->num_coeffs; i++) {
+        n_params->coeffs[i] = coeffs[i];
+    }
+}
+
+// Returns number of bytes written to the buffer
+int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
+    for(uint32_t i=0; i<buffer_size; i++) {
+        buffer[i] = 0;
+    }
+    uint32_t idx = 0;
+    for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
+        idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f,\n", n_params->coeffs[i]);
+    }
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f", n_params->coeffs[n_params->num_coeffs-1]);
+    return idx;
+}
+
 void neuron_backup(neuron_params_t *n_params) {
     for(int i=0; i<n_params->num_coeffs; i++) {
         n_params->backup_coeffs[i] = n_params->coeffs[i];
@@ -297,6 +316,10 @@ void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value) {
 
 uint32_t neuron_get_num_outputs(neuron_params_t * n_params) {
     return n_params->num_outputs;
+}
+
+uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
+    return n_params->num_coeffs;
 }
 
 // void neuron_update_coeffs(neuron_params_t * n_params, micro_network_t *micronet) {

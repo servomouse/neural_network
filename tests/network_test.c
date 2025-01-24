@@ -3,6 +3,7 @@
 #include <time.h>
 #include "utils.h"
 #include "network_new.h"
+#include "network_backup.h"
 
 typedef struct {
     double inputs[4];
@@ -154,11 +155,12 @@ network_map_t network_map = {
     .net_size = 9,
     .num_outputs = 1,
     .neurons = {
-        4, 4, NOT_OUTPUT, 0, 1, 2, 3,
-        5, 4, NOT_OUTPUT, 0, 1, 2, 3,
-        6, 4, NOT_OUTPUT, 0, 1, 2, 3,
-        7, 4, NOT_OUTPUT, 0, 1, 2, 3,
-        8, 4, 0,          4, 5, 6, 7,
+    //  idx num_inputs  output_idx  input_indices
+        4,  4,          NOT_OUTPUT, 0, 1, 2, 3,
+        5,  4,          NOT_OUTPUT, 0, 1, 2, 3,
+        6,  4,          NOT_OUTPUT, 0, 1, 2, 3,
+        7,  4,          NOT_OUTPUT, 0, 1, 2, 3,
+        8,  4,          0,          4, 5, 6, 7,
         // {.idx = 7, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
         // {.idx = 8, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
         // {.idx = 9, .num_inputs = 6, .indices = {0, 1, 2, 3, 4, 5, 0, 0}},
@@ -173,10 +175,10 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
     double error = 0;
     network_reset_counters(config);
     for(size_t i=0; i<dataset_size; i++) {
-        if(to_print) {
-            printf("Stage %lld:\n", i);
-        }
-        double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
+        // if(to_print) {
+        //     printf("Stage %lld:\n", i);
+        // }
+        double *outputs = network_get_outputs(config, dataset[i].inputs, 0);
         double e = 0;
 
         for(uint32_t j=0; j<num_outputs; j++) {
@@ -187,7 +189,7 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
         network_set_global_error(config, e);
 
         if(to_print) {
-            printf("Global error: %f\n", e);
+            // printf("Global error: %f\n", e);
             printf("Desired outputs: [");
             for(uint32_t j=0; j<num_outputs; j++) {
                 printf("%f, ", dataset[i].output[j]);
@@ -230,13 +232,19 @@ int test_mutations(network_t *config) {
     return EXIT_SUCCESS;
 }
 
+#define USE_BACKUP
+
 int main(void) {
     srand(time(NULL));
     network_t config;
-    network_init(&config, &network_map, sizeof_arr(dataset));
+    #ifdef USE_BACKUP
+    network_init(&config, &backup_map, sizeof_arr(dataset), backup_coeffs); // Restore network (recompilation required)
+    #else
+    network_init(&config, &network_map, sizeof_arr(dataset), NULL);
+    #endif
     printf("Network initialised!\n");
-    test_mutations(&config);
-    return 0;
+    // test_mutations(&config);
+    // return 0;
 
     double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
     double current_error = init_error;
@@ -267,12 +275,12 @@ int main(void) {
     current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
     printf("Final error: %f, counter = %lld\n", current_error, counter);
     // network_backup(&config);
-    // network_save_data(&config, "lalala");
+    network_save_data(&config, "network_backup.h");
 
     // network_restore_data(&config, "lalala");
-    // network_check_backup(&config);
+    // // network_check_backup(&config);
     // printf("Network restored!\n");
-    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 1);   // Just print values
+    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
     // printf("Error after restoring: %f\n", current_error);
     return 0;
 }

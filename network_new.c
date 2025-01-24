@@ -52,8 +52,9 @@ micronet_map_t coeffs_micronet_map = {
 neuron_params_t *neurons_backup;
 double *arr_backup;
 
-void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size) {
+void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size, double **bckp_coeffs) {
     srand(time(NULL));
+    config->map = net_map;
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
     config->net_size = net_map->net_size;
@@ -84,6 +85,9 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
                 uint32_t temp_idx = j-config->num_inputs;
                 neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
             }
+        }
+        if(bckp_coeffs) {
+            neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
         }
         if(neuron->output_idx != NOT_OUTPUT) {
             config->output_indices[neuron->output_idx] = config->num_inputs + i;
@@ -144,18 +148,89 @@ void network_set_global_error(network_t *config, double error) {
     }
 }
 
+// Buffer is supposed to be empty, returns number of bytes written to the buffer
+int network_save_map(network_t * config, char *buffer, uint32_t buffer_size) {
+    uint32_t idx = 0;
+
+    idx += snprintf(&buffer[idx], buffer_size-idx, "#pragma once\n");
+    idx += snprintf(&buffer[idx], buffer_size-idx, "#include \"neuron_types.h\"\n\n");
+    idx += snprintf(&buffer[idx], buffer_size-idx, "network_map_t backup_map = {\n");
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.num_inputs = %d,\n", config->num_inputs);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.net_size = %d,\n", config->net_size);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.num_outputs = %d,\n", config->num_outputs);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.neurons = {\n");
+
+    uint32_t offset = 0;
+    for(uint32_t i=0; i<config->num_neurons; i++) {
+        idx += snprintf(&buffer[idx], buffer_size-idx, "\t\t%d,\t", config->map->neurons[offset++]);   // Index
+        uint32_t num_inputs = config->map->neurons[offset];
+        idx += snprintf(&buffer[idx], buffer_size-idx, "%d,\t", config->map->neurons[offset++]);   // Num_inputs
+        idx += snprintf(&buffer[idx], buffer_size-idx, "%d,\t", config->map->neurons[offset++]);   // Output index
+        for(uint32_t j=0; j<num_inputs-1; j++) {
+            idx += snprintf(&buffer[idx], buffer_size-idx, "%d, ", config->map->neurons[offset++]);   // Input indices
+        }
+        idx += snprintf(&buffer[idx], buffer_size-idx, "%d", config->map->neurons[offset++]);   // Last input index of a neuron
+        if(i < config->num_neurons-1) {
+            idx += snprintf(&buffer[idx], buffer_size-idx, ",");
+        }
+        idx += snprintf(&buffer[idx], buffer_size-idx, "\n");
+    }
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t}\n};\n");
+    return idx;
+}
+
+#define BUF_SIZE 2048
+
+void clear_buffer(char *buffer, uint32_t buffer_size) {
+    for(uint32_t i=0; i<buffer_size; i++) {
+        buffer[i] = 0;
+    }
+}
+
+void write_buf_to_file(const char *buffer, const char *filename) {
+    FILE *file = fopen(filename, "ab");
+    if (file != NULL) {
+        fprintf (file, "%s", buffer);
+        fclose(file);
+    } else {
+        printf("File write error, here are coeffs: %s", buffer);
+    }
+}
+
 void network_save_data(network_t * config, char *filename) {
     // char *arr_fname = concat_strings("arr_", filename);
     // store_data(&config, sizeof(config), filename);
     // store_data(&config->arr, config->net_size * sizeof(double), arr_fname);
     // free(arr_fname);
-    char filename_buf[] = "neurons_structures.h";
-    neuron_prepare_file(filename_buf);
+    // char filename_buf[] = "neurons_structures.h";
+    char buffer[BUF_SIZE] = {0};
+    network_save_map(config, buffer, BUF_SIZE);
+    
+    write_buf_to_file(buffer, filename);
+
     for(uint32_t i=0; i<config->num_neurons; i++) {
-        // snprintf(&filename_buf[0], 20, "data/neurons.h", i);
-        neuron_save_data(&config->neurons[i], filename_buf, i);
+        uint32_t idx = snprintf(buffer, BUF_SIZE, "double coeffs_%04d[%d] = {\n", i, neuron_get_num_coeffs(&config->neurons[i]));
+        idx += neuron_get_coeffs_as_string(&config->neurons[i], &buffer[idx], BUF_SIZE-idx);
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\n};\n\n");
+        write_buf_to_file(buffer, filename);
     }
-    neuron_complete_file(filename_buf, config->num_neurons);
+    clear_buffer(buffer, BUF_SIZE);
+
+    uint32_t idx = 0;
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double *backup_coeffs[] = {\n");
+    for(uint32_t i=0; i<config->num_neurons-1; i++) {
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tcoeffs_%04d,\n", i);
+    }
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tcoeffs_%04d\n", config->num_neurons-1);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n");
+    write_buf_to_file(buffer, filename);
+
+    // neuron_prepare_file(filename_buf);
+    // for(uint32_t i=0; i<config->num_neurons; i++) {
+    //     // snprintf(&filename_buf[0], 20, "data/neurons.h", i);
+    //     neuron_save_data(&config->neurons[i], filename_buf, i);
+    // }
+    // neuron_complete_file(filename_buf, config->num_neurons);
 }
 
 void network_restore_data(network_t * config, char *filename) {

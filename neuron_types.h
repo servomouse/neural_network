@@ -4,7 +4,7 @@
 
 typedef struct {
     uint32_t idx;
-    uint8_t num_inputs;
+    uint32_t num_inputs;
     uint32_t indices[8];
 } subneuron_description_t;
 
@@ -12,12 +12,8 @@ typedef struct {
     uint8_t num_inputs;
     uint8_t num_neurons;
     uint8_t net_size;
-    struct {
-        uint32_t idx;
-        uint8_t num_inputs;
-        uint32_t indices[8];
-    } neurons[11];
     uint8_t output_idx;
+    subneuron_description_t neurons[11];
 } micronet_map_t;
 
 typedef struct {
@@ -28,6 +24,11 @@ typedef struct {
 } neuron_desc_t;
 
 #define NOT_OUTPUT 0xFFFFFFFF
+
+typedef struct {
+    uint32_t counter;
+    double value;
+} feedback_item_t;
 
 typedef struct {
     uint32_t num_inputs;
@@ -44,6 +45,8 @@ typedef struct {
     double *last_vector;
     double *rand_vector;
     double *part_values;
+    double *coeff_feedback;
+    feedback_item_t **inputs_feedback;
     // micro_network_t *micro_net;
     uint32_t num_coeffs;
     uint32_t num_inputs;
@@ -91,6 +94,7 @@ typedef struct {
     double *arr;
     neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
+    micronet_map_t *map;
 } micro_network_t;
 
 typedef struct {
@@ -101,10 +105,12 @@ typedef struct {
     double *arr;
     uint32_t *output_indices;
     double *outputs;
+    feedback_item_t **local_errors; // idx0 is neuron index, idx1 is sample index
     neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
     uint32_t last_mutated_micronet;
-    micro_network_t coeffs_micronet;
-    micro_network_t feedback_micronet;
+    micro_network_t *coeffs_micronet;
+    micro_network_t *feedback_micronet;
     network_map_t *map;
+    uint32_t dataset_size;
 } network_t;

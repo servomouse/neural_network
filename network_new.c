@@ -5,6 +5,7 @@
 #include "neuron.h" // includes neuron_types.h
 #include "utils.h"
 #include <time.h>
+#include "network_backup.h"
 
 // Inputs:
 //          - global error
@@ -18,6 +19,7 @@ micronet_map_t feedback_micronet_map = {
     .num_inputs = 5,
     .num_neurons = 11,
     .net_size = 16,
+    .output_idx = 15,
     .neurons = {
         {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
@@ -30,14 +32,14 @@ micronet_map_t feedback_micronet_map = {
         {.idx = 13, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
         {.idx = 14, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
         {.idx = 15, .num_inputs = 5, .indices = {10, 11, 12, 13, 14, 0, 0, 0}},
-    },
-    .output_idx = 15
+    }
 };
 
 micronet_map_t coeffs_micronet_map = {
     .num_inputs = 5,
     .num_neurons = 6,
     .net_size = 11,
+    .output_idx = 10,
     .neurons = {
         {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
@@ -45,20 +47,20 @@ micronet_map_t coeffs_micronet_map = {
         {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
         {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-    },
-    .output_idx = 10
+    }
 };
 
 neuron_params_t *neurons_backup;
 double *arr_backup;
 
-void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size, double **bckp_coeffs) {
+void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size) {
     srand(time(NULL));
     config->map = net_map;
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
     config->net_size = net_map->net_size;
     config->num_outputs = net_map->num_outputs;
+    config->dataset_size = dataset_size;
     printf("Creating network with:\n");
     printf("\t%d inputs;\n", config->num_inputs);
     printf("\t%d output(s);\n", config->num_outputs);
@@ -68,6 +70,10 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
     config->arr = calloc(config->net_size, sizeof(double));
     arr_backup = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
+    config->local_errors = calloc(config->net_size, sizeof(feedback_item_t*));
+    for(uint32_t i=0; i<config->net_size; i++) {
+        config->local_errors[i] = calloc(config->dataset_size, sizeof(feedback_item_t));
+    }
     neurons_backup = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->output_indices = calloc(config->num_outputs, sizeof(uint32_t));
     config->outputs = calloc(config->num_outputs, sizeof(double));
@@ -86,17 +92,25 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
                 neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
             }
         }
-        if(bckp_coeffs) {
-            neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
-        }
+        #ifdef USE_BACKUP
+        neuron_set_coeffs(&config->neurons[idx], network_backup_coeffs[idx]);
+        #endif
         if(neuron->output_idx != NOT_OUTPUT) {
             config->output_indices[neuron->output_idx] = config->num_inputs + i;
         }
         offset += num_inputs + 3;
     }
     // Init micronets:
-    // micronet_init(&config->feedback_micronet, &feedback_micronet_map);
-    // micronet_init(&config->coeffs_micronet, &coeffs_micronet_map);
+    config->feedback_micronet = calloc(1, sizeof(micro_network_t));
+    config->coeffs_micronet = calloc(1, sizeof(micro_network_t));
+    // #undef USE_BACKUP
+    #ifdef USE_BACKUP
+    micronet_init(config->feedback_micronet, &feedback_micronet_backup_map, feedback_micronet_backup_coeffs);
+    micronet_init(config->coeffs_micronet, &coeffs_micronet_backup_map, coeffs_micronet_backup_coeffs);
+    #else
+    micronet_init(config->feedback_micronet, &feedback_micronet_map, NULL);
+    micronet_init(config->coeffs_micronet, &coeffs_micronet_map, NULL);
+    #endif
 }
 
 void network_backup(network_t * config) {
@@ -127,7 +141,13 @@ double* network_get_outputs(network_t * config, double *inputs, uint32_t to_prin
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
+            if(to_print) {
+                printf("{\n");
+            }
             config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, to_print);
+            if(to_print) {
+                printf("},\n");
+            }
         }
     }
     for(size_t i=0; i<config->num_outputs; i++) {
@@ -142,9 +162,17 @@ void network_reset_counters(network_t *config) {
     }
 }
 
-void network_set_global_error(network_t *config, double error) {
+void network_set_global_error(network_t * config, double error, uint32_t offset) {
     for(int i=0; i<config->num_neurons; i++) {
-        neuron_set_global_error(&config->neurons[i], error);
+        neuron_set_global_error(&config->neurons[i], error, i);
+    }
+}
+
+void network_set_local_errors(network_t * config, double *errors, uint32_t offset) {
+    for(uint32_t i=0; i<config->num_outputs; i++) {
+        // neuron_set_local_error(&config->neurons[config->output_indices[i]], errors[i]);
+        config->local_errors[config->output_indices[i]][offset].value = errors[i];
+        config->local_errors[config->output_indices[i]][offset].counter++;
     }
 }
 
@@ -181,22 +209,6 @@ int network_save_map(network_t * config, char *buffer, uint32_t buffer_size) {
 
 #define BUF_SIZE 2048
 
-void clear_buffer(char *buffer, uint32_t buffer_size) {
-    for(uint32_t i=0; i<buffer_size; i++) {
-        buffer[i] = 0;
-    }
-}
-
-void write_buf_to_file(const char *buffer, const char *filename) {
-    FILE *file = fopen(filename, "ab");
-    if (file != NULL) {
-        fprintf (file, "%s", buffer);
-        fclose(file);
-    } else {
-        printf("File write error, here are coeffs: %s", buffer);
-    }
-}
-
 void network_save_data(network_t * config, char *filename) {
     // char *arr_fname = concat_strings("arr_", filename);
     // store_data(&config, sizeof(config), filename);
@@ -209,7 +221,7 @@ void network_save_data(network_t * config, char *filename) {
     write_buf_to_file(buffer, filename);
 
     for(uint32_t i=0; i<config->num_neurons; i++) {
-        uint32_t idx = snprintf(buffer, BUF_SIZE, "double coeffs_%04d[%d] = {\n", i, neuron_get_num_coeffs(&config->neurons[i]));
+        uint32_t idx = snprintf(buffer, BUF_SIZE, "double network_coeffs_%04d[%d] = {\n", i, neuron_get_num_coeffs(&config->neurons[i]));
         idx += neuron_get_coeffs_as_string(&config->neurons[i], &buffer[idx], BUF_SIZE-idx);
         idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\n};\n\n");
         write_buf_to_file(buffer, filename);
@@ -217,13 +229,17 @@ void network_save_data(network_t * config, char *filename) {
     clear_buffer(buffer, BUF_SIZE);
 
     uint32_t idx = 0;
-    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double *backup_coeffs[] = {\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double *network_backup_coeffs[] = {\n");
     for(uint32_t i=0; i<config->num_neurons-1; i++) {
-        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tcoeffs_%04d,\n", i);
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tnetwork_coeffs_%04d,\n", i);
     }
-    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tcoeffs_%04d\n", config->num_neurons-1);
-    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tnetwork_coeffs_%04d\n", config->num_neurons-1);
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n\n");
     write_buf_to_file(buffer, filename);
+    micronet_save_data(config->feedback_micronet, filename, "feedback_micronet_");
+    micronet_save_data(config->coeffs_micronet, filename, "coeffs_micronet_");
+
+    write_buf_to_file("#define USE_BACKUP\n", filename);
 
     // neuron_prepare_file(filename_buf);
     // for(uint32_t i=0; i<config->num_neurons; i++) {
@@ -247,10 +263,30 @@ void network_restore_data(network_t * config, char *filename) {
     }
 }
 
-void network_update(network_t * config) {
-    // for(int i=0; i<config->num_neurons; i++) {
-    //     neuron_update_coeffs(&config->neurons[i], &config->coeffs_micronet);
-    // }
+void network_stash_neurons(network_t * config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_stash_state(&config->neurons[i]);
+    }
+}
+
+void network_update_neurons(network_t * config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        config->feedback_array[i].counter = 0;
+        config->feedback_array[i].value = 0.0;
+    }
+    for(int i=config->num_neurons-1; i>=0; i--) {   // Go backwards
+        neuron_update_coeffs(&config->neurons[i],
+                             config->coeffs_micronet,
+                             config->feedback_micronet,
+                             config->feedback_array,
+                             i+config->num_inputs);
+    }
+}
+
+void network_rollback_neurons(network_t * config) {
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_rollback(&config->neurons[i]);
+    }
 }
 
 void network_mutate(network_t * config) {
@@ -265,17 +301,17 @@ void network_rollback(network_t * config) {
 void network_mutate_micronet(network_t * config) {
     config->last_mutated_micronet = random_bit();
     if(config->last_mutated_micronet) {
-        micronet_mutate(&config->feedback_micronet);
+        micronet_mutate(config->feedback_micronet);
     } else {
-        micronet_mutate(&config->coeffs_micronet);
+        micronet_mutate(config->coeffs_micronet);
     }
 }
 
 void network_rollback_micronet(network_t * config) {
     if(config->last_mutated_micronet) {
-        micronet_rollback(&config->feedback_micronet);
+        micronet_rollback(config->feedback_micronet);
     } else {
-        micronet_rollback(&config->coeffs_micronet);
+        micronet_rollback(config->coeffs_micronet);
     }
 }
 

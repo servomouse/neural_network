@@ -15,6 +15,16 @@ uint8_t random_bit(void) {
     return rand() & 1;
 }
 
+uint8_t count_bits(size_t value) {
+    uint8_t counter = 0;
+    for(uint8_t i=0; i<(8*sizeof(size_t)); i++) {
+        if(value & ((size_t)1<<i)) {
+            counter++;
+        }
+    }
+    return counter;
+}
+
 // Returns a random integer, min values is min, max value is max-1
 uint32_t random_int(uint32_t min, uint32_t max) {
     uint32_t range = (max - min); 
@@ -112,4 +122,20 @@ char *concat_strings(const char *s1, const char *s2) {
     strcpy(str_buf + s1_length, s2);
 
     return str_buf;
+}
+
+void clear_buffer(char *buffer, uint32_t buffer_size) {
+    for(uint32_t i=0; i<buffer_size; i++) {
+        buffer[i] = 0;
+    }
+}
+
+void write_buf_to_file(const char *buffer, const char *filename) {
+    FILE *file = fopen(filename, "ab");
+    if (file != NULL) {
+        fprintf (file, "%s", buffer);
+        fclose(file);
+    } else {
+        printf("File write error, here are coeffs: %s", buffer);
+    }
 }

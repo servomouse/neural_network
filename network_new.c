@@ -70,10 +70,8 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
     config->arr = calloc(config->net_size, sizeof(double));
     arr_backup = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
-    config->local_errors = calloc(config->net_size, sizeof(feedback_item_t*));
-    for(uint32_t i=0; i<config->net_size; i++) {
-        config->local_errors[i] = calloc(config->dataset_size, sizeof(feedback_item_t));
-    }
+    config->feedback_errors = calloc(config->net_size, sizeof(complex_item_t));
+    config->feedback_activations = calloc(config->net_size, sizeof(complex_item_t));
     neurons_backup = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->output_indices = calloc(config->num_outputs, sizeof(uint32_t));
     config->outputs = calloc(config->num_outputs, sizeof(double));
@@ -144,7 +142,7 @@ double* network_get_outputs(network_t * config, double *inputs, uint32_t to_prin
             if(to_print) {
                 printf("{\n");
             }
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, to_print);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, config->feedback_activations, config->num_inputs+i, to_print);
             if(to_print) {
                 printf("},\n");
             }
@@ -270,16 +268,16 @@ void network_stash_neurons(network_t * config) {
 }
 
 void network_update_neurons(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
-        config->feedback_array[i].counter = 0;
-        config->feedback_array[i].value = 0.0;
-    }
+    // for(int i=0; i<config->num_neurons; i++) {
+    //     config->feedback_array[i].counter = 0;
+    //     config->feedback_array[i].value = 0.0;
+    // }
     for(int i=config->num_neurons-1; i>=0; i--) {   // Go backwards
         neuron_update_coeffs(&config->neurons[i],
                              config->coeffs_micronet,
                              config->feedback_micronet,
-                             config->feedback_array,
-                             i+config->num_inputs);
+                             config->feedback_errors,
+                             config->feedback_activations, config->num_inputs+i);
     }
 }
 

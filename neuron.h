@@ -23,7 +23,7 @@ void neuron_complete_file(const char *filename, uint32_t num_neurons);
 void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx);
 
 void neuron_restore_state(neuron_params_t * n_params, char *filename);
-double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to_print);
+double neuron_get_output(neuron_params_t * n_params, double *inputs, complex_item_t *feedback_activations, uint32_t own_index, uint32_t to_print);
 void neuron_set_feedback_error(neuron_params_t * n_params, double error);
 void neuron_reset_feedback_error(neuron_params_t * n_params);
 void neuron_set_global_error(neuron_params_t * n_params, double error, uint32_t offset);
@@ -37,7 +37,21 @@ void neuron_print_coeffs(neuron_params_t * n_params);
 uint32_t neuron_get_num_outputs(neuron_params_t * n_params);
 uint32_t neuron_get_num_coeffs(neuron_params_t * n_params);
 void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value);
-void neuron_update_coeffs(neuron_params_t * n_params, micro_network_t *coeffs_micronet, micro_network_t *feedback_micronet, feedback_item_t **local_errors, uint32_t own_index);
+void neuron_update_coeffs(neuron_params_t * n_params,
+                          micro_network_t *coeffs_micronet,
+                          micro_network_t *feedback_micronet,
+                          complex_item_t *feedback_errors,
+                          complex_item_t *feedback_activations,
+                          uint32_t own_index);
+void neuron_generate_feedback(neuron_params_t * n_params,
+                              micro_network_t *coeffs_micronet,
+                              micro_network_t *feedback_micronet,
+                              complex_item_t *feedback_errors,
+                              complex_item_t *feedback_activations,
+                              uint32_t own_index);
 void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx);
 uint32_t neuron_get_output_idx(neuron_params_t * n_params);
 void neuron_reset_output_counter(neuron_params_t * n_params);
+void neuron_add_complex_item_value(complex_item_t *item, double value);
+void neuron_clear_complex_items(complex_item_t *items, uint32_t num_elements);
+double neuron_get_complex_item_value(complex_item_t *item);

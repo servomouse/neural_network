@@ -200,7 +200,7 @@ int test_func(int(*foo)(micro_network_t*), micro_network_t *n, const char *test_
 int main(void) {
     srand(time(NULL));
     micro_network_t config;
-    micronet_init(&config, &micronet_map);
+    micronet_init(&config, &micronet_map, NULL);
     printf("MicroNet initialised!\n");
 
     if(test_func(test_basic_functions,      &config, "basic functions") ||

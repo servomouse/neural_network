@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "micro_net.h"
-#include "neuron.h"
+#include "neuron_simple.h"
 #include "utils.h"
 #include <time.h>
 
@@ -26,17 +26,17 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
     printf("\ttotal size is %d\n", config->net_size);
 
     config->arr = calloc(config->net_size, sizeof(double));
-    config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
+    config->neurons = calloc(config->num_neurons, sizeof(simple_neuron_params_t));
     for(size_t i=0; i<config->num_neurons; i++) {
         uint8_t idx = net_map->neurons[i].idx - config->num_inputs;
         uint8_t num_inputs = net_map->neurons[i].num_inputs;
         neuron_init(&config->neurons[idx], num_inputs, 1);
         for(size_t j=0; j<net_map->neurons[i].num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, net_map->neurons[i].indices[j]);
-            if(j >= config->num_inputs) {
-                uint32_t temp_idx = j-config->num_inputs;
-                neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
-            }
+            // if(j >= config->num_inputs) {
+            //     uint32_t temp_idx = j-config->num_inputs;
+            //     neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
+            // }
         }
         if(bckp_coeffs) {
             neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
@@ -45,15 +45,15 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
 }
 
 double micronet_get_output(micro_network_t * config, double *inputs) {
-    for(int i=0; i<config->num_neurons; i++) {
-        neuron_reset_output_counter(&config->neurons[i]);
-    }
+    // for(int i=0; i<config->num_neurons; i++) {
+    //     neuron_reset_output_counter(&config->neurons[i]);
+    // }
     // printf("Micronet array: ");
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, 0);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
         }
         // printf("%f, ", config->arr[i]);
     }
@@ -62,9 +62,9 @@ double micronet_get_output(micro_network_t * config, double *inputs) {
 }
 
 void micronet_set_global_error(micro_network_t *config, double error) {
-    for(int i=config->num_inputs; i<config->net_size; i++) {
-        neuron_set_global_error(&config->neurons[i-config->num_inputs], error);
-    }
+    // for(int i=config->num_inputs; i<config->net_size; i++) {
+    //     neuron_set_global_error(&config->neurons[i-config->num_inputs], error);
+    // }
 }
 
 void micronet_save(micro_network_t * config, char *filename) {

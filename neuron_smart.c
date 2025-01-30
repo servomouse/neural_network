@@ -6,6 +6,7 @@
 #include "neuron.h"
 #include "micro_net.h"
 #include "neurons_structures.h"
+#include "neuron_complex_values.h"
 
 double activation_func(double sum) {
     if(sum > 1.0) {
@@ -150,11 +151,15 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
     n_params->num_coeffs = 1 << num_inputs;
     n_params->num_outputs = 0;
     n_params->output_counter = 0;
+    n_params->inputs_feedback_counter = 0;
     n_params->dataset_size = dataset_size;
     n_params->mutation_step = 0.01;
-    neuron_reset_feedback_error(n_params);
+    // neuron_reset_feedback_error(n_params);
 
-    n_params->inputs = alloc_memory(n_params->inputs, num_inputs, sizeof(double));
+    n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(complex_item_t));
+    n_params->inputs = alloc_memory(n_params->direct_inputs, n_params->num_inputs, sizeof(double));
+    n_params->inputs = alloc_memory(n_params->micronet_msg, 5, sizeof(double));
+    n_params->input_feedbacks = alloc_memory(n_params->input_feedbacks, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, num_inputs, sizeof(uint32_t));
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
     for(int i=0; i<n_params->num_coeffs; i++) {
@@ -178,10 +183,10 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
         free(n_params->coeff_feedback);
     }
     n_params->coeff_feedback = calloc(n_params->num_coeffs, sizeof(double));
-    n_params->inputs_feedback = alloc_memory(n_params->inputs_feedback, n_params->num_inputs, sizeof(feedback_item_t*));
-    for(uint32_t i=0; i<n_params->dataset_size; i++) {
-        n_params->inputs_feedback[i] = calloc(n_params->dataset_size, sizeof(feedback_item_t));
-    }
+    n_params->inputs_feedback = alloc_memory(n_params->inputs_feedback, n_params->num_inputs, sizeof(double));
+    // for(uint32_t i=0; i<n_params->dataset_size; i++) {
+    //     n_params->inputs_feedback[i] = calloc(n_params->dataset_size, sizeof(complex_item_t));
+    // }
 
     if(n_params->rand_vector) {
         free(n_params->rand_vector);
@@ -191,15 +196,15 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
     if(n_params->part_values) {
         free(n_params->part_values);
     }
-    n_params->part_values = calloc(n_params->num_coeffs * n_params->dataset_size, sizeof(double));
-    if(n_params->outputs) {
-        free(n_params->outputs);
-    }
-    n_params->outputs = calloc(n_params->dataset_size, sizeof(double));
-    if(n_params->global_errors) {
-        free(n_params->global_errors);
-    }
-    n_params->global_errors = calloc(n_params->dataset_size, sizeof(double));
+    n_params->part_values = calloc(n_params->num_coeffs * n_params->dataset_size, sizeof(complex_item_t));
+    // if(n_params->outputs) {
+    //     free(n_params->outputs);
+    // }
+    // n_params->outputs = calloc(n_params->dataset_size, sizeof(complex_item_t));
+    // if(n_params->global_errors) {
+    //     free(n_params->global_errors);
+    // }
+    // n_params->global_errors = calloc(n_params->dataset_size, sizeof(double));
 }
 
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx) {
@@ -267,35 +272,36 @@ void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value
 
 void neuron_reset_output_counter(neuron_params_t * n_params) {
     n_params->output_counter = 0;
+    n_params->inputs_feedback_counter = 0;
+    n_params->global_error = 0;
+    neuron_clear_complex_items(n_params->part_values, n_params->num_coeffs);
+    neuron_clear_complex_items(&n_params->output, 1);
+    for(size_t i=0; i<n_params->num_coeffs; i++) {
+        n_params->coeff_feedback[i] = 0;
+    }
 }
 
-double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to_print) {
-    // to_print = 0;
-    double part_values[32] = {0};
-    neuron_reset_feedback_error(n_params);
+double neuron_get_output(neuron_params_t * n_params, double *inputs, complex_item_t *feedback_activations, uint32_t own_index, micro_network_t *micronet, uint32_t to_print) {
+    double part_values[256] = {0};
     for(size_t i=0; i<n_params->num_inputs; i++) {
-        n_params->inputs[i] = inputs[n_params->indices[i]];
+        uint32_t idx = n_params->indices[i];
+        neuron_add_complex_item_value(&n_params->inputs[i], inputs[idx]);
+        n_params->direct_inputs[i] = inputs[idx];
     }
-    uint32_t part_val_idx = n_params->num_coeffs * n_params->output_counter;
-    n_params->part_values[part_val_idx] = 0;
-    n_params->outputs[n_params->output_counter] = n_params->coeffs[0];         // BIAS
-    // if(to_print)
-    //     printf("BIAS: %f\n", n_params->coeffs[0]);
-    for(size_t i=1; i<n_params->num_coeffs; i++) {  // Inputs
+
+    double output = n_params->coeffs[0];         // BIAS
+    for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;
         for(size_t j=0; j<n_params->num_inputs; j++) {
             if(((1 << j) & i)> 0) {
-                temp *= n_params->inputs[j];
+                temp *= n_params->direct_inputs[j];
             }
         }
         part_values[i] = temp;
-        // if(to_print)
-        //     printf("Part value %lld: %f; coeff: %f\n", i, temp, n_params->coeffs[i]);
-        n_params->part_values[part_val_idx + i] = temp;
-        n_params->outputs[n_params->output_counter] += temp * n_params->coeffs[i];
+        neuron_add_complex_item_value(&n_params->part_values[i], temp);
+        output += activation_func(temp * n_params->coeffs[i]);
     }
-    n_params->outputs[n_params->output_counter] = activation_func(n_params->outputs[n_params->output_counter]);
-    double ret_val = n_params->outputs[n_params->output_counter];
+    neuron_add_complex_item_value(&n_params->output, output);
     if(to_print) {
         printf("\"part_values\": [");
         for(size_t i=0; i<n_params->num_coeffs-1; i++) {
@@ -307,10 +313,38 @@ double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to
             printf("%f, ", n_params->coeffs[i]);
         }
         printf("%f];\n", n_params->coeffs[n_params->num_coeffs-1]);
-        printf("\"output\": %f\n\n", ret_val);
+        printf("\"output\": %f\n\n", output);
     }
-    // n_params->output_counter += 1;
-    return ret_val;
+    // Set feedback activations:
+    for(uint32_t i=0; i<n_params->num_inputs; i++) {
+        uint32_t idx = n_params->indices[i];
+        neuron_add_complex_item_value(&feedback_activations[idx], output);
+    }
+    // Create feedbacks:
+
+    double feedbacks[256] = {0};
+    n_params->micronet_msg = 0;
+    
+    for(size_t i=1; i<n_params->num_coeffs; i++) {
+        double temp = 1.0;
+        for(size_t j=0; j<n_params->num_inputs; j++) {
+            if(((1 << j) & i)> 0) {
+                temp *= n_params->direct_inputs[j];
+            }
+        }
+        double micronet_inputs[] = {
+            temp,
+            n_params->coeffs[i],
+            output,
+            n_params->micronet_msg[0],
+            n_params->micronet_msg[1],
+            n_params->micronet_msg[2],
+            n_params->micronet_msg[3],
+            n_params->micronet_msg[4],
+        };
+        feedbacks[i] = micronet_get_output(micronet, micronet_inputs);
+    }
+    return output;
 }
 
 void neuron_set_feedback_error(neuron_params_t * n_params, double error) {
@@ -319,16 +353,16 @@ void neuron_set_feedback_error(neuron_params_t * n_params, double error) {
     n_params->num_feedbacks_received += 1;
 }
 
-void neuron_reset_feedback_error(neuron_params_t * n_params) {
-    n_params->feedback_error = 0;
-    n_params->feedback_error_count = 0;
-    n_params->num_feedbacks_received = 0;
-}
+// void neuron_reset_feedback_error(neuron_params_t * n_params) {
+//     n_params->feedback_error = 0;
+//     n_params->feedback_error_count = 0;
+//     n_params->num_feedbacks_received = 0;
+// }
 
 void neuron_set_global_error(neuron_params_t * n_params, double error, uint32_t offset) {
     // printf("Global error: %f\n", error);
-    n_params->global_errors[offset] = error;
-    n_params->output_counter += 1;
+    n_params->global_error = error;
+    // n_params->output_counter += 1;
 }
 
 void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value) {
@@ -343,11 +377,69 @@ uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
     return n_params->num_coeffs;
 }
 
-void neuron_update_coeffs(neuron_params_t * n_params, micro_network_t *coeffs_micronet, micro_network_t *feedback_micronet, feedback_item_t **local_errors, uint32_t own_index) {
-    // double feedback_error = 0;
-    // if(feedback_arr[own_index].counter > 0) {
-    //     feedback_error = feedback_arr[own_index].value / feedback_arr[own_index].counter;
-    // }
+void neuron_generate_feedback(neuron_params_t * n_params,
+                              micro_network_t *coeffs_micronet,
+                              micro_network_t *feedback_micronet,
+                              complex_item_t *feedback_errors,
+                              complex_item_t *feedback_activations,
+                              uint32_t own_index) {
+    if(n_params->inputs_feedback_counter > 0) {
+        for(size_t i=1; i<n_params->num_inputs; i++) {
+            uint32_t idx = n_params->indices[i];
+            neuron_sub_complex_item_value(&feedback_errors[idx], n_params->inputs_feedback[i]);
+        }
+    }
+    for(size_t i=1; i<n_params->num_inputs; i++) {
+        n_params->inputs_feedback[i] = 0;
+    }
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        double micronet_inputs[14] = {
+            n_params->global_error,
+            n_params->coeffs[i],                                    // Current value
+            feedback_errors[own_index].max_value,                   // Feedback error
+            feedback_errors[own_index].tot_value/feedback_errors[own_index].counter,
+            feedback_errors[own_index].min_value,
+            feedback_activations[own_index].max_value,              // Next layer activations
+            feedback_activations[own_index].tot_value/feedback_errors[own_index].counter,
+            feedback_activations[own_index].min_value,
+            n_params->part_values[i].max_value,                     // Partial value calculated by the neuron_get_output function
+            n_params->part_values[i].tot_value/n_params->part_values[i].counter,
+            n_params->part_values[i].min_value,
+            n_params->output.max_value,                             // Neuron output
+            n_params->output.tot_value/n_params->output.counter,
+            n_params->output.min_value
+        };
+        n_params->coeff_feedback[i] = micronet_get_output(feedback_micronet, micronet_inputs);
+    }
+    for(size_t i=1; i<n_params->num_coeffs; i++) {
+        double sum = 0;
+        for(size_t j=0; j<n_params->num_inputs; j++) {
+            if(((1 << j) & i)> 0) {
+                sum += neuron_get_complex_item_value(&n_params->inputs[j]);
+            }
+        }
+        for(size_t j=0; j<n_params->num_inputs; j++) {
+            if(((1 << j) & i)> 0) {
+                double coeff_delta = n_params->coeff_feedback[i];
+                double coeff_delta_multiplier = neuron_get_complex_item_value(&n_params->inputs[j]) / sum;
+                n_params->inputs_feedback[i] += coeff_delta * coeff_delta_multiplier;
+            }
+        }
+    }
+    for(size_t i=1; i<n_params->num_inputs; i++) {
+        uint32_t idx = n_params->indices[i];
+        neuron_set_complex_item_value(&feedback_errors[idx], n_params->inputs_feedback[i]);
+    }
+    n_params->inputs_feedback_counter ++;
+}
+
+void neuron_update_coeffs(neuron_params_t * n_params,
+                          micro_network_t *coeffs_micronet,
+                          micro_network_t *feedback_micronet,
+                          complex_item_t *feedback_errors,
+                          complex_item_t *feedback_activations,
+                          uint32_t own_index) {
+
     
     for(size_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeff_feedback[i] = 0;

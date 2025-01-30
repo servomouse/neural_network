@@ -52,6 +52,3 @@ void neuron_generate_feedback(neuron_params_t * n_params,
 void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx);
 uint32_t neuron_get_output_idx(neuron_params_t * n_params);
 void neuron_reset_output_counter(neuron_params_t * n_params);
-void neuron_add_complex_item_value(complex_item_t *item, double value);
-void neuron_clear_complex_items(complex_item_t *items, uint32_t num_elements);
-double neuron_get_complex_item_value(complex_item_t *item);

@@ -18,7 +18,7 @@ targets = {
     },
     "neuron_test": {
         "build_flags": common_flags,
-        "build_files": ["test/neuron_test.c", "neuron_smart.c", "utils.c"],
+        "build_files": ["test/neuron_test.c", "neuron_smart.c", "utils.c", "neuron_complex_values.c"],
         "output_file": "bin/neuron_test.exe"
     },
     "controller": {
@@ -28,7 +28,7 @@ targets = {
     },
     "micronet_test": {
         "build_flags": common_flags,
-        "build_files": ["tests/micronet_test.c", "neuron_smart.c", "micro_net.c", "utils.c"],
+        "build_files": ["tests/micronet_test.c", "neuron_simple.c", "micro_net.c", "utils.c"],
         "output_file": "bin/micronet_test.exe"
     },
     "network": {
@@ -38,7 +38,7 @@ targets = {
     },
     "network_test": {
         "build_flags": common_flags,
-        "build_files": ["tests/network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c"],
+        "build_files": ["tests/network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c", "neuron_complex_values.c"],
         "output_file": "bin/network_test.exe"
     },
 }

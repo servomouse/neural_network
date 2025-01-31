@@ -34,70 +34,24 @@ void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
     return calloc(num_elements, sizeof_element);
 }
 
-void neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs, uint32_t dataset_size) {
+void neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
     printf("Creating simple neuron with %d inputs\n", num_inputs);
     n_params->num_inputs = num_inputs;
     n_params->num_coeffs = 1 << num_inputs;
-    n_params->num_outputs = 0;
-    n_params->output_counter = 0;
-    n_params->inputs_feedback_counter = 0;
-    n_params->dataset_size = dataset_size;
     n_params->mutation_step = 0.01;
-    // neuron_reset_feedback_error(n_params);
 
-    n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(complex_item_t));
-    n_params->inputs = alloc_memory(n_params->direct_inputs, n_params->num_inputs, sizeof(double));
-    n_params->inputs = alloc_memory(n_params->micronet_msg, 5, sizeof(double));
-    n_params->input_feedbacks = alloc_memory(n_params->input_feedbacks, n_params->num_inputs, sizeof(double));
+    n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, num_inputs, sizeof(uint32_t));
+    n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
+    n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
     for(int i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.1, 0.1);
     }
-
-    if(n_params->backup_coeffs) {
-        free(n_params->backup_coeffs);
-    }
-    n_params->backup_coeffs = calloc(n_params->num_coeffs, sizeof(double));
-    for(int i=0; i<n_params->num_coeffs; i++) {
-        n_params->backup_coeffs[i] = n_params->coeffs[i];
-    }
-
-    if(n_params->last_vector) {
-        free(n_params->last_vector);
-    }
-    n_params->last_vector = calloc(n_params->num_coeffs, sizeof(double));
-
-    if(n_params->coeff_feedback) {
-        free(n_params->coeff_feedback);
-    }
-    n_params->coeff_feedback = calloc(n_params->num_coeffs, sizeof(double));
-    n_params->inputs_feedback = alloc_memory(n_params->inputs_feedback, n_params->num_inputs, sizeof(double));
-    // for(uint32_t i=0; i<n_params->dataset_size; i++) {
-    //     n_params->inputs_feedback[i] = calloc(n_params->dataset_size, sizeof(complex_item_t));
-    // }
-
-    if(n_params->rand_vector) {
-        free(n_params->rand_vector);
-    }
-    n_params->rand_vector = calloc(n_params->num_coeffs, sizeof(double));
-
-    if(n_params->part_values) {
-        free(n_params->part_values);
-    }
-    n_params->part_values = calloc(n_params->num_coeffs * n_params->dataset_size, sizeof(complex_item_t));
-    // if(n_params->outputs) {
-    //     free(n_params->outputs);
-    // }
-    // n_params->outputs = calloc(n_params->dataset_size, sizeof(complex_item_t));
-    // if(n_params->global_errors) {
-    //     free(n_params->global_errors);
-    // }
-    // n_params->global_errors = calloc(n_params->dataset_size, sizeof(double));
 }
 
-void neuron_set_input_idx(simple_neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx) {
+void neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
     printf("Setting input %d index to %d\n", input_number, input_idx);
     if(input_number < n_params->num_inputs) {
         n_params->indices[input_number] = input_idx;
@@ -132,7 +86,7 @@ double neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
         double temp = 1.0;
         for(size_t j=0; j<n_params->num_inputs; j++) {
             if(((1 << j) & i)> 0) {
-                uint32_t idx = n_params->indices[i];
+                uint32_t idx = n_params->indices[j];
                 temp *= inputs[idx];
             }
         }

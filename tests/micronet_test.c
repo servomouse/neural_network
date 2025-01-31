@@ -74,16 +74,16 @@ micronet_map_t micronet_map = {
     .num_neurons = 5,
     .net_size = 9,
     .neurons = {
-        {.idx = 4, .num_inputs = 4, .indices = {0, 1, 2, 3, 0, 0, 0, 0}},
-        {.idx = 5, .num_inputs = 6, .indices = {0, 1, 2, 3, 0, 0, 0, 0}},
-        {.idx = 6, .num_inputs = 6, .indices = {0, 1, 2, 3, 0, 0, 0, 0}},
-        {.idx = 7, .num_inputs = 6, .indices = {0, 1, 2, 3, 0, 0, 0, 0}},
-        {.idx = 8, .num_inputs = 6, .indices = {4, 5, 6, 7, 0, 0, 0, 0}},
+        {.idx = 4, .num_inputs = 4, .indices = {0, 1, 2, 3}},
+        {.idx = 5, .num_inputs = 4, .indices = {0, 1, 2, 3}},
+        {.idx = 6, .num_inputs = 4, .indices = {0, 1, 2, 3}},
+        {.idx = 7, .num_inputs = 4, .indices = {0, 1, 2, 3}},
+        {.idx = 8, .num_inputs = 4, .indices = {4, 5, 6, 7}},
     },
     .output_idx = 8
 };
 
-double get_error(micro_network_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
+static double get_error(micro_network_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
     // Works only with single output networks
     double error = 0;
     for(size_t i=0; i<dataset_size; i++) {
@@ -203,9 +203,13 @@ int main(void) {
     micronet_init(&config, &micronet_map, NULL);
     printf("MicroNet initialised!\n");
 
-    if(test_func(test_basic_functions,      &config, "basic functions") ||
-       test_func(test_multiple_mutations,   &config, "multiple mutationsmutations")||
-       test_func(test_evolution,            &config, "evolution")) {
+    // micronet_get_output(&config, dataset[0].inputs);
+
+    if(
+        test_func(test_basic_functions,      &config, "basic functions") ||
+        test_func(test_multiple_mutations,   &config, "multiple mutations")||
+        test_func(test_evolution,            &config, "evolution")
+        ) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

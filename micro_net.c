@@ -23,24 +23,24 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
     printf("Creating micro network with:\n");
     printf("\t%d inputs;\n", config->num_inputs);
     printf("\t%d neurons;\n", config->num_neurons);
-    printf("\ttotal size is %d\n", config->net_size);
+    printf("\ttotal network size is %d\n", config->net_size);
 
-    config->arr = calloc(config->net_size, sizeof(double));
+    config->arr     = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(simple_neuron_params_t));
     for(size_t i=0; i<config->num_neurons; i++) {
-        uint8_t idx = net_map->neurons[i].idx - config->num_inputs;
+        uint8_t idx        = net_map->neurons[i].idx - config->num_inputs;
         uint8_t num_inputs = net_map->neurons[i].num_inputs;
-        neuron_init(&config->neurons[idx], num_inputs, 1);
-        for(size_t j=0; j<net_map->neurons[i].num_inputs; j++) {
+        neuron_init(&config->neurons[idx], num_inputs);
+        for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, net_map->neurons[i].indices[j]);
             // if(j >= config->num_inputs) {
             //     uint32_t temp_idx = j-config->num_inputs;
             //     neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
             // }
         }
-        if(bckp_coeffs) {
-            neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
-        }
+        // if(bckp_coeffs) {
+        //     neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
+        // }
     }
 }
 

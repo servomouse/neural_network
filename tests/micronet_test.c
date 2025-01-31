@@ -268,7 +268,7 @@ int evolution(void) {
     return 0;
 }
 
-// #define TESTS_MODE
+#define TESTS_MODE
 
 int main(void) {
     #ifdef TESTS_MODE
@@ -276,6 +276,7 @@ int main(void) {
     micro_network_t config;
     micronet_init(&config, &micronet_map, NULL);
     printf("MicroNet initialised!\n");
+    // get_error(&config, dataset, sizeof_arr(dataset), 1, 0);
 
     if(test_func(test_basic_functions,      &config, "basic functions") ||
        test_func(test_multiple_mutations,   &config, "multiple mutations")||

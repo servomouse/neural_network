@@ -5,15 +5,16 @@
 typedef struct {
     uint32_t idx;
     uint32_t num_inputs;
-    uint32_t indices[8];
+    uint32_t indices[0];
 } subneuron_description_t;
 
 typedef struct {
-    uint8_t num_inputs;
-    uint8_t num_neurons;
-    uint8_t net_size;
-    uint8_t output_idx;
-    subneuron_description_t neurons[11];
+    uint32_t num_inputs;
+    uint32_t num_neurons;
+    uint32_t net_size;
+    uint32_t *neurons;
+    uint32_t num_outputs;
+    uint32_t output_indices[];
 } micronet_map_t;
 
 typedef struct {
@@ -113,8 +114,10 @@ typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
     uint32_t net_size;
-    uint8_t output_idx;
+    uint32_t num_outputs;
+    uint32_t *output_indices;
     double *arr;
+    double *outputs;
     simple_neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
     micronet_map_t *map;

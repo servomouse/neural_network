@@ -4,7 +4,7 @@
 #include "neuron_types.h"
 
 void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **bckp_coeffs);
-double micronet_get_output(micro_network_t *config, double *inputs);
+double *micronet_get_output(micro_network_t *config, double *inputs);
 void micronet_save(micro_network_t * config, char *filename);
 void micronet_restore(micro_network_t * config, char *filename);
 void micronet_mutate(micro_network_t * config);

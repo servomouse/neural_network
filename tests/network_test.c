@@ -4,9 +4,11 @@
 #include "utils.h"
 #include "network_new.h"
 
+#define DATASET_NUM_OUTPUTS 1
+
 typedef struct {
     double inputs[4];
-    double output[1];
+    double output[DATASET_NUM_OUTPUTS];
 } dataset_entry_t;
 
 // dataset_entry_t dataset[] = {
@@ -180,6 +182,48 @@ double get_average_error(uint32_t num_outputs, double *errors) {
         average_error += errors[j];
     }
     return average_error / num_outputs;
+}
+
+double train_network(network_t *config, uint8_t to_print) {
+    // double error = 0;
+    double local_errors[DATASET_NUM_OUTPUTS] = {0.0};
+    double global_errors[sizeof_arr(dataset)] = {0.0};
+    uint32_t dataset_size = sizeof_arr(dataset);
+    uint32_t num_outputs = DATASET_NUM_OUTPUTS;
+    network_reset_activations(config);
+    for(size_t i=0; i<sizeof_arr(dataset); i++) {
+        double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
+
+        for(uint32_t j=0; j<num_outputs; j++) {
+            double diff = dataset[i].output[j] - outputs[j];
+            local_errors[j] = diff * diff;
+        }
+        global_errors[i] = get_average_error(local_errors, num_outputs);
+
+        network_set_output_errors(config, local_errors);
+        network_set_global_error(config, global_errors[i]);
+        network_generate_feedbacks(config);
+        network_update_weights(config);
+
+        if(to_print) {
+            printf("\"global_error\": %f\n},\n", global_errors[i]);
+            // printf("Desired outputs: [");
+            // for(uint32_t j=0; j<num_outputs; j++) {
+            //     printf("%f, ", dataset[i].output[j]);
+            // }
+            // printf("]; real outputs: [");
+            // for(uint32_t j=0; j<num_outputs; j++) {
+            //     printf("%f, ", outputs[j]);
+            // }
+            // printf("]\n");
+        }
+        // error += e;
+    }
+    
+    // for(uint32_t j=0; j<num_outputs; j++) {
+    //     global_errors[j] / dataset_size;
+    // }
+    return get_average_error(global_errors, dataset_size);
 }
 
 uint32_t counter = 0;

@@ -12,7 +12,7 @@ typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
     uint32_t net_size;
-    uint32_t *neurons;
+    uint32_t *neurons;  // subneuron_description_t is used here
     uint32_t num_outputs;
     uint32_t output_indices[];
 } micronet_map_t;
@@ -110,6 +110,12 @@ typedef struct {
 //     } last_value;
 // } neuron_params_t;
 
+
+typedef struct {
+    uint32_t counter;
+    double value;
+} complex_value_t;
+
 typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
@@ -131,6 +137,7 @@ typedef struct {
     double *arr;
     uint32_t *output_indices;
     double *outputs;
+    complex_value_t *feedback;
     complex_item_t *feedback_errors;
     complex_item_t *feedback_activations;
     neuron_params_t *neurons;

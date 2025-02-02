@@ -15,39 +15,24 @@
 //          - neuron output
 //          - sum of other coeffs * input values
 
-micronet_map_t feedback_micronet_map = {
-    .num_inputs = 5,
-    .num_neurons = 11,
-    .net_size = 16,
-    .output_idx = 15,
-    .neurons = {
-        {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 7, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-        {.idx = 11, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-        {.idx = 12, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-        {.idx = 13, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-        {.idx = 14, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-        {.idx = 15, .num_inputs = 5, .indices = {10, 11, 12, 13, 14, 0, 0, 0}},
-    }
+uint32_t neurons[] = {
+    // idx  num_inputs  indices
+       4,   5,          0, 1, 2, 3, 4,
+       5,   5,          0, 1, 2, 3, 4,
+       6,   5,          0, 1, 2, 3, 4,
+       7,   5,          0, 1, 2, 3, 4,
+       8,   5,          0, 1, 2, 3, 4,
+       9,   5,          0, 1, 2, 3, 4,
+      10,   5,          5, 6, 7, 8, 9
 };
 
 micronet_map_t coeffs_micronet_map = {
     .num_inputs = 5,
     .num_neurons = 6,
     .net_size = 11,
-    .output_idx = 10,
-    .neurons = {
-        {.idx = 5, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 6, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 7, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 8, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 9, .num_inputs = 5, .indices = {0, 1, 2, 3, 4, 0, 0, 0}},
-        {.idx = 10, .num_inputs = 5, .indices = {5, 6, 7, 8, 9, 0, 0, 0}},
-    }
+    .neurons = neurons,
+    .num_outputs = 1,
+    .output_indices = {10},
 };
 
 neuron_params_t *neurons_backup;
@@ -71,6 +56,7 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
     arr_backup = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->feedback_errors = calloc(config->net_size, sizeof(complex_item_t));
+    config->feedback_ = calloc(config->net_size, sizeof(complex_value_t));
     config->feedback_activations = calloc(config->net_size, sizeof(complex_item_t));
     neurons_backup = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->output_indices = calloc(config->num_outputs, sizeof(uint32_t));
@@ -154,23 +140,33 @@ double* network_get_outputs(network_t * config, double *inputs, uint32_t to_prin
     return config->outputs;
 }
 
-void network_reset_counters(network_t *config) {
-    for(int i=0; i<config->num_neurons; i++) {
-        neuron_reset_output_counter(&config->neurons[i]);
+void network_reset_activations(network_t *config) {
+    for(int i=0; i<config->net_size; i++) {
+        config->arr[i] = 0;
+        config->feedback[i].value = 0;
+        config->feedback[i].counter = 0;
     }
 }
 
-void network_set_global_error(network_t * config, double error, uint32_t offset) {
+void network_set_global_error(network_t * config, double error) {
     for(int i=0; i<config->num_neurons; i++) {
-        neuron_set_global_error(&config->neurons[i], error, i);
+        neuron_set_global_error(&config->neurons[i], error);
     }
 }
 
-void network_set_local_errors(network_t * config, double *errors, uint32_t offset) {
+void network_set_local_errors(network_t * config, double *errors) {
     for(uint32_t i=0; i<config->num_outputs; i++) {
-        // neuron_set_local_error(&config->neurons[config->output_indices[i]], errors[i]);
-        config->local_errors[config->output_indices[i]][offset].value = errors[i];
-        config->local_errors[config->output_indices[i]][offset].counter++;
+        config->feedback[config->output_indices[i]].value = errors[i];
+        config->feedback[config->output_indices[i]].counter++;
+    }
+    for(int i=config->num_neurons-1; i>=0; i--) {
+        neuron_generate_feedbacks(&config->neurons[i], config->feedback);
+    }
+}
+
+void network_update_weights(network_t *config) {
+    for(int i=config->num_neurons-1; i>=0; i--) {
+        neuron_update_weights(&config->neurons[i], config->feedback);
     }
 }
 

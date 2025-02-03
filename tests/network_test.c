@@ -200,8 +200,8 @@ double train_network(network_t *config, uint8_t to_print) {
         }
         global_errors[i] = get_average_error(local_errors, num_outputs);
 
+        network_set_global_error(config, global_errors[i]); // Set global error first
         network_set_output_errors(config, local_errors);
-        network_set_global_error(config, global_errors[i]);
         network_generate_feedbacks(config);
         network_update_weights(config);
 
@@ -232,7 +232,7 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
     // double error = 0;
     double *local_errors = calloc(num_outputs, sizeof(double));
     double *global_errors = calloc(dataset_size, sizeof(double));
-    network_reset_counters(config);
+    // network_reset_counters(config);
     counter = 0;
     for(size_t i=0; i<dataset_size; i++) {
         if(to_print) {
@@ -245,9 +245,9 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
             double diff = dataset[i].output[j] - outputs[j];
             local_errors[j] = diff * diff;
         }
-        network_set_local_errors(config, local_errors, i);
+        // network_set_local_errors(config, local_errors, i);
         global_errors[i] = get_average_error(local_errors, num_outputs);
-        network_set_global_error(config, global_errors[i], i);
+        // network_set_global_error(config, global_errors[i], i);
 
         if(to_print) {
             printf("\"global_error\": %f\n},\n", global_errors[i]);

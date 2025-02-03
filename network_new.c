@@ -146,6 +146,9 @@ void network_reset_activations(network_t *config) {
         config->feedback[i].value = 0;
         config->feedback[i].counter = 0;
     }
+    for(int i=0; i<config->num_neurons; i++) {
+        neuron_clear_stashes(&config->neurons[i]);
+    }
 }
 
 void network_set_global_error(network_t * config, double error) {
@@ -154,19 +157,22 @@ void network_set_global_error(network_t * config, double error) {
     }
 }
 
-void network_set_local_errors(network_t * config, double *errors) {
+void network_set_output_errors(network_t * config, double *errors) {
     for(uint32_t i=0; i<config->num_outputs; i++) {
         config->feedback[config->output_indices[i]].value = errors[i];
         config->feedback[config->output_indices[i]].counter++;
     }
+}
+
+void network_generate_feedbacks(network_t * config) {
     for(int i=config->num_neurons-1; i>=0; i--) {
-        neuron_generate_feedbacks(&config->neurons[i], config->feedback);
+        neuron_generate_feedbacks(&config->neurons[i], config->feedback, config->feedback_micronet, i);
     }
 }
 
 void network_update_weights(network_t *config) {
     for(int i=config->num_neurons-1; i>=0; i--) {
-        neuron_update_weights(&config->neurons[i], config->feedback);
+        neuron_update_coeffs(&config->neurons[i], config->feedback, config->coeffs_micronet, i);
     }
 }
 
@@ -263,19 +269,19 @@ void network_stash_neurons(network_t * config) {
     }
 }
 
-void network_update_neurons(network_t * config) {
-    // for(int i=0; i<config->num_neurons; i++) {
-    //     config->feedback_array[i].counter = 0;
-    //     config->feedback_array[i].value = 0.0;
-    // }
-    for(int i=config->num_neurons-1; i>=0; i--) {   // Go backwards
-        neuron_update_coeffs(&config->neurons[i],
-                             config->coeffs_micronet,
-                             config->feedback_micronet,
-                             config->feedback_errors,
-                             config->feedback_activations, config->num_inputs+i);
-    }
-}
+// void network_update_neurons(network_t * config) {
+//     // for(int i=0; i<config->num_neurons; i++) {
+//     //     config->feedback_array[i].counter = 0;
+//     //     config->feedback_array[i].value = 0.0;
+//     // }
+//     for(int i=config->num_neurons-1; i>=0; i--) {   // Go backwards
+//         neuron_update_coeffs(&config->neurons[i],
+//                              config->coeffs_micronet,
+//                              config->feedback_micronet,
+//                              config->feedback_errors,
+//                              config->feedback_activations, config->num_inputs+i);
+//     }
+// }
 
 void network_rollback_neurons(network_t * config) {
     for(int i=0; i<config->num_neurons; i++) {

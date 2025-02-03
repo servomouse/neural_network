@@ -12,12 +12,12 @@ void network_restore(network_t * config);
 
 void network_reset_activations(network_t * config);
 void network_set_global_error(network_t * config, double error);
-void network_set_local_errors(network_t * config, double *errors);
-// void network_generate_feedbacks(network_t * config);
+void network_set_output_errors(network_t * config, double *errors);
+void network_generate_feedbacks(network_t * config);
 void network_update_weights(network_t * config);
 
 void network_stash_neurons(network_t * config);
-void network_update_neurons(network_t * config);
+// void network_update_neurons(network_t * config);
 void network_rollback_neurons(network_t * config);
 
 void network_reset_counters(network_t *config);

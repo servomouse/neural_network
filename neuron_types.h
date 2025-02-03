@@ -35,6 +35,11 @@ typedef struct {
 } complex_item_t;
 
 typedef struct {
+    uint32_t counter;
+    double value;
+} complex_value_t;
+
+typedef struct {
     uint32_t num_inputs;
     uint32_t net_size;      // Total net size, including inputs
     uint32_t num_outputs;
@@ -42,7 +47,7 @@ typedef struct {
 } network_map_t;
 
 typedef struct {
-    complex_item_t *inputs;
+    double *inputs;
     double *direct_inputs;
     double *micronet_msg;
     double *input_feedbacks;
@@ -53,9 +58,13 @@ typedef struct {
     double *last_vector;
     double *rand_vector;
     double *coeff_feedback;
-    complex_item_t *part_values;
-    complex_item_t output;
-    double *inputs_feedback;    // Array for temporary values
+    double *part_values;
+    double *part_sums;
+    double *part_feedbacks;
+    double output;
+    complex_value_t *inputs_feedback;    // Array for temporary values
+    double *feedback_micronet_stash;
+    double *coeffs_micronet_stash;
     // micro_network_t *micro_net;
     uint32_t num_coeffs;
     uint32_t num_inputs;
@@ -110,11 +119,6 @@ typedef struct {
 //     } last_value;
 // } neuron_params_t;
 
-
-typedef struct {
-    uint32_t counter;
-    double value;
-} complex_value_t;
 
 typedef struct {
     uint32_t num_inputs;

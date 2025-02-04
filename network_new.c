@@ -17,22 +17,38 @@
 
 uint32_t neurons[] = {
     // idx  num_inputs  indices
-       4,   5,          0, 1, 2, 3, 4,
-       5,   5,          0, 1, 2, 3, 4,
-       6,   5,          0, 1, 2, 3, 4,
-       7,   5,          0, 1, 2, 3, 4,
-       8,   5,          0, 1, 2, 3, 4,
-       9,   5,          0, 1, 2, 3, 4,
-      10,   5,          5, 6, 7, 8, 9
+       11,  8,           0,  1,  2,  3,  4,  5,  6,  7,
+       12,  8,           1,  2,  3,  4,  5,  6,  7,  8,
+       13,  8,           2,  3,  4,  5,  6,  7,  8,  9,
+       14,  8,           3,  4,  5,  6,  7,  8,  9, 10,
+       15,  8,           4,  5,  6,  7,  8,  9, 10,  0,
+       16,  8,           5,  6,  7,  8,  9, 10,  0,  1,
+       17,  8,           6,  7,  8,  9, 10,  0,  1,  2,
+       18,  8,           7,  8,  9, 10,  0,  1,  2,  3,
+       19,  8,           8,  9, 10,  0,  1,  2,  3,  4,
+       20,  8,           9, 10,  0,  1,  2,  3,  4,  5,
+       21,  8,          10,  0,  1,  2,  3,  4,  5,  6,
+
+       22,  8,          11, 12, 13, 14, 15, 16, 17, 18,
+       23,  8,          12, 13, 14, 15, 16, 17, 18, 19,
+       24,  8,          13, 14, 15, 16, 17, 18, 19, 20,
+       25,  8,          14, 15, 16, 17, 18, 19, 20, 21,
+
+       26,  4,          22, 23, 24, 25, 26,
+       27,  4,          22, 23, 24, 25, 26,
+       28,  4,          22, 23, 24, 25, 26,
+       29,  4,          22, 23, 24, 25, 26,
+       30,  4,          22, 23, 24, 25, 26,
+       31,  4,          22, 23, 24, 25, 26,
 };
 
 micronet_map_t coeffs_micronet_map = {
-    .num_inputs = 5,
-    .num_neurons = 6,
-    .net_size = 11,
+    .num_inputs = 11,
+    .num_neurons = 21,
+    .net_size = 32,
     .neurons = neurons,
-    .num_outputs = 1,
-    .output_indices = {10},
+    .num_outputs = 6,
+    .output_indices = {26, 27, 28, 29, 30, 31},
 };
 
 neuron_params_t *neurons_backup;
@@ -56,7 +72,7 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
     arr_backup = calloc(config->net_size, sizeof(double));
     config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->feedback_errors = calloc(config->net_size, sizeof(complex_item_t));
-    config->feedback_ = calloc(config->net_size, sizeof(complex_value_t));
+    // config->feedback_ = calloc(config->net_size, sizeof(complex_value_t));
     config->feedback_activations = calloc(config->net_size, sizeof(complex_item_t));
     neurons_backup = calloc(config->num_neurons, sizeof(neuron_params_t));
     config->output_indices = calloc(config->num_outputs, sizeof(uint32_t));
@@ -128,7 +144,7 @@ double* network_get_outputs(network_t * config, double *inputs, uint32_t to_prin
             if(to_print) {
                 printf("{\n");
             }
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, config->feedback_activations, config->num_inputs+i, to_print);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, to_print);
             if(to_print) {
                 printf("},\n");
             }

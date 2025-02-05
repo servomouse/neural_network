@@ -38,7 +38,7 @@ targets = {
     },
     "network_test": {
         "build_flags": common_flags,
-        "build_files": ["tests/network_test.c", "neuron_smart.c", "network_new.c", "micro_net.c", "utils.c", "neuron_complex_values.c"],
+        "build_files": ["tests/network_test.c", "neuron_smart.c", "neuron_simple.c", "network_new.c", "micro_net.c", "utils.c", "neuron_complex_values.c"],
         "output_file": "bin/network_test.exe"
     },
 }

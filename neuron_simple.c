@@ -6,7 +6,7 @@
 #include "neuron_simple.h"
 #include "micro_net.h"
 
-double activation_func(double sum) {
+static double activation_func(double sum) {
     if(sum > 1.0) {
         return 1.0;
     } else if(sum < -1.0) {
@@ -16,7 +16,7 @@ double activation_func(double sum) {
     }
 }
 
-double control_coeffs_func(double coeff) {
+static  double control_coeffs_func(double coeff) {
     if(coeff > 1.0) {
         return 1.0;
     } else if(coeff < -1.0) {
@@ -26,17 +26,16 @@ double control_coeffs_func(double coeff) {
     }
 }
 
-
-void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
+static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
     if(p) {
         free(p);
     }
     return calloc(num_elements, sizeof_element);
 }
 
-void neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
+void mini_neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
-    printf("Creating simple neuron with %d inputs\n", num_inputs);
+    // printf("Creating simple neuron with %d inputs\n", num_inputs);
     n_params->num_inputs = num_inputs;
     n_params->num_coeffs = 1 << num_inputs;
     n_params->mutation_step = 0.01;
@@ -51,8 +50,8 @@ void neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
     }
 }
 
-void neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
-    printf("Setting input %d index to %d\n", input_number, input_idx);
+void mini_neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
+    // printf("Setting input %d index to %d\n", input_number, input_idx);
     if(input_number < n_params->num_inputs) {
         n_params->indices[input_number] = input_idx;
     } else {
@@ -60,14 +59,14 @@ void neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_numbe
     }
 }
 
-void neuron_set_coeffs(simple_neuron_params_t * n_params, double *coeffs) {
+void mini_neuron_set_coeffs(simple_neuron_params_t * n_params, double *coeffs) {
     for(int i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = coeffs[i];
     }
 }
 
 // Returns number of bytes written to the buffer
-int neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
+int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
     for(uint32_t i=0; i<buffer_size; i++) {
         buffer[i] = 0;
     }
@@ -79,7 +78,7 @@ int neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buffer, 
     return idx;
 }
 
-double neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
+double mini_neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
 
     double output = n_params->coeffs[0];         // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
@@ -95,18 +94,18 @@ double neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
     return activation_func(output);
 }
 
-uint32_t neuron_get_num_coeffs(simple_neuron_params_t * n_params) {
+uint32_t mini_neuron_get_num_coeffs(simple_neuron_params_t * n_params) {
     return n_params->num_coeffs;
 }
 
-void neuron_stash_state(simple_neuron_params_t * n_params) {
+void mini_neuron_stash_state(simple_neuron_params_t * n_params) {
     for(int32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->last_vector[i] = n_params->coeffs[i];
     }
 }
 
-void neuron_mutate(simple_neuron_params_t * n_params) {
-    neuron_stash_state(n_params);
+void mini_neuron_mutate(simple_neuron_params_t * n_params) {
+    mini_neuron_stash_state(n_params);
     
     if(n_params->mutated == 1) {    // If previuos mutation was successfull, keep going in the same direction
         n_params->bad_mutations_counter = 0;
@@ -123,7 +122,7 @@ void neuron_mutate(simple_neuron_params_t * n_params) {
     n_params->mutated = 1;
 }
 
-void neuron_rollback(simple_neuron_params_t * n_params) {
+void mini_neuron_rollback(simple_neuron_params_t * n_params) {
     for(int32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = n_params->last_vector[i];
     }
@@ -133,7 +132,7 @@ void neuron_rollback(simple_neuron_params_t * n_params) {
     }
 }
 
-void neuron_print_coeffs(simple_neuron_params_t * n_params) {
+void mini_neuron_print_coeffs(simple_neuron_params_t * n_params) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         printf("%f, ", n_params->coeffs[i]);
     }

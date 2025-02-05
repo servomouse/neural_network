@@ -8,9 +8,9 @@
 #include "neurons_structures.h"
 #include "neuron_complex_values.h"
 
-#define MICRONET_STASH_SIZE 5
+#define MICRONET_STASH_SIZE 6
 
-double activation_func(double sum) {
+static double activation_func(double sum) {
     if(sum > 1.0) {
         return 1.0;
     } else if(sum < -1.0) {
@@ -20,7 +20,7 @@ double activation_func(double sum) {
     }
 }
 
-double control_coeffs_func(double coeff) {
+static double control_coeffs_func(double coeff) {
     if(coeff > 1.0) {
         return 1.0;
     } else if(coeff < -1.0) {
@@ -118,28 +118,28 @@ void neuron_complete_file(const char *filename, uint32_t num_neurons) {
     }
 }
 
-void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx) {
-    if(restore_from_header) {
-        // printf("Restoring neuron %d from header\n", neuron_idx);
-        neuron_min_desc_t *neuron = saved_neurons[neuron_idx];
-        // n_params->num_inputs = neuron->num_inputs;
-        // n_params->num_coeffs = neuron->num_coeffs;
-        // n_params->dataset_size = neuron->dataset_size;
-        for(int i=0; i<n_params->num_coeffs; i++) {
-            n_params->coeffs[i] = neuron->coeffs[i];
-        }
-        // for(size_t i=0; i<n_params->num_inputs; i++) {
-        //    n_params->indices[i] = neuron->indices[i];
-        // }
-    } else {
-        // printf("Restoring neuron %d from binary\n", neuron_idx);
-        char buffer[BUF_SIZE] = {0};
-        snprintf(buffer, BUF_SIZE, "data/neuron_%d_coeffs.bin", neuron_idx);
-        restore_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), buffer);
-    }
-}
+// void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx) {
+//     if(restore_from_header) {
+//         // printf("Restoring neuron %d from header\n", neuron_idx);
+//         neuron_min_desc_t *neuron = saved_neurons[neuron_idx];
+//         // n_params->num_inputs = neuron->num_inputs;
+//         // n_params->num_coeffs = neuron->num_coeffs;
+//         // n_params->dataset_size = neuron->dataset_size;
+//         for(int i=0; i<n_params->num_coeffs; i++) {
+//             n_params->coeffs[i] = neuron->coeffs[i];
+//         }
+//         // for(size_t i=0; i<n_params->num_inputs; i++) {
+//         //    n_params->indices[i] = neuron->indices[i];
+//         // }
+//     } else {
+//         // printf("Restoring neuron %d from binary\n", neuron_idx);
+//         char buffer[BUF_SIZE] = {0};
+//         snprintf(buffer, BUF_SIZE, "data/neuron_%d_coeffs.bin", neuron_idx);
+//         restore_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), buffer);
+//     }
+// }
 
-void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
+static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
     if(p) {
         free(p);
     }
@@ -167,7 +167,7 @@ void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t datas
     n_params->part_feedbacks = alloc_memory(n_params->part_feedbacks, n_params->num_coeffs, sizeof(double));
     n_params->part_sums = alloc_memory(n_params->part_sums, n_params->num_coeffs, sizeof(double));
     n_params->feedback_micronet_stash = alloc_memory(n_params->feedback_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
-    n_params->coeffs_micronet_stash = alloc_memory(n_params->coeffs_micronet_stash, MICRONET_STASH_SIZE, sizeof(double));
+    n_params->coeffs_micronet_stash   = alloc_memory(n_params->coeffs_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
     for(int i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.1, 0.1);
     }
@@ -276,22 +276,22 @@ void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value
     }
 }
 
-void neuron_reset_output_counter(neuron_params_t * n_params) {
-    n_params->output_counter = 0;
-    n_params->inputs_feedback_counter = 0;
-    n_params->global_error = 0;
-    neuron_clear_complex_items(n_params->part_values, n_params->num_coeffs);
-    neuron_clear_complex_items(&n_params->output, 1);
-    for(size_t i=0; i<n_params->num_coeffs; i++) {
-        n_params->coeff_feedback[i] = 0;
-    }
-}
+// void neuron_reset_output_counter(neuron_params_t * n_params) {
+//     n_params->output_counter = 0;
+//     n_params->inputs_feedback_counter = 0;
+//     n_params->global_error = 0;
+//     neuron_clear_complex_items(n_params->part_values, n_params->num_coeffs);
+//     neuron_clear_complex_items(&n_params->output, 1);
+//     for(size_t i=0; i<n_params->num_coeffs; i++) {
+//         n_params->coeff_feedback[i] = 0;
+//     }
+// }
 
 void neuron_clear_stashes(neuron_params_t * n_params) {
     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
         n_params->feedback_micronet_stash[i] = 0.0;
     }
-    for(size_t i=0; i<MICRONET_STASH_SIZE; i++) {
+    for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
         n_params->coeffs_micronet_stash[i] = 0.0;
     }
 }
@@ -334,23 +334,30 @@ double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to
 }
 
 static void generate_part_feedback(neuron_params_t * n_params, double feedback_value, micro_network_t *feedback_micronet) {
+    uint32_t stash_offset = MICRONET_STASH_SIZE;
     for(size_t i=1; i<n_params->num_coeffs; i++) {
-        uint32_t stash_offset = MICRONET_STASH_SIZE * i;
         double micronet_inputs[MICRONET_STASH_SIZE+5] = {
             feedback_value,
             n_params->part_values[i],
             n_params->coeffs[i],
             n_params->output,
-            n_params->global_error
+            n_params->global_error,
+            n_params->coeffs_micronet_stash[stash_offset+0],
+            n_params->coeffs_micronet_stash[stash_offset+1],
+            n_params->coeffs_micronet_stash[stash_offset+2],
+            n_params->feedback_micronet_stash[stash_offset+3],
+            n_params->feedback_micronet_stash[stash_offset+4],
+            n_params->feedback_micronet_stash[stash_offset+5],
         };
-        for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
-            micronet_inputs[5+j] = n_params->feedback_micronet_stash[stash_offset+j];
-        };
+        // for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
+        //     micronet_inputs[5+j] = n_params->feedback_micronet_stash[stash_offset+j];
+        // };
         double *outputs = micronet_get_output(feedback_micronet, micronet_inputs);
         n_params->part_feedbacks[i] = outputs[0];
         for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
             n_params->feedback_micronet_stash[stash_offset+j] = outputs[j];
         };
+        stash_offset += MICRONET_STASH_SIZE;
     }
 }
 
@@ -388,34 +395,40 @@ void neuron_generate_feedbacks(neuron_params_t * n_params, complex_value_t *feed
 
     // Step 2: calculate feedback for each input
     generate_feedbacks_for_inputs(n_params);
+
     // Step 3: set feedback values
     for(size_t i=0; i<n_params->num_inputs; i++) {
         feedbacks[n_params->indices[i]].value += n_params->inputs_feedback[i].value / n_params->inputs_feedback[i].counter;
     }
-    // feedbacks[own_index].value = 0;
-    // feedbacks[own_index].counter = 0;
 }
 
 void neuron_update_coeffs(neuron_params_t * n_params, complex_value_t *feedbacks, micro_network_t *coeffs_micronet, uint32_t own_index) {
     if(feedbacks[own_index].counter == 0) return;
 
-    for(size_t i=1; i<n_params->num_coeffs; i++) {
-        uint32_t stash_offset = MICRONET_STASH_SIZE * i;
+    uint32_t stash_offset = 0.0;
+    for(size_t i=0; i<n_params->num_coeffs; i++) {
         double micronet_inputs[MICRONET_STASH_SIZE+5] = {
             feedbacks[own_index].value/feedbacks[own_index].counter,
             n_params->part_values[i],
             n_params->coeffs[i],
             n_params->output,
-            n_params->global_error
+            n_params->global_error,
+            n_params->feedback_micronet_stash[stash_offset+0],
+            n_params->feedback_micronet_stash[stash_offset+1],
+            n_params->feedback_micronet_stash[stash_offset+2],
+            n_params->coeffs_micronet_stash[stash_offset+3],
+            n_params->coeffs_micronet_stash[stash_offset+4],
+            n_params->coeffs_micronet_stash[stash_offset+5],
         };
-        for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
-            micronet_inputs[5+j] = n_params->coeffs_micronet_stash[stash_offset+j];
-        };
+        // for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
+        //     micronet_inputs[5+j] = n_params->coeffs_micronet_stash[stash_offset+j];
+        // };
         double *outputs = micronet_get_output(coeffs_micronet, micronet_inputs);
         for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
             n_params->coeffs_micronet_stash[stash_offset+j] = outputs[j];
         };
         n_params->coeffs[i] += outputs[0];
+        stash_offset += MICRONET_STASH_SIZE;
     }
 }
 
@@ -431,7 +444,7 @@ void neuron_set_feedback_error(neuron_params_t * n_params, double error) {
 //     n_params->num_feedbacks_received = 0;
 // }
 
-void neuron_set_global_error(neuron_params_t * n_params, double error, uint32_t offset) {
+void neuron_set_global_error(neuron_params_t * n_params, double error) {
     // printf("Global error: %f\n", error);
     n_params->global_error = error;
     // n_params->output_counter += 1;

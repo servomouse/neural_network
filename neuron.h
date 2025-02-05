@@ -29,7 +29,7 @@ void neuron_generate_feedbacks(neuron_params_t * n_params, complex_value_t *feed
 void neuron_update_coeffs(neuron_params_t * n_params, complex_value_t *feedbacks, micro_network_t *coeffs_micronet, uint32_t own_index);
 void neuron_reset_feedback_error(neuron_params_t * n_params);
 void neuron_clear_stashes(neuron_params_t * n_params);
-void neuron_set_global_error(neuron_params_t * n_params, double error, uint32_t offset);
+void neuron_set_global_error(neuron_params_t * n_params, double error);
 
 
 void neuron_backup(neuron_params_t *n_params);

@@ -176,7 +176,7 @@ char *stages[] = {
     "after"
 };
 
-double get_average_error(uint32_t num_outputs, double *errors) {
+double get_average_error(double *errors, uint32_t num_outputs) {
     double average_error = 0;
     for(uint32_t j=0; j<num_outputs; j++) {
         average_error += errors[j];
@@ -303,12 +303,10 @@ int main(void) {
 
     size_t counter = 0;
     double new_error = 0;
-    while((current_error > 0.001) && (counter++ < 1000)) {
+    while((current_error > 0.001) && (counter++ < 100)) {
         network_mutate_micronet(&config);
-        // printf("Updating neurons\n");
-        // for(size_t i=0; i<10; i++) {
-            network_update_neurons(&config);
-        // }
+        train_network(&config, 0);
+        // break;
         new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
         network_rollback_neurons(&config);
         if(new_error > current_error) {

@@ -106,8 +106,8 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
     config->coeffs_micronet = calloc(1, sizeof(micro_network_t));
     // #undef USE_BACKUP
     #ifdef USE_BACKUP
-    micronet_init(config->feedback_micronet, &micronet_map, feedback_micronet_backup_coeffs);
-    micronet_init(config->coeffs_micronet, &micronet_map, coeffs_micronet_backup_coeffs);
+    micronet_init(config->feedback_micronet, &feedback_micronet_backup_map, feedback_micronet_backup_coeffs);
+    micronet_init(config->coeffs_micronet, &coeffs_micronet_backup_map, coeffs_micronet_backup_coeffs);
     #else
     micronet_init(config->feedback_micronet, &micronet_map, NULL);
     micronet_init(config->coeffs_micronet, &micronet_map, NULL);
@@ -249,9 +249,9 @@ void network_save_data(network_t * config, char *filename) {
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n\n");
     write_buf_to_file(buffer, filename);
     micronet_save_data(config->feedback_micronet, filename, "feedback_micronet_");
-    // micronet_save_data(config->coeffs_micronet, filename, "coeffs_micronet_");
+    micronet_save_data(config->coeffs_micronet, filename, "coeffs_micronet_");
 
-    // write_buf_to_file("#define USE_BACKUP\n", filename);
+    write_buf_to_file("#define USE_BACKUP\n", filename);
 }
 
 // void network_restore_data(network_t * config, char *filename) {

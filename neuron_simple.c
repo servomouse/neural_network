@@ -72,9 +72,9 @@ int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buf
     }
     uint32_t idx = 0;
     for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
-        idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f,\n", n_params->coeffs[i]);
+        idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f,\n", n_params->coeffs[i]);
     }
-    idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f", n_params->coeffs[n_params->num_coeffs-1]);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f", n_params->coeffs[n_params->num_coeffs-1]);
     return idx;
 }
 

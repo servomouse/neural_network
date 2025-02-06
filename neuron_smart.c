@@ -235,9 +235,9 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
     }
     uint32_t idx = 0;
     for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
-        idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f,\n", n_params->coeffs[i]);
+        idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f,\n", n_params->coeffs[i]);
     }
-    idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.15f", n_params->coeffs[n_params->num_coeffs-1]);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f", n_params->coeffs[n_params->num_coeffs-1]);
     return idx;
 }
 
@@ -425,7 +425,7 @@ void neuron_update_coeffs(neuron_params_t * n_params, complex_value_t *feedbacks
         // };
         double *outputs = micronet_get_output(coeffs_micronet, micronet_inputs);
         for(uint32_t j=0; j<MICRONET_STASH_SIZE; j++) {
-            n_params->coeffs_micronet_stash[stash_offset+j] = outputs[j];
+            n_params->coeffs_micronet_stash[stash_offset+j] = 0.01 * outputs[j];
         };
         n_params->coeffs[i] += outputs[0];
         stash_offset += MICRONET_STASH_SIZE;

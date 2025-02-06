@@ -303,7 +303,7 @@ int main(void) {
 
     size_t counter = 0;
     double new_error = 0;
-    while((current_error > 0.001) && (counter++ < 100)) {
+    while((current_error > 0.001) && (counter++ < 1000000)) {
         network_mutate_micronet(&config);
         train_network(&config, 0);
         // break;
@@ -315,8 +315,10 @@ int main(void) {
             if(new_error < current_error) {
                 printf("New error: %f\n", new_error);
                 fflush(stdout);
+                current_error = new_error;
+            // } else {
+            //     network_rollback_micronet(&config);
             }
-            current_error = new_error;
         }
         new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
         if(new_error != init_error) {
@@ -329,7 +331,7 @@ int main(void) {
     current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
     printf("Final error: %f, counter = %lld\n", current_error, counter);
 
-    network_save_data(&config, "network_backup.h");
+    network_save_data(&config, "network_backup_output.h");
 
     return 0;
 }

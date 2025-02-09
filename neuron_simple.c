@@ -67,9 +67,9 @@ void mini_neuron_set_coeffs(simple_neuron_params_t * n_params, double *coeffs) {
 
 // Returns number of bytes written to the buffer
 int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
-    for(uint32_t i=0; i<buffer_size; i++) {
-        buffer[i] = 0;
-    }
+    // for(uint32_t i=0; i<buffer_size; i++) {
+    //     buffer[i] = 0;
+    // }
     uint32_t idx = 0;
     for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
         idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f,\n", n_params->coeffs[i]);

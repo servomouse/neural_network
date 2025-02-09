@@ -5,7 +5,7 @@
 #include "neuron.h" // includes neuron_types.h
 #include "utils.h"
 #include <time.h>
-#include "network_backup.h"
+#include "backups/network_backup.h"
 
 // Inputs:
 //          - global error
@@ -15,53 +15,17 @@
 //          - neuron output
 //          - sum of other coeffs * input values
 
-uint32_t neurons[] = {
-    // idx  num_inputs  indices
-       11,  8,           0,  1,  2,  3,  4,  5,  6,  7,
-       12,  8,           1,  2,  3,  4,  5,  6,  7,  8,
-       13,  8,           2,  3,  4,  5,  6,  7,  8,  9,
-       14,  8,           3,  4,  5,  6,  7,  8,  9, 10,
-       15,  8,           4,  5,  6,  7,  8,  9, 10,  0,
-       16,  8,           5,  6,  7,  8,  9, 10,  0,  1,
-       17,  8,           6,  7,  8,  9, 10,  0,  1,  2,
-       18,  8,           7,  8,  9, 10,  0,  1,  2,  3,
-       19,  8,           8,  9, 10,  0,  1,  2,  3,  4,
-       20,  8,           9, 10,  0,  1,  2,  3,  4,  5,
-       21,  8,          10,  0,  1,  2,  3,  4,  5,  6,
-
-       22,  8,          11, 12, 13, 14, 15, 16, 17, 18,
-       23,  8,          12, 13, 14, 15, 16, 17, 18, 19,
-       24,  8,          13, 14, 15, 16, 17, 18, 19, 20,
-       25,  8,          14, 15, 16, 17, 18, 19, 20, 21,
-
-       26,  4,          22, 23, 24, 25,
-       27,  4,          22, 23, 24, 25,
-       28,  4,          22, 23, 24, 25,
-       29,  4,          22, 23, 24, 25,
-       30,  4,          22, 23, 24, 25,
-       31,  4,          22, 23, 24, 25,
-};
-
-micronet_map_t micronet_map = {
-    .num_inputs = 11,
-    .num_neurons = 21,
-    .net_size = 32,
-    .neurons = neurons,
-    .num_outputs = 6,
-    .output_indices = {26, 27, 28, 29, 30, 31},
-};
-
 neuron_params_t *neurons_backup;
 double *arr_backup;
 
-void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size) {
+void network_init(network_t * config, network_map_t *net_map, micro_network_t *c_micronet, micro_network_t *f_micronet) {
     srand(time(NULL));
     config->map = net_map;
     config->num_inputs = net_map->num_inputs;
     config->num_neurons = net_map->net_size - net_map->num_inputs;
     config->net_size = net_map->net_size;
     config->num_outputs = net_map->num_outputs;
-    config->dataset_size = dataset_size;
+    // config->dataset_size = dataset_size;
     printf("Creating network with:\n");
     printf("\t%d inputs;\n", config->num_inputs);
     printf("\t%d output(s);\n", config->num_outputs);
@@ -84,7 +48,7 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
         neuron_desc_t *neuron = (neuron_desc_t *)&net_map->neurons[offset];
         uint8_t idx = neuron->idx - config->num_inputs;
         uint8_t num_inputs = neuron->num_inputs;
-        neuron_init(&config->neurons[idx], num_inputs, dataset_size);
+        neuron_init(&config->neurons[idx], num_inputs);
         neuron_set_output_idx(&config->neurons[idx], neuron->output_idx);
         for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, neuron->indices[j]);
@@ -101,17 +65,8 @@ void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_s
         }
         offset += num_inputs + 3;
     }
-    // Init micronets:
-    config->feedback_micronet = calloc(1, sizeof(micro_network_t));
-    config->coeffs_micronet = calloc(1, sizeof(micro_network_t));
-    // #undef USE_BACKUP
-    #ifdef USE_BACKUP
-    micronet_init(config->feedback_micronet, &feedback_micronet_backup_map, feedback_micronet_backup_coeffs);
-    micronet_init(config->coeffs_micronet, &coeffs_micronet_backup_map, coeffs_micronet_backup_coeffs);
-    #else
-    micronet_init(config->feedback_micronet, &micronet_map, NULL);
-    micronet_init(config->coeffs_micronet, &micronet_map, NULL);
-    #endif
+    config->feedback_micronet = f_micronet;
+    config->coeffs_micronet = c_micronet;
 }
 
 void network_backup(network_t * config) {
@@ -137,7 +92,7 @@ void network_restore(network_t * config) {
     printf("Network restored!\n");
 }
 
-double* network_get_outputs(network_t * config, double *inputs, uint32_t to_print) {
+double *network_get_outputs(network_t *config, double *inputs, uint32_t to_print) {
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
@@ -183,13 +138,13 @@ void network_set_output_errors(network_t * config, double *errors) {
 
 void network_generate_feedbacks(network_t * config) {
     for(int i=config->num_neurons-1; i>=0; i--) {
-        neuron_generate_feedbacks(&config->neurons[i], config->feedback, config->feedback_micronet, i);
+        neuron_generate_feedbacks(&config->neurons[i], config->feedback, config->feedback_micronet, i+config->num_inputs);
     }
 }
 
 void network_update_weights(network_t *config) {
     for(int i=config->num_neurons-1; i>=0; i--) {
-        neuron_update_coeffs(&config->neurons[i], config->feedback, config->coeffs_micronet, i);
+        neuron_update_coeffs(&config->neurons[i], config->feedback, config->coeffs_micronet, i+config->num_inputs);
     }
 }
 
@@ -248,8 +203,8 @@ void network_save_data(network_t * config, char *filename) {
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\tnetwork_coeffs_%04d\n", config->num_neurons-1);
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n\n");
     write_buf_to_file(buffer, filename);
-    micronet_save_data(config->feedback_micronet, filename, "feedback_micronet_");
-    micronet_save_data(config->coeffs_micronet, filename, "coeffs_micronet_");
+    // micronet_save_data(config->feedback_micronet, filename, "feedback_micronet_");
+    // micronet_save_data(config->coeffs_micronet, filename, "coeffs_micronet_");
 
     write_buf_to_file("#define USE_BACKUP\n", filename);
 }

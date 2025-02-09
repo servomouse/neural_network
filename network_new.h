@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "neuron_types.h"
 
-void network_init(network_t * config, network_map_t *net_map, uint32_t dataset_size);
+void network_init(network_t * config, network_map_t *net_map, micro_network_t *c_micronet, micro_network_t *f_micronet);
 double *network_get_outputs(network_t * config, double *inputs, uint32_t to_print);
 // void network_set_local_errors(network_t * config, double *errors, uint32_t offset);
 void network_backup(network_t * config);

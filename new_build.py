@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 # build_files = ["nanite.c", "utils.c"]
-common_flags = ["-lm", "-g", "-Wall", "-lws2_32", "-I.", "-fstack-protector-all"]
+common_flags = ["-lm", "-g", "-Wall", "-lws2_32", "-I.", "-Ibackups", "-fstack-protector-all"]
 
 targets = {
     "neuron_linear": {

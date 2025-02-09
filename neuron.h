@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "neuron_types.h"
 
-void neuron_init(neuron_params_t * n_params, uint32_t num_inputs, uint32_t dataset_size);
+void neuron_init(neuron_params_t * n_params, uint32_t num_inputs);
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
 void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value);
 void neuron_save_state(neuron_params_t * n_params, char *filename);

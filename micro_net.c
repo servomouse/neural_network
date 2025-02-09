@@ -125,6 +125,13 @@ void micronet_print_coeffs(micro_network_t * config) {
 
 // Buffer is supposed to be empty, returns number of bytes written to the buffer
 static int micronet_save_map(micro_network_t * config, char *buffer, uint32_t buffer_size, char *prefix, char *filename) {
+    // uint32_t num_inputs;
+    // uint32_t num_neurons;
+    // uint32_t net_size;
+    // uint32_t *neurons;  // subneuron_description_t is used here
+    // uint32_t num_outputs;
+    // uint32_t output_indices[];
+
     uint32_t idx = 0;
 
     idx += snprintf(&buffer[idx], buffer_size-idx, "uint32_t %sneurons[] = {\n", prefix);
@@ -156,31 +163,37 @@ static int micronet_save_map(micro_network_t * config, char *buffer, uint32_t bu
     idx += snprintf(&buffer[idx], buffer_size-idx, "\t.num_inputs = %d,\n", config->num_inputs);
     idx += snprintf(&buffer[idx], buffer_size-idx, "\t.num_neurons = %d,\n", config->num_neurons);
     idx += snprintf(&buffer[idx], buffer_size-idx, "\t.net_size = %d,\n", config->net_size);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.neurons = %sneurons,\n", prefix);
     idx += snprintf(&buffer[idx], buffer_size-idx, "\t.num_outputs = %d,\n", config->num_outputs);
 
     idx += snprintf(&buffer[idx], buffer_size-idx, "\t.output_indices = {");
     for(uint32_t i=0; i<config->num_outputs-1; i++) {
         idx += snprintf(&buffer[idx], buffer_size-idx, "%d, ", config->output_indices[i]);
     }
-    idx += snprintf(&buffer[idx], buffer_size-idx, "%d},\n", config->output_indices[config->num_outputs-1]);
+    idx += snprintf(&buffer[idx], buffer_size-idx, "%d}\n", config->output_indices[config->num_outputs-1]);
 
-    idx += snprintf(&buffer[idx], buffer_size-idx, "\t.neurons = %sneurons\n", prefix);
     idx += snprintf(&buffer[idx], buffer_size-idx, "};\n\n");
     return idx;
 }
 
 #define BUF_SIZE 8192
 
-void micronet_save_data(micro_network_t * config, char *filename, char *prefix) {
+void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define) {
     char buffer[BUF_SIZE] = {0};
+    uint32_t idx = 0;
+
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "#pragma once\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "#include \"neuron_types.h\"\n\n");
+
+    write_buf_to_file(buffer, filename);
     micronet_save_map(config, buffer, BUF_SIZE, prefix, filename);
     
     write_buf_to_file(buffer, filename);
     clear_buffer(buffer, BUF_SIZE);
-    uint32_t idx = 0;
+    idx = 0;
 
     for(uint32_t i=0; i<config->num_neurons; i++) {
-        idx += snprintf(buffer, BUF_SIZE, "double %scoeffs_%04d[%d] = {\n", prefix, i, mini_neuron_get_num_coeffs(&config->neurons[i]));
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double %scoeffs_%04d[%d] = {\n", prefix, i, mini_neuron_get_num_coeffs(&config->neurons[i]));
         idx += mini_neuron_get_coeffs_as_string(&config->neurons[i], &buffer[idx], BUF_SIZE-idx);
         idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\n};\n\n");
 
@@ -196,5 +209,6 @@ void micronet_save_data(micro_network_t * config, char *filename, char *prefix) 
     }
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\t%scoeffs_%04d\n", prefix, config->num_neurons-1);
     idx += snprintf(&buffer[idx], BUF_SIZE-idx, "};\n\n");
+    idx += snprintf(&buffer[idx], BUF_SIZE-idx, "#define %s\n", to_define);
     write_buf_to_file(buffer, filename);
 }

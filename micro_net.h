@@ -11,4 +11,4 @@ void micronet_mutate(micro_network_t * config);
 void micronet_rollback(micro_network_t * config);
 void micronet_print_coeffs(micro_network_t * config);
 void micronet_set_global_error(micro_network_t * config, double error);
-void micronet_save_data(micro_network_t * config, char *filename, char *prefix);
+void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define);

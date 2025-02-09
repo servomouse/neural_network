@@ -3,6 +3,9 @@
 #include <time.h>
 #include "utils.h"
 #include "network_new.h"
+#include "micro_net.h"
+#include "backups/f_micronet_backup.h"
+#include "backups/c_micronet_backup.h"
 
 #define DATASET_NUM_OUTPUTS 1
 
@@ -151,6 +154,29 @@ dataset_entry_t dataset[] = {
     {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
 };
 
+// Micronet architecture:
+
+uint32_t neurons[] = {
+    // idx  num_inputs  indices
+       5,  5,           0, 1, 2, 3, 4,
+       6,  5,           1, 2, 3, 4, 0,
+       7,  5,           2, 3, 4, 0, 1,
+       8,  5,           3, 4, 0, 1, 2,
+       9,  5,           4, 0, 1, 2, 3,
+      10,  5,           5, 6, 7, 8, 9
+};
+
+micronet_map_t micronet_map = {
+    .num_inputs = 5,
+    .num_neurons = 6,
+    .net_size = 11,
+    .neurons = neurons,
+    .num_outputs = 1,
+    .output_indices = {10},
+};
+
+// Network architecture:
+
 network_map_t network_map = {
     .num_inputs = 4,
     .net_size = 9,
@@ -293,7 +319,22 @@ int test_mutations(network_t *config) {
 int main(void) {
     srand(time(NULL));
     network_t config;
-    network_init(&config, &network_map, sizeof_arr(dataset));
+
+    micro_network_t c_micronet, f_micronet;
+
+    #ifdef USE_C_MICRONET_BACKUP
+    micronet_init(config->coeffs_micronet, &coeffs_micronet_backup_map, coeffs_micronet_backup_coeffs);
+    #else
+    micronet_init(&c_micronet, &micronet_map, NULL);
+    #endif
+
+    #ifdef USE_F_MICRONET_BACKUP
+    micronet_init(&f_micronet, &feedback_micronet_backup_map, feedback_micronet_backup_coeffs);
+    #else
+    micronet_init(&f_micronet, &micronet_map, NULL);
+    #endif
+    
+    network_init(&config, &network_map, &c_micronet, &f_micronet);
     printf("Network initialised!\n");
 
     double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
@@ -301,37 +342,76 @@ int main(void) {
     printf("Init error: %f\n", current_error);
     network_stash_neurons(&config);
 
+    // Network mutations
+    // size_t counter = 0;
+    // double new_error = 0;
+    // while((current_error > 0.001) && (counter++ < 100000)) {
+    //     network_mutate(&config);
+    //     new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    //     if(new_error > current_error) {
+    //         network_rollback(&config);
+    //         new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    //         if(new_error != current_error) {
+    //             printf("New error != current error after rollback!: new_error = %f, current_error = %f\n", new_error, current_error);
+    //             return 1;
+    //         }
+    //     } else {
+    //         if(new_error < current_error) {
+    //             printf("New error: %f\n", new_error);
+    //         }
+    //         current_error = new_error;
+    //     }
+    // }
+
+    // Micronet mutations
     size_t counter = 0;
-    double new_error = 0;
-    while((current_error > 0.001) && (counter++ < 1000000)) {
+    // double new_error = 0;
+    double current_delta = 0;
+    double new_delta = 0;
+    uint32_t delta_counter = 0;
+    while((current_error > 0.001) && (counter++ < 2)) {
         network_mutate_micronet(&config);
-        train_network(&config, 0);
+        double temp_error = 0;
+        for(uint32_t i=0; i<100; i++) {
+            train_network(&config, 0);
+            temp_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+            new_delta += current_error - temp_error;
+            delta_counter ++;
+            current_error = temp_error;
+        }
+        new_delta /= delta_counter;
         // break;
-        new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+        // new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
         network_rollback_neurons(&config);
-        if(new_error > current_error) {
+        if(new_delta < current_delta) {
+            // network_rollback_neurons(&config);
             network_rollback_micronet(&config);
         } else {
-            if(new_error < current_error) {
-                printf("New error: %f\n", new_error);
+            if(new_delta > current_delta) {
+                // network_stash_neurons(&config);
+                printf("New delta: %f\n", new_delta);
                 fflush(stdout);
-                current_error = new_error;
+                current_delta = new_delta;
             // } else {
             //     network_rollback_micronet(&config);
             }
         }
-        new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-        if(new_error != init_error) {
-            printf("New error != init_error after rollback!: new_error = %f, init_error = %f\n", new_error, init_error);
-            return 1;
-        }
+        // new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+        // // if(new_error != init_error) {
+        // if(new_error != current_error) {
+        //     // printf("New error != init_error after rollback!: new_error = %f, init_error = %f\n", new_error, init_error);
+        //     printf("New error != current_error after rollback!: new_error = %f, current_error = %f\n", new_error, current_error);
+        //     return 1;
+        // }
     }
     
-    printf("Final error: %f, counter = %lld\n", current_error, counter);
-    current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
-    printf("Final error: %f, counter = %lld\n", current_error, counter);
+    printf("Final error: %f, max_delta = %f, counter = %lld\n", current_error, current_delta, counter);
+    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
+    // printf("Final error: %f, counter = %lld\n", current_error, counter);
 
-    network_save_data(&config, "network_backup_output.h");
+    // network_save_data(&config, "backups/network_backup_output.h");
+    // micronet_save_data(&f_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
+    micronet_save_data(&c_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
 
     return 0;
 }

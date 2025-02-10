@@ -79,7 +79,6 @@ int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buf
 }
 
 double mini_neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
-
     double output = n_params->coeffs[0];         // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;

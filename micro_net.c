@@ -74,6 +74,19 @@ double *micronet_get_output(micro_network_t * config, double *inputs) {
     for(uint32_t i=0; i<config->num_outputs; i++) {
         config->outputs[i] = config->arr[config->output_indices[i]];
     }
+    if(config->outputs[0] != config->outputs[0]) {
+        printf("Micornet error! array:\n");
+        for(uint32_t i=0; i<config->net_size; i++) {
+            printf("%f, ", config->arr[i]);
+        }
+        printf("\n");
+        printf("Inputs:\n");
+        for(uint32_t i=0; i<config->num_inputs; i++) {
+            printf("%f, ", inputs[i]);
+        }
+        printf("\n");
+        exit(0);
+    }
     // printf("\n");
     return config->outputs;
 }

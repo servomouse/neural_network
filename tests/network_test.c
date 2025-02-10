@@ -120,59 +120,82 @@ dataset_entry_t dataset[] = {
     {.inputs = {-1, 0.8, -0.9, 0.7}, .output = {0.128}},
     {.inputs = {0.8, 0.8, 1.0, 0.9}, .output = {0.1911}},
     {.inputs = {1.0, 1.0, 1.0, 0.5}, .output = {0.125}},
-    {.inputs = {0.8, -0.7, -1, 0.9}, .output = {0.128}},
-    {.inputs = {0.9, -1, -0.8, 0.9}, .output = {0.2721}},
-    {.inputs = {-0.7, 0.9, 1.0, 0.8}, .output = {-0.128}},
-    {.inputs = {-0.7, -0.8, 1.0, 1.0}, .output = {0.1756}},
-    {.inputs = {-1, -1, -0.8, -0.9}, .output = {0.3732}},
-    {.inputs = {-1, -1, -0.9, 0.8}, .output = {-0.3732}},
-    {.inputs = {1.0, -1, -0.8, 0.7}, .output = {0.1756}},
-    {.inputs = {-0.9, -0.6, -1, 0.9}, .output = {-0.1148}},
-    {.inputs = {-1, 1.0, 0.9, -0.7}, .output = {0.25}},
-    {.inputs = {-1, -1, 0.6, -0.9}, .output = {-0.1575}},
-    {.inputs = {1.0, -1, 0.9, -1}, .output = {0.729}},
-    {.inputs = {-0.9, 0.7, -1, -0.9}, .output = {-0.1823}},
-    {.inputs = {-0.8, -1, 0.8, 0.8}, .output = {0.1342}},
-    {.inputs = {0.7, -1, 1.0, 1.0}, .output = {-0.343}},
-    {.inputs = {0.9, -1, 1.0, 1.0}, .output = {-0.729}},
-    {.inputs = {-0.9, 0.6, -1, 1.0}, .output = {0.1575}},
-    {.inputs = {-0.9, 0.8, -0.9, -1}, .output = {-0.2721}},
-    {.inputs = {-0.6, 0.8, -1, -1}, .output = {-0.1106}},
-    {.inputs = {-0.9, 0.8, 0.9, 0.8}, .output = {-0.1393}},
-    {.inputs = {-0.9, -0.8, 1.0, 0.9}, .output = {0.2721}},
-    {.inputs = {1.0, 0.7, 0.7, 1.0}, .output = {0.1176}},
-    {.inputs = {0.9, 0.7, -0.9, 0.9}, .output = {-0.1329}},
-    {.inputs = {-0.9, 1.0, 0.9, 1.0}, .output = {-0.5314}},
-    {.inputs = {0.9, -0.9, -0.6, 1.0}, .output = {0.1148}},
-    {.inputs = {0.6, 0.9, 1.0, -1}, .output = {-0.1575}},
-    {.inputs = {0.7, 1.0, -1, 0.8}, .output = {-0.1756}},
-    {.inputs = {0.7, 0.7, 1.0, -1}, .output = {-0.1176}},
-    {.inputs = {-1, 0.9, -1, -0.7}, .output = {-0.25}},
-    {.inputs = {0.8, 1.0, 0.9, -1}, .output = {-0.3732}},
-    {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
-    {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
-    {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
+    // {.inputs = {0.8, -0.7, -1, 0.9}, .output = {0.128}},
+    // {.inputs = {0.9, -1, -0.8, 0.9}, .output = {0.2721}},
+    // {.inputs = {-0.7, 0.9, 1.0, 0.8}, .output = {-0.128}},
+    // {.inputs = {-0.7, -0.8, 1.0, 1.0}, .output = {0.1756}},
+    // {.inputs = {-1, -1, -0.8, -0.9}, .output = {0.3732}},
+    // {.inputs = {-1, -1, -0.9, 0.8}, .output = {-0.3732}},
+    // {.inputs = {1.0, -1, -0.8, 0.7}, .output = {0.1756}},
+    // {.inputs = {-0.9, -0.6, -1, 0.9}, .output = {-0.1148}},
+    // {.inputs = {-1, 1.0, 0.9, -0.7}, .output = {0.25}},
+    // {.inputs = {-1, -1, 0.6, -0.9}, .output = {-0.1575}},
+    // {.inputs = {1.0, -1, 0.9, -1}, .output = {0.729}},
+    // {.inputs = {-0.9, 0.7, -1, -0.9}, .output = {-0.1823}},
+    // {.inputs = {-0.8, -1, 0.8, 0.8}, .output = {0.1342}},
+    // {.inputs = {0.7, -1, 1.0, 1.0}, .output = {-0.343}},
+    // {.inputs = {0.9, -1, 1.0, 1.0}, .output = {-0.729}},
+    // {.inputs = {-0.9, 0.6, -1, 1.0}, .output = {0.1575}},
+    // {.inputs = {-0.9, 0.8, -0.9, -1}, .output = {-0.2721}},
+    // {.inputs = {-0.6, 0.8, -1, -1}, .output = {-0.1106}},
+    // {.inputs = {-0.9, 0.8, 0.9, 0.8}, .output = {-0.1393}},
+    // {.inputs = {-0.9, -0.8, 1.0, 0.9}, .output = {0.2721}},
+    // {.inputs = {1.0, 0.7, 0.7, 1.0}, .output = {0.1176}},
+    // {.inputs = {0.9, 0.7, -0.9, 0.9}, .output = {-0.1329}},
+    // {.inputs = {-0.9, 1.0, 0.9, 1.0}, .output = {-0.5314}},
+    // {.inputs = {0.9, -0.9, -0.6, 1.0}, .output = {0.1148}},
+    // {.inputs = {0.6, 0.9, 1.0, -1}, .output = {-0.1575}},
+    // {.inputs = {0.7, 1.0, -1, 0.8}, .output = {-0.1756}},
+    // {.inputs = {0.7, 0.7, 1.0, -1}, .output = {-0.1176}},
+    // {.inputs = {-1, 0.9, -1, -0.7}, .output = {-0.25}},
+    // {.inputs = {0.8, 1.0, 0.9, -1}, .output = {-0.3732}},
+    // {.inputs = {0.7, 1.0, 0.8, -0.9}, .output = {-0.128}},
+    // {.inputs = {0.8, -1, 0.9, -1}, .output = {0.3732}},
+    // {.inputs = {1.0, -1, 0.7, 0.8}, .output = {-0.1756}},
 };
 
 // Micronet architecture:
 
+// uint32_t neurons[] = {
+//     // idx  num_inputs  indices
+//        5,  5,           0, 1, 2, 3, 4,
+//        6,  5,           1, 2, 3, 4, 0,
+//        7,  5,           2, 3, 4, 0, 1,
+//        8,  5,           3, 4, 0, 1, 2,
+//        9,  5,           4, 0, 1, 2, 3,
+//       10,  5,           5, 6, 7, 8, 9
+// };
+
 uint32_t neurons[] = {
     // idx  num_inputs  indices
-       5,  5,           0, 1, 2, 3, 4,
-       6,  5,           1, 2, 3, 4, 0,
-       7,  5,           2, 3, 4, 0, 1,
-       8,  5,           3, 4, 0, 1, 2,
-       9,  5,           4, 0, 1, 2, 3,
-      10,  5,           5, 6, 7, 8, 9
+       11,  8,          0, 1, 2, 3, 4, 5, 6, 7,
+       12,  8,          1, 2, 3, 4, 5, 6, 7, 8,
+       13,  8,          2, 3, 4, 5, 6, 7, 8, 9,
+       14,  8,          3, 4, 5, 6, 7, 8, 9, 10,
+       15,  8,          0, 1, 2, 3, 7, 8, 9, 10,
+
+       16,  5,          11, 12, 13, 14, 15,
+       17,  5,          11, 12, 13, 14, 15,
+       18,  5,          11, 12, 13, 14, 15,
+       19,  5,          11, 12, 13, 14, 15,
+       20,  5,          11, 12, 13, 14, 15,
+       21,  5,          11, 12, 13, 14, 15,
+
+       22,  6,          16, 17, 18, 19, 20, 21,
+       23,  6,          16, 17, 18, 19, 20, 21,
+       24,  6,          16, 17, 18, 19, 20, 21,
+       25,  6,          16, 17, 18, 19, 20, 21,
+       26,  6,          16, 17, 18, 19, 20, 21,
+       27,  6,          16, 17, 18, 19, 20, 21,
 };
 
 micronet_map_t micronet_map = {
-    .num_inputs = 5,
-    .num_neurons = 6,
-    .net_size = 11,
+    .num_inputs = 11,
+    .num_neurons = 17,
+    .net_size = 28,
     .neurons = neurons,
-    .num_outputs = 1,
-    .output_indices = {10},
+    .num_outputs = 6,
+    .output_indices = {22, 23, 24, 25, 26, 27},
 };
 
 // Network architecture:
@@ -260,9 +283,9 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
     double *global_errors = calloc(dataset_size, sizeof(double));
     // network_reset_counters(config);
     counter = 0;
-    for(size_t i=0; i<dataset_size; i++) {
+    for(uint32_t i=0; i<dataset_size; i++) {
         if(to_print) {
-            printf("\"stage_%lld_%s: {\n", i, stages[counter]);
+            printf("\"stage_%d_%s: {\n", i, stages[counter]);
         }
         double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
         // double e = 0;
@@ -273,6 +296,10 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
         }
         // network_set_local_errors(config, local_errors, i);
         global_errors[i] = get_average_error(local_errors, num_outputs);
+        if(global_errors[i] != global_errors[i]) {
+            printf("outputs[0] = %f\n", outputs[0]);
+        }
+        printf("global_errors[%d] = %f\n", i, global_errors[i]);
         // network_set_global_error(config, global_errors[i], i);
 
         if(to_print) {
@@ -294,7 +321,10 @@ double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *datas
     // for(uint32_t j=0; j<num_outputs; j++) {
     //     global_errors[j] / dataset_size;
     // }
-    return get_average_error(global_errors, dataset_size);
+    double err = get_average_error(global_errors, dataset_size);
+    free(local_errors);
+    free(global_errors);
+    return err;
 }
 
 int test_mutations(network_t *config) {
@@ -316,31 +346,56 @@ int test_mutations(network_t *config) {
     return EXIT_SUCCESS;
 }
 
-int main(void) {
-    srand(time(NULL));
-    network_t config;
+double get_delta(network_t *config, double current_error) {
+    double temp_error = 0;
+    double new_delta = 0.0;
+    uint32_t delta_counter = 0;
+    for(uint32_t i=0; i<10; i++) {
+        train_network(config, 0);
+        temp_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+        printf("temp_error: %f\n", temp_error);
+        new_delta += current_error - temp_error;
+        delta_counter ++;
+        current_error = temp_error;
+    }
+    printf("new_delta: %f; delta_counter: %d\n", new_delta, delta_counter);
+    return new_delta / delta_counter;
+}
 
-    micro_network_t c_micronet, f_micronet;
+network_t * init_network(void) {
+    network_t *net = calloc(1, sizeof(network_t));
+    micro_network_t *c_micronet = calloc(1, sizeof(micro_network_t));
+    micro_network_t *f_micronet = calloc(1, sizeof(micro_network_t));
 
     #ifdef USE_C_MICRONET_BACKUP
-    micronet_init(config->coeffs_micronet, &coeffs_micronet_backup_map, coeffs_micronet_backup_coeffs);
+    micronet_init(c_micronet, &c_micronet_backup_map, c_micronet_backup_coeffs);
     #else
-    micronet_init(&c_micronet, &micronet_map, NULL);
+    micronet_init(c_micronet, &micronet_map, NULL);
     #endif
 
     #ifdef USE_F_MICRONET_BACKUP
-    micronet_init(&f_micronet, &feedback_micronet_backup_map, feedback_micronet_backup_coeffs);
+    micronet_init(f_micronet, &f_micronet_backup_map, f_micronet_backup_coeffs);
     #else
-    micronet_init(&f_micronet, &micronet_map, NULL);
+    micronet_init(f_micronet, &micronet_map, NULL);
     #endif
     
-    network_init(&config, &network_map, &c_micronet, &f_micronet);
-    printf("Network initialised!\n");
+    network_init(net, &network_map, c_micronet, f_micronet);
+    return net;
+}
 
-    double init_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+int main(void) {
+    srand(time(NULL));
+    network_t *config = init_network();
+    printf("Network initialised! arr_size = %lld\n", sizeof_arr(dataset));
+
+    double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
     double current_error = init_error;
-    printf("Init error: %f\n", current_error);
-    network_stash_neurons(&config);
+    network_stash_neurons(config);
+    double init_delta = get_delta(config, current_error);
+    double current_delta = init_delta;
+    printf("Init error: %f, init_delta: %f\n", current_error, init_delta);
+    fflush(stdout);
+    return 0;
 
     // Network mutations
     // size_t counter = 0;
@@ -365,53 +420,36 @@ int main(void) {
 
     // Micronet mutations
     size_t counter = 0;
-    // double new_error = 0;
-    double current_delta = 0;
     double new_delta = 0;
-    uint32_t delta_counter = 0;
-    while((current_error > 0.001) && (counter++ < 2)) {
-        network_mutate_micronet(&config);
-        double temp_error = 0;
-        for(uint32_t i=0; i<100; i++) {
-            train_network(&config, 0);
-            temp_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-            new_delta += current_error - temp_error;
-            delta_counter ++;
-            current_error = temp_error;
-        }
-        new_delta /= delta_counter;
-        // break;
-        // new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-        network_rollback_neurons(&config);
+    while(counter++ < 100) {
+        network_mutate_micronet(config);
+        new_delta = get_delta(config, init_error);
+        network_rollback_neurons(config);
         if(new_delta < current_delta) {
-            // network_rollback_neurons(&config);
-            network_rollback_micronet(&config);
+            // network_rollback_neurons(config);
+            network_rollback_micronet(config);
         } else {
             if(new_delta > current_delta) {
-                // network_stash_neurons(&config);
+                // network_stash_neurons(config);
                 printf("New delta: %f\n", new_delta);
                 fflush(stdout);
                 current_delta = new_delta;
-            // } else {
-            //     network_rollback_micronet(&config);
             }
         }
-        // new_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-        // // if(new_error != init_error) {
-        // if(new_error != current_error) {
-        //     // printf("New error != init_error after rollback!: new_error = %f, init_error = %f\n", new_error, init_error);
-        //     printf("New error != current_error after rollback!: new_error = %f, current_error = %f\n", new_error, current_error);
-        //     return 1;
-        // }
     }
     
-    printf("Final error: %f, max_delta = %f, counter = %lld\n", current_error, current_delta, counter);
-    // current_error = get_error(&config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);   // Just print values
-    // printf("Final error: %f, counter = %lld\n", current_error, counter);
+    current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    printf("Init error: %f, final error: %f, init_delta: %f, max_delta: %f, counter = %lld\n", init_error, current_error, init_delta, current_delta, counter);
 
-    // network_save_data(&config, "backups/network_backup_output.h");
-    // micronet_save_data(&f_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
-    micronet_save_data(&c_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
+    if(current_delta > init_delta) {
+        network_save_data(config, "backups/network_backup_output.h");
+        micronet_save_data(config->feedback_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
+        micronet_save_data(config->coeffs_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
+    }
+    free(config->feedback_micronet);
+    free(config->coeffs_micronet);
+    free(config);
+
 
     return 0;
 }

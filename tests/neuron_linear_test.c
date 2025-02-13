@@ -71,8 +71,6 @@ int test_rollback(neuron_params_t *n) {
 }
 
 int test_save_restore(neuron_params_t *n) {
-    printf("\nCoeffs 0: ");
-    neuron_print_coeffs(n);
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     uint32_t num_coeffs = neuron_get_num_coeffs(n);
     double *bckp_coeffs = calloc(num_coeffs, sizeof(double));
@@ -87,11 +85,7 @@ int test_save_restore(neuron_params_t *n) {
     // double init_error = get_error(n, dataset, sizeof_arr(dataset), 0);
     // printf("Error after setting coeffs = %f;\n", error);
     // neuron_restore_data(n, 123);
-    printf("Coeffs 1: ");
-    neuron_print_coeffs(n);
     neuron_set_coeffs(n, bckp_coeffs);
-    printf("Coeffs 2: ");
-    neuron_print_coeffs(n);
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     if(init_error != error) {
         printf("Error: save-restore doesn't work: error after restore != error before save");

@@ -26,9 +26,7 @@ static  double control_coeffs_func(double coeff) {
 }
 
 static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
-    if(p) {
-        free(p);
-    }
+    if(p) { free(p); }
     return calloc(num_elements, sizeof_element);
 }
 
@@ -54,9 +52,9 @@ void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint
     // printf("Setting input %d index to %d\n", input_number, input_idx);
     if(input_number < n_params->num_inputs) {
         n_params->indices[input_number] = input_idx;
-    } else {
-        printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
+        return;
     }
+    printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
 }
 
 void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs) {
@@ -79,9 +77,6 @@ uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
 
 // Returns number of bytes written to the buffer
 int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
-    // for(uint32_t i=0; i<buffer_size; i++) {
-    //     buffer[i] = 0;
-    // }
     uint32_t idx = 0;
     for(uint32_t i=0; i<n_params->num_coeffs-1; i++) {
         idx += snprintf(&buffer[idx], buffer_size-idx, "\t%.5f,\n", n_params->coeffs[i]);
@@ -91,8 +86,8 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
 }
 
 double neuron_get_output(neuron_params_t *n_params, double *inputs) {
-    double output = n_params->coeffs[n_params->num_coeffs];         // BIAS
-    for(size_t i=0; i<n_params->num_coeffs; i++) {
+    double output = n_params->coeffs[n_params->num_inputs];         // BIAS
+    for(size_t i=0; i<n_params->num_inputs; i++) {
         uint32_t idx = n_params->indices[i];
         output += inputs[idx] * n_params->coeffs[i];
     }

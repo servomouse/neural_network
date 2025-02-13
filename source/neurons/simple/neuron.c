@@ -4,7 +4,6 @@
 #include <math.h>
 #include "utils.h"
 #include "neuron.h"
-#include "micro_net.h"
 
 static double activation_func(double sum) {
     if(sum > 1.0) {
@@ -33,7 +32,7 @@ static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) 
     return calloc(num_elements, sizeof_element);
 }
 
-void mini_neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
+void simple_neuron_init(neuron_params_t * n_params, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
     // printf("Creating simple neuron with %d inputs\n", num_inputs);
     n_params->num_inputs = num_inputs;
@@ -45,12 +44,12 @@ void mini_neuron_init(simple_neuron_params_t * n_params, uint32_t num_inputs) {
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
     n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
-    for(int i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.1, 0.1);
     }
 }
 
-void mini_neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
+void simple_neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
     // printf("Setting input %d index to %d\n", input_number, input_idx);
     if(input_number < n_params->num_inputs) {
         n_params->indices[input_number] = input_idx;
@@ -59,14 +58,18 @@ void mini_neuron_set_input_idx(simple_neuron_params_t *n_params, uint32_t input_
     }
 }
 
-void mini_neuron_set_coeffs(simple_neuron_params_t * n_params, double *coeffs) {
-    for(int i=0; i<n_params->num_coeffs; i++) {
+void simple_neuron_set_coeffs(neuron_params_t * n_params, double *coeffs) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = coeffs[i];
     }
 }
 
+void simple_neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double coeff) {
+    n_params->coeffs[idx] = coeff;
+}
+
 // Returns number of bytes written to the buffer
-int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
+int simple_neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size) {
     // for(uint32_t i=0; i<buffer_size; i++) {
     //     buffer[i] = 0;
     // }
@@ -78,7 +81,7 @@ int mini_neuron_get_coeffs_as_string(simple_neuron_params_t *n_params, char *buf
     return idx;
 }
 
-double mini_neuron_get_output(simple_neuron_params_t *n_params, double *inputs) {
+double simple_neuron_get_output(neuron_params_t *n_params, double *inputs) {
     double output = n_params->coeffs[0];         // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;
@@ -93,18 +96,18 @@ double mini_neuron_get_output(simple_neuron_params_t *n_params, double *inputs) 
     return activation_func(output);
 }
 
-uint32_t mini_neuron_get_num_coeffs(simple_neuron_params_t * n_params) {
+uint32_t simple_neuron_get_num_coeffs(neuron_params_t * n_params) {
     return n_params->num_coeffs;
 }
 
-void mini_neuron_stash_state(simple_neuron_params_t * n_params) {
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+void simple_neuron_stash_state(neuron_params_t * n_params) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->last_vector[i] = n_params->coeffs[i];
     }
 }
 
-void mini_neuron_mutate(simple_neuron_params_t * n_params) {
-    mini_neuron_stash_state(n_params);
+void simple_neuron_mutate(neuron_params_t * n_params) {
+    simple_neuron_stash_state(n_params);
     
     if(n_params->mutated == 1) {    // If previuos mutation was successfull, keep going in the same direction
         n_params->bad_mutations_counter = 0;
@@ -115,14 +118,14 @@ void mini_neuron_mutate(simple_neuron_params_t * n_params) {
             gen_vector(n_params->num_coeffs, random_double(0, n_params->mutation_step), n_params->rand_vector);
         }
     }
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = control_coeffs_func(n_params->coeffs[i] + n_params->rand_vector[i]);
     }
     n_params->mutated = 1;
 }
 
-void mini_neuron_rollback(simple_neuron_params_t * n_params) {
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+void simple_neuron_rollback(neuron_params_t * n_params) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = n_params->last_vector[i];
     }
     if(n_params->mutated == 1) {
@@ -131,7 +134,7 @@ void mini_neuron_rollback(simple_neuron_params_t * n_params) {
     }
 }
 
-void mini_neuron_print_coeffs(simple_neuron_params_t * n_params) {
+void simple_neuron_print_coeffs(neuron_params_t * n_params) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         printf("%f, ", n_params->coeffs[i]);
     }

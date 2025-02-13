@@ -64,8 +64,16 @@ void simple_neuron_set_coeffs(neuron_params_t * n_params, double *coeffs) {
     }
 }
 
-void simple_neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double coeff) {
-    n_params->coeffs[idx] = coeff;
+void simple_neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double value) {
+    n_params->coeffs[idx] = value;
+}
+
+double simple_neuron_get_coeff(neuron_params_t * n_params, uint32_t idx) {
+    return n_params->coeffs[idx];
+}
+
+uint32_t simple_neuron_get_num_coeffs(neuron_params_t * n_params) {
+    return n_params->num_coeffs;
 }
 
 // Returns number of bytes written to the buffer
@@ -96,9 +104,9 @@ double simple_neuron_get_output(neuron_params_t *n_params, double *inputs) {
     return activation_func(output);
 }
 
-uint32_t simple_neuron_get_num_coeffs(neuron_params_t * n_params) {
-    return n_params->num_coeffs;
-}
+// uint32_t simple_neuron_get_num_coeffs(neuron_params_t * n_params) {
+//     return n_params->num_coeffs;
+// }
 
 void simple_neuron_stash_state(neuron_params_t * n_params) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {

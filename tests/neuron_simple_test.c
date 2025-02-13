@@ -7,12 +7,12 @@
 
 double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
     double error = 0;
-    // simple_neuron_reset_output_counter(config);
+    // neuron_reset_output_counter(config);
     for(size_t i=0; i<dataset_size; i++) {
         if(to_print) {
             printf("Stage %lld:\n", i);
         }
-        double output = simple_neuron_get_output(config, dataset[i].inputs);
+        double output = neuron_get_output(config, dataset[i].inputs);
 
         double diff = dataset[i].output - output;
         double e = diff * diff;
@@ -31,7 +31,7 @@ int test_mutation(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error before mutation = %f;\n", init_error);
 
-    simple_neuron_mutate(n);
+    neuron_mutate(n);
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error after mutation = %f;\n", error);
     if(error == init_error) {
@@ -39,7 +39,7 @@ int test_mutation(neuron_params_t *n) {
         return EXIT_FAILURE;
     }
 
-    // simple_neuron_rollback(n);
+    // neuron_rollback(n);
     // error = get_error(n, dataset, sizeof_arr(dataset), 0);
     // printf("Error after mutation = %f;\n", error);
     // if(error != init_error) {
@@ -52,14 +52,14 @@ int test_mutation(neuron_params_t *n) {
 int test_rollback(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error before mutation = %f;\n", init_error);
-    simple_neuron_stash_state(n);
+    neuron_stash_state(n);
 
     double error;
     for(uint32_t i=0; i<4; i++) {
-        simple_neuron_set_coeff(n, i, 0.5);
+        neuron_set_coeff(n, i, 0.5);
         error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
         // printf("Error after setting coeff %d = %f;\n", i, error);
-        simple_neuron_rollback(n);
+        neuron_rollback(n);
     }
     error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error after rollback = %f;\n", error);
@@ -72,20 +72,20 @@ int test_rollback(neuron_params_t *n) {
 
 int test_save_restore(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    uint32_t num_coeffs = simple_neuron_get_num_coeffs(n);
+    uint32_t num_coeffs = neuron_get_num_coeffs(n);
     double *bckp_coeffs = calloc(num_coeffs, sizeof(double));
     for(uint32_t i=0; i<num_coeffs; i++) {
-        bckp_coeffs[i] = simple_neuron_get_coeff(n, i);
+        bckp_coeffs[i] = neuron_get_coeff(n, i);
     }
-    // simple_neuron_save_coeffs(n, 123);
-    simple_neuron_set_coeff(n, 0, 0.5);
-    simple_neuron_set_coeff(n, 1, 0.5);
-    simple_neuron_set_coeff(n, 2, 0.5);
-    simple_neuron_set_coeff(n, 3, 0.5);
+    // neuron_save_coeffs(n, 123);
+    neuron_set_coeff(n, 0, 0.5);
+    neuron_set_coeff(n, 1, 0.5);
+    neuron_set_coeff(n, 2, 0.5);
+    neuron_set_coeff(n, 3, 0.5);
     // double init_error = get_error(n, dataset, sizeof_arr(dataset), 0);
     // printf("Error after setting coeffs = %f;\n", error);
-    // simple_neuron_restore_data(n, 123);
-    simple_neuron_set_coeffs(n, bckp_coeffs);
+    // neuron_restore_data(n, 123);
+    neuron_set_coeffs(n, bckp_coeffs);
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     if(init_error != error) {
         printf("Error: save-restore doesn't work: error after restore != error before save");
@@ -96,13 +96,13 @@ int test_save_restore(neuron_params_t *n) {
 }
 
 int test_output(neuron_params_t *n) {
-    simple_neuron_stash_state(n);
+    neuron_stash_state(n);
     for(uint32_t i=0; i<16; i++) {
         // printf("Setting coeff[%d] to %f\n", i, 0.02 * i);
-        simple_neuron_set_coeff(n, i, 0.02 * i+1);
+        neuron_set_coeff(n, i, 0.02 * i+1);
     }
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    simple_neuron_rollback(n);
+    neuron_rollback(n);
     // printf("Error after setting coeffs = %f;\n", error);
     if(round_to_precision(error, 6) == 0.517241) {
         return EXIT_SUCCESS;
@@ -124,9 +124,9 @@ int test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_
 int main() {
     srand(time(NULL));
     neuron_params_t test_neuron = {0};
-    simple_neuron_init(&test_neuron, 4);
+    neuron_init(&test_neuron, 4);
     for(size_t j=0; j<4; j++) {
-        simple_neuron_set_input_idx(&test_neuron, j, j);
+        neuron_set_input_idx(&test_neuron, j, j);
     }
     if(test_func(test_output,       &test_neuron, "output") ||
        test_func(test_mutation,     &test_neuron, "mutations")||

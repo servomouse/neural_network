@@ -47,12 +47,12 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
         uint32_t idx        = neuron->idx - config->num_inputs;
         uint32_t num_inputs = neuron->num_inputs;
         // printf("Neuron %d: idx = %d, num_inputs = %d, offset = %d\n", i, idx, num_inputs, offset);
-        mini_neuron_init(&config->neurons[idx], num_inputs);
+        simple_neuron_init(&config->neurons[idx], num_inputs);
         for(size_t j=0; j<num_inputs; j++) {
-            mini_neuron_set_input_idx(&config->neurons[idx], j, neuron->indices[j]);
+            simple_neuron_set_input_idx(&config->neurons[idx], j, neuron->indices[j]);
         }
         if(bckp_coeffs) {
-            mini_neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
+            simple_neuron_set_coeffs(&config->neurons[idx], bckp_coeffs[idx]);
         }
         offset += 2 + num_inputs;
     }
@@ -60,14 +60,14 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
 
 double *micronet_get_output(micro_network_t * config, double *inputs) {
     // for(int i=0; i<config->num_neurons; i++) {
-    //     mini_neuron_reset_output_counter(&config->neurons[i]);
+    //     simple_neuron_reset_output_counter(&config->neurons[i]);
     // }
     // printf("Micronet array: ");
     for(int i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
-            config->arr[i] = mini_neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
+            config->arr[i] = simple_neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
         }
         // printf("%f, ", config->arr[i]);
     }
@@ -93,7 +93,7 @@ double *micronet_get_output(micro_network_t * config, double *inputs) {
 
 void micronet_set_global_error(micro_network_t *config, double error) {
     // for(int i=config->num_inputs; i<config->net_size; i++) {
-    //     mini_neuron_set_global_error(&config->neurons[i-config->num_inputs], error);
+    //     simple_neuron_set_global_error(&config->neurons[i-config->num_inputs], error);
     // }
 }
 
@@ -121,16 +121,16 @@ void micronet_mutate(micro_network_t * config) {
     if(config->mutated_neuron_idx == config->num_neurons) {
         config->mutated_neuron_idx = 0;
     }
-    mini_neuron_mutate(&config->neurons[config->mutated_neuron_idx]);
+    simple_neuron_mutate(&config->neurons[config->mutated_neuron_idx]);
 }
 
 void micronet_rollback(micro_network_t * config) {
-    mini_neuron_rollback(&config->neurons[config->mutated_neuron_idx]);
+    simple_neuron_rollback(&config->neurons[config->mutated_neuron_idx]);
 }
 
 void micronet_print_coeffs(micro_network_t * config) {
     for(int i=config->num_inputs; i<config->net_size; i++) {
-        mini_neuron_print_coeffs(&config->neurons[i-config->num_inputs]);
+        simple_neuron_print_coeffs(&config->neurons[i-config->num_inputs]);
     }
 }
 
@@ -206,8 +206,8 @@ void micronet_save_data(micro_network_t * config, char *filename, char *prefix, 
     idx = 0;
 
     for(uint32_t i=0; i<config->num_neurons; i++) {
-        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double %scoeffs_%04d[%d] = {\n", prefix, i, mini_neuron_get_num_coeffs(&config->neurons[i]));
-        idx += mini_neuron_get_coeffs_as_string(&config->neurons[i], &buffer[idx], BUF_SIZE-idx);
+        idx += snprintf(&buffer[idx], BUF_SIZE-idx, "double %scoeffs_%04d[%d] = {\n", prefix, i, simple_neuron_get_num_coeffs(&config->neurons[i]));
+        idx += simple_neuron_get_coeffs_as_string(&config->neurons[i], &buffer[idx], BUF_SIZE-idx);
         idx += snprintf(&buffer[idx], BUF_SIZE-idx, "\n};\n\n");
 
         write_buf_to_file(buffer, filename);

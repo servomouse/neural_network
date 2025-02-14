@@ -16,3 +16,9 @@ target_link_libraries(neuron_smart_test
 add_executable(micronet_test micronet_test.c)
 
 add_executable(network_test network_test.c)
+
+add_custom_target(runtests
+    COMMAND ${CMAKE_CTEST_COMMAND}
+    DEPENDS
+        neuron_simple_test
+)

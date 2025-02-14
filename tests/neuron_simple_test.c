@@ -123,15 +123,26 @@ int test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_
 
 int main() {
     srand(time(NULL));
-    neuron_params_t test_neuron = {0};
-    neuron_init(&test_neuron, 4);
+    neuron_params_t poly_neuron = {0};
+    neuron_init(&poly_neuron, NPoly, 4);
     for(size_t j=0; j<4; j++) {
-        neuron_set_input_idx(&test_neuron, j, j);
+        neuron_set_input_idx(&poly_neuron, j, j);
     }
-    if(test_func(test_output,       &test_neuron, "output") ||
-       test_func(test_mutation,     &test_neuron, "mutations")||
-       test_func(test_rollback,     &test_neuron, "rollback")||
-       test_func(test_save_restore, &test_neuron, "save-restore")) {
+    if(test_func(test_output,       &poly_neuron, "poly neuron output") ||
+       test_func(test_mutation,     &poly_neuron, "poly neuron mutations")||
+       test_func(test_rollback,     &poly_neuron, "poly neuron rollback")||
+       test_func(test_save_restore, &poly_neuron, "poly neuron save-restore")) {
+        return EXIT_FAILURE;
+    }
+    neuron_params_t linear_neuron = {0};
+    neuron_init(&linear_neuron, NLinear, 4);
+    for(size_t j=0; j<4; j++) {
+        neuron_set_input_idx(&linear_neuron, j, j);
+    }
+    if(test_func(test_output,       &linear_neuron, "linear neuron output") ||
+       test_func(test_mutation,     &linear_neuron, "linear neuron mutations")||
+       test_func(test_rollback,     &linear_neuron, "linear neuron rollback")||
+       test_func(test_save_restore, &linear_neuron, "linear neuron save-restore")) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.31)
 # include(config.cmake)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
 project(project_name)
+
+include(CTest)
 
 # Set up build directories
 # set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_C_COMPILER gcc)
-# set(CMAKE_CXX_COMPILER c++)
 
 # Remove default flags
 # set(CMAKE_C_FLAGS "")

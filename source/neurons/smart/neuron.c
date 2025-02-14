@@ -4,9 +4,9 @@
 #include <math.h>
 #include "utils.h"
 #include "neuron.h"
-#include "micro_net.h"
-#include "neurons_structures.h"
-#include "neuron_complex_values.h"
+// #include "micro_net.h"
+// #include "neurons_structures.h"
+// #include "neuron_complex_values.h"
 
 #define MICRONET_STASH_SIZE 6
 

@@ -46,7 +46,14 @@ typedef struct {
     uint32_t neurons[];    // neuron_desc_t is used here
 } network_map_t;
 
+typedef enum {
+    NLinear = 0,
+    NPoly,
+    NSmart
+} neuron_type_t;
+
 typedef struct {
+    neuron_type_t n_type;
     double *inputs;
     double *direct_inputs;
     double *micronet_msg;

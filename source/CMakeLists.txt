@@ -1,5 +1,4 @@
 add_subdirectory(micronet)
 add_subdirectory(network)
-add_subdirectory(neurons/linear)
 add_subdirectory(neurons/simple)
 add_subdirectory(neurons/smart)

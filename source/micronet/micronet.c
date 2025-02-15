@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "micronet.h"
 #include "neuron.h"
+#include "neuron_iface.h"
 #include "utils.h"
 #include <time.h>
 

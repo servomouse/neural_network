@@ -137,14 +137,14 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
 
 // The opposite is neuron_restore
 void neuron_backup(neuron_params_t *n_params) {
-    for(int i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->backup_coeffs[i] = n_params->coeffs[i];
     }
 }
 
 // The opposite is neuron_backup
 void neuron_restore(neuron_params_t *n_params) {
-    for(int i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = n_params->backup_coeffs[i];
     }
 }
@@ -250,13 +250,13 @@ void neuron_set_global_error(neuron_params_t * n_params, double error) {
     n_params->global_error = error;
 }
 
-uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
-    return n_params->num_coeffs;
-}
+// uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
+//     return n_params->num_coeffs;
+// }
 
 // The opposite is neuron_rollback
 void neuron_stash_state(neuron_params_t * n_params) {
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->last_vector[i] = n_params->coeffs[i];
     }
 }
@@ -273,7 +273,7 @@ void neuron_mutate(neuron_params_t * n_params) {
             gen_vector(n_params->num_coeffs, random_double(0, n_params->mutation_step), n_params->rand_vector);
         }
     }
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = control_coeffs_func(n_params->coeffs[i] + n_params->rand_vector[i]);
     }
     n_params->mutated = 1;
@@ -281,7 +281,7 @@ void neuron_mutate(neuron_params_t * n_params) {
 
 // The opposite is neuron_rollback
 void neuron_rollback(neuron_params_t * n_params) {
-    for(int32_t i=0; i<n_params->num_coeffs; i++) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = n_params->last_vector[i];
     }
     if(n_params->mutated == 1) {

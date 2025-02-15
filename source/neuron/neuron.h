@@ -7,11 +7,12 @@
 
 #define MICRONET_STASH_SIZE 6
 
-void neuron_init(neuron_params_t * n_params, uint32_t num_inputs);
+void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_inputs);
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
 void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value);
 void neuron_save_state(neuron_params_t * n_params, char *filename);
 void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs);
+double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx);
 int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size);
 
 void neuron_stash_state(neuron_params_t * n_params);
@@ -25,7 +26,7 @@ void neuron_complete_file(const char *filename, uint32_t num_neurons);
 void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx);
 
 void neuron_restore_state(neuron_params_t * n_params, char *filename);
-double neuron_get_output(neuron_params_t * n_params, double *inputs, uint32_t to_print);
+double neuron_get_output(neuron_params_t * n_params, double *inputs);
 void neuron_set_feedback_error(neuron_params_t * n_params, double error);
 void neuron_generate_feedbacks(neuron_params_t * n_params, complex_value_t *feedbacks, micro_network_t *feedback_micronet, uint32_t own_index);
 void neuron_update_coeffs(neuron_params_t * n_params, complex_value_t *feedbacks, micro_network_t *coeffs_micronet, uint32_t own_index);

@@ -1,4 +1,5 @@
 {
+	// https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference
     "configurations": [
       {
         "name": "Linux",

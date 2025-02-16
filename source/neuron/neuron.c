@@ -32,7 +32,7 @@ static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) 
 
 void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
-    printf("Creating neuron with %d inputs\n", num_inputs);
+    printf("Creating neuron with %d inputs, %s\n", num_inputs, BCKP_DIR_PATH);
     n_params->n_type = n_type;
     n_params->num_inputs = num_inputs;
     if(n_type == NLinear) {
@@ -135,19 +135,19 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
     return idx;
 }
 
-// The opposite is neuron_restore
-void neuron_backup(neuron_params_t *n_params) {
-    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        n_params->backup_coeffs[i] = n_params->coeffs[i];
-    }
-}
+// // The opposite is neuron_restore
+// void neuron_backup(neuron_params_t *n_params) {
+//     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+//         n_params->backup_coeffs[i] = n_params->coeffs[i];
+//     }
+// }
 
-// The opposite is neuron_backup
-void neuron_restore(neuron_params_t *n_params) {
-    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        n_params->coeffs[i] = n_params->backup_coeffs[i];
-    }
-}
+// // The opposite is neuron_backup
+// void neuron_restore(neuron_params_t *n_params) {
+//     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+//         n_params->coeffs[i] = n_params->backup_coeffs[i];
+//     }
+// }
 
 void neuron_clear_stashes(neuron_params_t * n_params) {
     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {

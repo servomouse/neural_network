@@ -46,7 +46,7 @@ typedef struct {
     uint32_t neurons[];    // neuron_desc_t is used here
 } network_map_t;
 
-typedef enum {
+typedef enum uint32_t {
     NLinear = 0,
     NPoly,
     NSmart

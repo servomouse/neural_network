@@ -15,6 +15,11 @@ void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs);
 double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx);
 int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size);
 
+// Save-restore functions:
+
+void neuron_save(neuron_params_t * n_params, char *filename);
+void neuron_restore(neuron_params_t * n_params, char *filename);
+
 void neuron_stash_state(neuron_params_t * n_params);
 void neuron_mutate(neuron_params_t * n_params);
 void neuron_rollback(neuron_params_t * n_params);
@@ -37,7 +42,7 @@ void neuron_set_global_error(neuron_params_t * n_params, double error);
 
 void neuron_backup(neuron_params_t *n_params);
 void neuron_check_backup(neuron_params_t *n_params);
-void neuron_restore(neuron_params_t *n_params);
+// void neuron_restore(neuron_params_t *n_params);
 
 void neuron_print_coeffs(neuron_params_t * n_params);
 uint32_t neuron_get_num_outputs(neuron_params_t * n_params);

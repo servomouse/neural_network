@@ -72,39 +72,84 @@ uint64_t get_hash(uint8_t *data, size_t size) {
     return hash;
 }
 
+typedef struct {
+    uint32_t size;  // bytes
+    uint64_t hash;
+    uint8_t data[0];
+} stored_data_t;
+
 int store_data(void *data, size_t size, char *filename) {
-    uint64_t hash = get_hash((uint8_t*)data, size);
     FILE *file = fopen(filename, "wb");
     if (file == NULL) {
         printf("ERROR: Failed to open file %s\n", filename);
         return EXIT_FAILURE;
     }
+    stored_data_t data_struct = {
+        .size = size,
+        .hash = get_hash((uint8_t*)data, size)
+    };
+    fwrite(&data_struct, sizeof(stored_data_t), 1, file);
     fwrite((uint8_t *)data, 1, size, file);
-    fwrite(&hash, sizeof(hash), 1, file);
     fclose(file);
     return EXIT_SUCCESS;
 }
 
-int restore_data(void *data, size_t size, char *filename) {
+// Free the returned pointer after use
+void *restore_data( char *filename) {
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
         printf("ERROR: Failed to open file %s\n", filename);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
-    size_t len_data = fread((uint8_t *)data, 1, size, file);
-    uint64_t hash;
-    fread(&hash, sizeof(hash), 1, file);
-    if(hash != get_hash((uint8_t*)data, size)) {
+    stored_data_t data_struct = {0};
+    fread((uint8_t *)&data_struct, sizeof(stored_data_t), 1, file);
+    uint8_t *data = calloc(data_struct.size, 1);
+    size_t len_data = fread((uint8_t *)data, 1, data_struct.size, file);
+    if(data_struct.hash != get_hash((uint8_t*)data, data_struct.size)) {
         printf("ERROR: File %s corrupted (hash check failed)\n", filename);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     fclose(file);
-    if(len_data != size) {
-        printf("ERROR: Failed reading file %s (%lld of %lld bytes were read)\n", filename, len_data, size);
-        return EXIT_FAILURE;
+    if(len_data != data_struct.size) {
+        printf("ERROR: Failed reading file %s (%lld of %d bytes were read)\n", filename, len_data, data_struct.size);
+        exit(EXIT_FAILURE);
     }
-    return EXIT_SUCCESS;
+    return data;
 }
+
+// int store_data(void *data, size_t size, char *filename) {
+//     uint64_t hash = get_hash((uint8_t*)data, size);
+//     FILE *file = fopen(filename, "wb");
+//     if (file == NULL) {
+//         printf("ERROR: Failed to open file %s\n", filename);
+//         return EXIT_FAILURE;
+//     }
+//     fwrite((uint8_t *)data, 1, size, file);
+//     fwrite(&hash, sizeof(hash), 1, file);
+//     fclose(file);
+//     return EXIT_SUCCESS;
+// }
+
+// int restore_data(void *data, size_t size, char *filename) {
+//     FILE *file = fopen(filename, "rb");
+//     if (file == NULL) {
+//         printf("ERROR: Failed to open file %s\n", filename);
+//         return EXIT_FAILURE;
+//     }
+//     size_t len_data = fread((uint8_t *)data, 1, size, file);
+//     uint64_t hash;
+//     fread(&hash, sizeof(hash), 1, file);
+//     if(hash != get_hash((uint8_t*)data, size)) {
+//         printf("ERROR: File %s corrupted (hash check failed)\n", filename);
+//         return EXIT_FAILURE;
+//     }
+//     fclose(file);
+//     if(len_data != size) {
+//         printf("ERROR: Failed reading file %s (%lld of %lld bytes were read)\n", filename, len_data, size);
+//         return EXIT_FAILURE;
+//     }
+//     return EXIT_SUCCESS;
+// }
 
 /* Concats two strings and returns result. Don't forget to free the result buffer after use */
 char *concat_strings(const char *s1, const char *s2) {

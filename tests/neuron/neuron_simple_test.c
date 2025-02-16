@@ -3,7 +3,7 @@
 #include <time.h>
 #include "neuron.h"
 #include "utils.h"
-#include "dataset.h"
+#include "datasets.h"
 
 double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
     double error = 0;

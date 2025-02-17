@@ -13,7 +13,6 @@
 //          - neuron output
 //          - sum of other coeffs * input values
 
-// May be only single output
 void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **bckp_coeffs) {
     config->map = net_map;
     config->map->neurons = &net_map->neurons[0];

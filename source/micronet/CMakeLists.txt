@@ -20,3 +20,10 @@ target_compile_options(micronet
         -lws2_32
         -fstack-protector-all
 )
+
+target_compile_definitions(micronet
+    PRIVATE
+        BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
+)
+
+target_compile_definitions(micronet PRIVATE CMAKE_EXPORT_COMPILE_COMMANDS=1)

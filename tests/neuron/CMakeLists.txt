@@ -1,46 +1,79 @@
-# set(NEURON_PREFIX neuron)
+add_library(neuron_test_common
+    common_functions.c
+)
 
-# Single neuron test
-add_executable(neuron_simple_test neuron_simple_test.c)
-
-target_link_libraries(neuron_simple_test
+target_link_libraries(neuron_test_common
     PRIVATE
         neuron
         utils
 )
-target_include_directories(neuron_simple_test
+
+target_include_directories(neuron_test_common
+    PRIVATE
+        ${TESTS_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Test basic functions
+add_executable(neuron_test_output neuron_test_output.c)
+
+target_link_libraries(neuron_test_output
+    PRIVATE
+        neuron
+        utils
+        neuron_test_common
+)
+target_include_directories(neuron_test_output
     PRIVATE
         ${TESTS_DIR}
 )
 
-add_test(NAME neuron_simple_test COMMAND neuron_simple_test)
+add_test(NAME neuron_test_output COMMAND neuron_test_output)
 
+# Test mutations
+add_executable(neuron_test_mutation neuron_test_mutation.c)
 
-# add_executable(neuron_smart_test neuron_smart_test.c)
-# target_link_libraries(neuron_smart_test
-#     neuron
-#     utils
-# )
+target_link_libraries(neuron_test_mutation
+    PRIVATE
+        neuron
+        utils
+        neuron_test_common
+)
+target_include_directories(neuron_test_mutation
+    PRIVATE
+        ${TESTS_DIR}
+)
 
-# Micronet test
-# add_executable(micronet_test micronet_test.c)
+add_test(NAME neuron_test_mutation COMMAND neuron_test_mutation)
 
-# Full netowrk test
-# add_executable(network_test network_test.c)
+# Test rollback
+add_executable(neuron_test_rollback neuron_test_rollback.c)
 
-# Save-restore functionality test
-# add_executable(save_restore_test save_restore_test.c)
-# target_link_libraries(save_restore_test
-#     utils
-# )
+target_link_libraries(neuron_test_rollback
+    PRIVATE
+        neuron
+        utils
+        neuron_test_common
+)
+target_include_directories(neuron_test_rollback
+    PRIVATE
+        ${TESTS_DIR}
+)
 
-# add_test(NAME save_restore_test COMMAND save_restore_test)
+add_test(NAME neuron_test_rollback COMMAND neuron_test_rollback)
 
-# add_dependencies(runtest neuron_simple_test)
+# Test the save-restore functionality
+add_executable(neuron_test_save_restore neuron_test_save_restore.c)
 
-# add_custom_target(runtests
-#     COMMAND ${CMAKE_CTEST_COMMAND}
-#     DEPENDS
-#         neuron_simple_test
-#         save_restore_test
-# )
+target_link_libraries(neuron_test_save_restore
+    PRIVATE
+        neuron
+        utils
+        neuron_test_common
+)
+target_include_directories(neuron_test_save_restore
+    PRIVATE
+        ${TESTS_DIR}
+)
+
+add_test(NAME neuron_test_save_restore COMMAND neuron_test_save_restore)

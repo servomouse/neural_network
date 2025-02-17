@@ -8,6 +8,9 @@ add_subdirectory(neuron)
 add_custom_target(runtests
     COMMAND ${CMAKE_CTEST_COMMAND}
     DEPENDS
-        neuron_simple_test
+        neuron_test_output
+        neuron_test_mutation
+        neuron_test_rollback
+        neuron_test_save_restore
         save_restore_test
 )

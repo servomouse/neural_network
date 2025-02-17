@@ -87,6 +87,7 @@ void network_restore(network_t * config) {
     // memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
     // memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
     for(int i=0; i<config->num_neurons; i++) {
+        #error: fixme!;
         neuron_restore(&config->neurons[i]);
     }
     printf("Network restored!\n");

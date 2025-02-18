@@ -1,0 +1,12 @@
+{
+    "git.ignoreLimitWarning": true,
+    "files.associations": {
+        "cmath": "c",
+        "chrono": "c",
+        "variant": "c",
+        "network_new.h": "c",
+        "numbers": "c",
+        "neuron_simple.h": "c",
+        "neuron.h": "c"
+    }
+}

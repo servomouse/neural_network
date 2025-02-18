@@ -4,8 +4,15 @@ add_library(micronet
 )
 
 target_link_libraries(micronet
-    neuron
-    utils
+    PRIVATE
+        neuron
+        utils
+)
+
+target_include_directories(micronet
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/source/micronet
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set(CMAKE_C_FLAGS "")
@@ -26,4 +33,4 @@ target_compile_definitions(micronet
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )
 
-target_compile_definitions(micronet PRIVATE CMAKE_EXPORT_COMPILE_COMMANDS=1)
+# target_compile_definitions(micronet PRIVATE CMAKE_EXPORT_COMPILE_COMMANDS=1)

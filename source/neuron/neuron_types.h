@@ -4,21 +4,6 @@
 
 typedef struct {
     uint32_t idx;
-    uint32_t num_inputs;
-    uint32_t indices[0];
-} subneuron_description_t;
-
-typedef struct {
-    uint32_t num_inputs;
-    uint32_t num_neurons;
-    uint32_t net_size;
-    uint32_t *neurons;  // subneuron_description_t is used here
-    uint32_t num_outputs;
-    uint32_t output_indices[];
-} micronet_map_t;
-
-typedef struct {
-    uint32_t idx;
     uint32_t num_inputs;    // Also used as a size of the indices array
     uint32_t output_idx;    // Map this neuron to the outputs array with output_idx index, set to 0xFFFFFFFF if the neuron is not output
     uint32_t indices[];     // Which neurons are used as inputs for this neuron
@@ -91,20 +76,20 @@ typedef struct {
 } neuron_params_t;
 
 
-typedef struct {
-    double *inputs;
-    uint32_t *indices;
-    double *coeffs;
-    double *last_vector;
-    double *rand_vector;
-    uint32_t num_coeffs;
-    uint32_t num_inputs;
-    uint32_t num_feedbacks_received;
-    uint32_t output_counter;
-    uint32_t mutated;
-    uint32_t bad_mutations_counter;
-    double mutation_step;
-} simple_neuron_params_t;
+// typedef struct {
+//     double *inputs;
+//     uint32_t *indices;
+//     double *coeffs;
+//     double *last_vector;
+//     double *rand_vector;
+//     uint32_t num_coeffs;
+//     uint32_t num_inputs;
+//     uint32_t num_feedbacks_received;
+//     uint32_t output_counter;
+//     uint32_t mutated;
+//     uint32_t bad_mutations_counter;
+//     double mutation_step;
+// } simple_neuron_params_t;
 
 // typedef struct {
 //     double *inputs;
@@ -126,36 +111,3 @@ typedef struct {
 //     } last_value;
 // } neuron_params_t;
 
-
-typedef struct {
-    uint32_t num_inputs;
-    uint32_t num_neurons;
-    uint32_t net_size;
-    uint32_t num_outputs;
-    uint32_t *output_indices;
-    double *arr;
-    double *outputs;
-    simple_neuron_params_t *neurons;
-    uint32_t mutated_neuron_idx;
-    micronet_map_t *map;
-} micro_network_t;
-
-typedef struct {
-    uint32_t num_inputs;
-    uint32_t num_neurons;
-    uint32_t net_size;
-    uint32_t num_outputs;
-    double *arr;
-    uint32_t *output_indices;
-    double *outputs;
-    complex_value_t *feedback;
-    complex_item_t *feedback_errors;
-    complex_item_t *feedback_activations;
-    neuron_params_t *neurons;
-    uint32_t mutated_neuron_idx;
-    uint32_t last_mutated_micronet;
-    micro_network_t *coeffs_micronet;
-    micro_network_t *feedback_micronet;
-    network_map_t *map;
-    uint32_t dataset_size;
-} network_t;

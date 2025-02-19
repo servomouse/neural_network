@@ -17,3 +17,37 @@ include(CTest)
 add_subdirectory(lib)
 add_subdirectory(source)
 add_subdirectory(tests)
+
+# Train micronet target
+
+add_executable(train_micronet train_micronet.c)
+
+target_link_libraries(train_micronet
+    PRIVATE
+        micronet
+        neuron
+        utils
+)
+target_include_directories(train_micronet
+    PRIVATE
+        ${TESTS_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set(CMAKE_C_FLAGS "")
+set(CMAKE_CXX_FLAGS "")
+
+target_compile_options(train_micronet
+    PRIVATE
+        -Wall
+        -Wextra
+        -lm
+        -g
+        -lws2_32
+        -fstack-protector-all
+)
+
+target_compile_definitions(train_micronet
+    PRIVATE
+        BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
+)

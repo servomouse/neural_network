@@ -46,6 +46,8 @@ typedef struct {
     uint32_t inputs_feedback_counter;
     uint32_t *indices;
     double *coeffs;
+    double *c_net_stash;
+    double *f_net_stash;
     double *backup_coeffs;
     double *last_vector;
     double *rand_vector;

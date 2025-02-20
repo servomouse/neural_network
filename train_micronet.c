@@ -89,6 +89,36 @@ static double get_error(micro_network_t *net, dataset_entry_t *dataset, size_t d
     return error / dataset_size;
 }
 
+/*
+- global error
+- feedback error
+- neuron output
+- coefficient value
+- input value
+- c_net stash
+- f_net stash
+- global stash
+*/
+
+uint32_t smart_neurons[] = {
+    // idx  num_inputs  type indices
+       8,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+       9,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+      10,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+      11,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+
+      12,   4,          1,   8, 9, 10, 11,
+};
+
+micronet_map_t smart_micronet_map = {
+    .num_inputs = 8,
+    .num_neurons = 5,
+    .net_size = 13,
+    .neurons = smart_neurons,
+    .num_outputs = 1,
+    .output_indices = {12},
+};
+
 int evolution(void) {
     srand(time(NULL));
     micro_network_t target_net;
@@ -102,7 +132,13 @@ int evolution(void) {
         }
         // printf("},\n");
     }
-    printf("MicroNet initialised!\n");
+    printf("Target microNet initialised!\n");
+    micro_network_t c_micronet;
+    micronet_init(&c_micronet, &smart_micronet_map, NULL);
+    printf("C microNet initialised!\n");
+    micro_network_t f_micronet;
+    micronet_init(&f_micronet, &smart_micronet_map, NULL);
+    printf("F microNet initialised!\n");
 
     // // Dataset generator
     // for(uint32_t i=0; i<16; i++) {

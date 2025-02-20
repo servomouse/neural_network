@@ -96,16 +96,16 @@ def send_graph(space, space_size):
     space_nodes = {}
     node_count = 0
     for i in range(space_size):
-            for j in range(space_size):
-                for k in range(space_size):
-                    if space[i][j][k] is not None:
-                        node_count += 1
-                        space_nodes[f"{i}-{j}-{k}"] = {}
-                        space_nodes[f"{i}-{j}-{k}"]['coords'] = {}
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
-                        space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
-                        space_nodes[f"{i}-{j}-{k}"]['color'] = space[i][j][k]['color']  # hex(random.randint(100, 0x00FFFF))
+        for j in range(space_size):
+            for k in range(space_size):
+                if space[i][j][k] is not None:
+                    node_count += 1
+                    space_nodes[f"{i}-{j}-{k}"] = {}
+                    space_nodes[f"{i}-{j}-{k}"]['coords'] = {}
+                    space_nodes[f"{i}-{j}-{k}"]['coords']['x'] = i
+                    space_nodes[f"{i}-{j}-{k}"]['coords']['y'] = j
+                    space_nodes[f"{i}-{j}-{k}"]['coords']['z'] = k
+                    space_nodes[f"{i}-{j}-{k}"]['color'] = space[i][j][k]['color']  # hex(random.randint(100, 0x00FFFF))
     print(f"There are {node_count} nodes in the space")
     ws.send_data(json.dumps(space_nodes))
 

@@ -38,8 +38,9 @@ void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **b
     }
     // printf("\ttotal micronet size is %d\n", config->net_size);
 
-    config->arr     = calloc(config->net_size, sizeof(double));
-    config->neurons = calloc(config->num_neurons, sizeof(neuron_params_t));
+    config->arr          = calloc(config->net_size, sizeof(double));
+    config->feedback_arr = calloc(config->net_size, sizeof(feedback_item_t));
+    config->neurons      = calloc(config->num_neurons, sizeof(neuron_params_t));
 
     uint32_t offset = 0;
     for(uint32_t i=0; i<config->num_neurons; i++) {
@@ -95,6 +96,29 @@ double *micronet_get_output(micro_network_t * config, double *inputs) {
 void micronet_set_global_error(micro_network_t *config, double error) {
     for(uint32_t i=config->num_inputs; i<config->net_size; i++) {
         neuron_set_global_error(&config->neurons[i-config->num_inputs], error);
+    }
+}
+
+void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net) {
+    for(uint32_t i=config->net_size-1; i>config->num_inputs; i++) {
+        neuron_generate_feedbacks(&config->neurons[i-config->num_inputs], config->feedback_arr, f_net, i);
+    }
+}
+
+void micronet_clear_feedbacks(micro_network_t *config) {
+    for(uint32_t i=0; i<config->net_size; i++) {
+        config->feedback_arr[i].value = 0.0;
+        config->feedback_arr[i].stash = 0.0;
+        config->feedback_arr[i].counter = 0;
+        if(i>config->num_inputs) {
+            neuron_clear_stashes(&config->neurons[i-config->num_inputs]);
+        }
+    }
+}
+
+void micronet_update_coeffs(micro_network_t *config, micro_network_t *c_net) {
+    for(uint32_t i=config->net_size-1; i>config->num_inputs; i++) {
+        neuron_update_coeffs(&config->neurons[i], config->feedback_arr, c_net, i);
     }
 }
 

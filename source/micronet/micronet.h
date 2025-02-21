@@ -30,6 +30,7 @@ typedef struct {
     neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
     micronet_map_t *map;
+    feedback_item_t *feedback_arr;
 } micro_network_t;
 
 void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **bckp_coeffs);
@@ -41,3 +42,5 @@ void micronet_rollback(micro_network_t * config);
 void micronet_print_coeffs(micro_network_t * config);
 void micronet_set_global_error(micro_network_t * config, double error);
 void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define);
+void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net);
+void micronet_clear_feedbacks(micro_network_t *config);

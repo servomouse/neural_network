@@ -30,6 +30,13 @@ static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) 
     return calloc(num_elements, sizeof_element);
 }
 
+void clear_stashes(neuron_params_t *n_params) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        n_params->c_net_stash[i] = 0.0;
+        n_params->f_net_stash[i] = 0.0;
+    }
+}
+
 void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
     printf("Creating neuron with %d inputs, %s\n", num_inputs, BCKP_DIR_PATH);
@@ -151,14 +158,14 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
 //     }
 // }
 
-void neuron_clear_stashes(neuron_params_t * n_params) {
-    for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
-        n_params->feedback_micronet_stash[i] = 0.0;
-    }
-    for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
-        n_params->coeffs_micronet_stash[i] = 0.0;
-    }
-}
+// void neuron_clear_stashes(neuron_params_t * n_params) {
+//     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
+//         n_params->feedback_micronet_stash[i] = 0.0;
+//     }
+//     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
+//         n_params->coeffs_micronet_stash[i] = 0.0;
+//     }
+// }
 
 double neuron_get_output(neuron_params_t *n_params, double *inputs) {
     for(size_t i=0; i<n_params->num_inputs; i++) {

@@ -77,6 +77,11 @@ typedef struct {
     double mutation_step;
 } neuron_params_t;
 
+typedef struct {
+    uint32_t counter;
+    double value;
+    double stash;
+} feedback_item_t;
 
 // typedef struct {
 //     double *inputs;

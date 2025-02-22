@@ -42,5 +42,7 @@ void micronet_rollback(micro_network_t * config);
 void micronet_print_coeffs(micro_network_t * config);
 void micronet_set_global_error(micro_network_t * config, double error);
 void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define);
+
+void micronet_update_coeffs(micro_network_t *config, micro_network_t *c_net);
 void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net);
 void micronet_clear_feedbacks(micro_network_t *config);

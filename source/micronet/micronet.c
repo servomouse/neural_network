@@ -100,7 +100,7 @@ void micronet_set_global_error(micro_network_t *config, double error) {
 }
 
 void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net) {
-    for(uint32_t i=config->net_size-1; i>config->num_inputs; i++) {
+    for(uint32_t i=config->net_size-1; i>config->num_inputs; i--) {
         neuron_generate_feedbacks(&config->neurons[i-config->num_inputs], config->feedback_arr, f_net, i);
     }
 }
@@ -117,7 +117,7 @@ void micronet_clear_feedbacks(micro_network_t *config) {
 }
 
 void micronet_update_coeffs(micro_network_t *config, micro_network_t *c_net) {
-    for(uint32_t i=config->net_size-1; i>config->num_inputs; i++) {
+    for(uint32_t i=config->num_inputs; i<config->net_size; i++) {
         neuron_update_coeffs(&config->neurons[i], config->feedback_arr, c_net, i);
     }
 }

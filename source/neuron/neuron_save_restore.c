@@ -22,6 +22,7 @@ void neuron_save(neuron_params_t * n_params, char *filename) {
         n_data->coeffs[i] = n_params->coeffs[i];
     }
     store_data(n_data, data_size, filename);
+    free(n_data);
 }
 
 void neuron_restore(neuron_params_t * n_params, char *filename) {
@@ -32,4 +33,5 @@ void neuron_restore(neuron_params_t * n_params, char *filename) {
     for(uint32_t i=0; i<n_data->num_coeffs; i++) {
         n_params->coeffs[i] = n_data->coeffs[i];
     }
+    free(n_data);
 }

@@ -72,21 +72,57 @@ static double get_error(micro_network_t *net, dataset_entry_t *dataset, size_t d
             e += delta * delta;
         }
 
-        printf("Desired outputs: [");
-        for(uint32_t j=0; j<num_outputs-1; j++) {
-            printf("%f, ", dataset[i].outputs[j]);
-        }
-        printf("%f], ", dataset[i].outputs[num_outputs-1]);
+        // printf("Desired outputs: [");
+        // for(uint32_t j=0; j<num_outputs-1; j++) {
+        //     printf("%f, ", dataset[i].outputs[j]);
+        // }
+        // printf("%f], ", dataset[i].outputs[num_outputs-1]);
 
-        printf("real outputs: [");
-        for(uint32_t j=0; j<num_outputs-1; j++) {
-            printf("%f, ", outputs[j]);
-        }
-        printf("%f];\n", outputs[num_outputs-1]);
+        // printf("real outputs: [");
+        // for(uint32_t j=0; j<num_outputs-1; j++) {
+        //     printf("%f, ", outputs[j]);
+        // }
+        // printf("%f];\n", outputs[num_outputs-1]);
 
         error += e;
     }
     return error / dataset_size;
+}
+
+static void train_net(micro_network_t *target_net, micro_network_t *c_net, micro_network_t *f_net, dataset_entry_t *dataset, size_t dataset_size, uint32_t num_outputs) {
+    // Works only with single output networks
+    double error = 0;
+    for(size_t i=0; i<dataset_size; i++) {
+        double *outputs = micronet_get_output(target_net, dataset[i].inputs);
+        double e = 0.0;
+        for(uint32_t j=0; j<num_outputs; j++) {
+            double delta = dataset[i].outputs[j] - outputs[j];
+            e += delta * delta;
+        }
+        micronet_set_global_error(target_net, e);
+
+        
+        // double new_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
+        // double delta = new_error - init_error;
+        // double e_val = delta * delta;
+        // // #error "Update f_micronet (5 inputs and 2 outputs)"
+        micronet_update_feedbacks(target_net, f_net);
+        micronet_update_coeffs(target_net, c_net);
+
+        // printf("Desired outputs: [");
+        // for(uint32_t j=0; j<num_outputs-1; j++) {
+        //     printf("%f, ", dataset[i].outputs[j]);
+        // }
+        // printf("%f], ", dataset[i].outputs[num_outputs-1]);
+
+        // printf("real outputs: [");
+        // for(uint32_t j=0; j<num_outputs-1; j++) {
+        //     printf("%f, ", outputs[j]);
+        // }
+        // printf("%f];\n", outputs[num_outputs-1]);
+
+        error += e;
+    }
 }
 
 /*
@@ -100,23 +136,35 @@ static double get_error(micro_network_t *net, dataset_entry_t *dataset, size_t d
 - global stash
 */
 
+// uint32_t smart_neurons[] = {
+//     // idx  num_inputs  type indices
+//        8,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+//        9,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+//       10,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+//       11,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+
+//       12,   4,          1,   8, 9, 10, 11,
+// };
+
 uint32_t smart_neurons[] = {
     // idx  num_inputs  type indices
-       8,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
-       9,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
-      10,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
-      11,   8,          1,   0, 1, 2, 3, 4, 5, 6, 7,
+       5,   5,          1,   0, 1, 2, 3, 4,
+       6,   5,          1,   0, 1, 2, 3, 4,
+       7,   5,          1,   0, 1, 2, 3, 4,
+       8,   5,          1,   0, 1, 2, 3, 4,
+       9,   5,          1,   0, 1, 2, 3, 4,
 
-      12,   4,          1,   8, 9, 10, 11,
+      10,   5,          1,   5, 6, 7, 8, 9,
+      11,   5,          1,   5, 6, 7, 8, 9,
 };
 
 micronet_map_t smart_micronet_map = {
-    .num_inputs = 8,
-    .num_neurons = 5,
-    .net_size = 13,
+    .num_inputs = 5,
+    .num_neurons = 7,
+    .net_size = 12,
     .neurons = smart_neurons,
-    .num_outputs = 1,
-    .output_indices = {12},
+    .num_outputs = 2,
+    .output_indices = {10, 11},
 };
 
 void init_coeffs(micro_network_t *net) {
@@ -158,28 +206,43 @@ int evolution(void) {
 
     double init_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
     printf("Init error: %f\n", init_error);
+    double current_delta = 0, new_delta = 0;
 
-    for(uint32_t i=0; i<1000; i++) {
-        init_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
+    for(uint32_t i=0; i<10000; i++) {
         uint32_t coords[2] = {
             random_int(0, 5),
             random_int(0, 5)
         };
         neuron_set_coeff(&target_net.neurons[coords[0]], coords[1], random_double(-0.5, 0.5));
-        double new_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
-        double delta = new_error - init_error;
-        double e_val = delta * delta;
-        micronet_set_global_error(&target_net, e_val);
-        micronet_clear_feedbacks(&target_net);
+        init_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
+        // printf("Init error: %f; ", init_error);
+
+        if(init_error == 0.0) {
+            continue;
+        }
+
         micronet_mutate(&c_micronet);
         micronet_mutate(&f_micronet);
-        #error "Update f_micronet (5 inputs and 2 outputs)"
-        micronet_update_feedbacks(&target_net, &f_micronet);
-        micronet_update_coeffs(&target_net, &c_micronet);
+        micronet_clear_feedbacks(&target_net);
+        train_net(&target_net, &c_micronet, &f_micronet, linear_dataset, sizeof_arr(linear_dataset), 1);
+        // double new_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
+        // double delta = new_error - init_error;
+        // double e_val = delta * delta;
+        // micronet_set_global_error(&target_net, e_val);
+        // // // #error "Update f_micronet (5 inputs and 2 outputs)"
+        // micronet_update_feedbacks(&target_net, &f_micronet);
+        // micronet_update_coeffs(&target_net, &c_micronet);
+
         double final_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
-        if(final_error > new_error) {
+        new_delta = (init_error - final_error) / init_error;
+        // printf("final error: %f, new_delta: %f\n", final_error, new_delta);
+        if(new_delta < current_delta) {
             micronet_rollback(&f_micronet);
             micronet_rollback(&c_micronet);
+        } else if(new_delta > current_delta) {
+            current_delta = new_delta;
+            // printf("Useful mutation!\n");
+            printf("Init error: %f; final error: %f, new_delta: %f\n", init_error, final_error, new_delta);
         }
         init_coeffs(&target_net);
     }

@@ -159,7 +159,7 @@ int test_func(int(*foo)(micro_network_t*), micro_network_t *n, const char *test_
 int evolution(void) {
     srand(time(NULL));
     micro_network_t config;
-    micronet_init(&config, &micronet_map, NULL);
+    micronet_init(&config, &micronet_map);
     printf("MicroNet initialised!\n");
 
     double current_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
@@ -214,8 +214,8 @@ int evolution(void) {
 int main(void) {
     #ifdef TESTS_MODE
     srand(time(NULL));
-    micro_network_t config;
-    micronet_init(&config, &micronet_map, NULL);
+    micro_network_t config = {0};
+    micronet_init(&config, &micronet_map);
     printf("MicroNet initialised!\n");
     // get_error(&config, dataset, sizeof_arr(dataset), 1, 0);
 

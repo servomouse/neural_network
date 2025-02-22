@@ -159,7 +159,7 @@ char *concat_strings(const char *s1, const char *s2) {
 
     char *const str_buf = malloc(total_length + 1);
     if (str_buf == NULL) {
-        fprintf(stderr, "malloc failed\n");
+        fprintf(stderr, "Failed to allocate memory at %s: %d\n", __FILE__, __LINE__);
         exit(EXIT_FAILURE);
     }
 

@@ -91,15 +91,17 @@ static double get_error(micro_network_t *net, dataset_entry_t *dataset, size_t d
 
 static void train_net(micro_network_t *target_net, micro_network_t *c_net, micro_network_t *f_net, dataset_entry_t *dataset, size_t dataset_size, uint32_t num_outputs) {
     // Works only with single output networks
-    double error = 0;
+    // double error = 0;
+    double *errors = calloc(num_outputs, sizeof(double));
     for(size_t i=0; i<dataset_size; i++) {
         double *outputs = micronet_get_output(target_net, dataset[i].inputs);
         double e = 0.0;
         for(uint32_t j=0; j<num_outputs; j++) {
             double delta = dataset[i].outputs[j] - outputs[j];
-            e += delta * delta;
+            errors[j] = delta * delta;
+            e += errors[j];
         }
-        micronet_set_global_error(target_net, e);
+        micronet_set_global_error(target_net, e/num_outputs, errors);
 
         
         // double new_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
@@ -121,7 +123,7 @@ static void train_net(micro_network_t *target_net, micro_network_t *c_net, micro
         // }
         // printf("%f];\n", outputs[num_outputs-1]);
 
-        error += e;
+        // error += e;
     }
 }
 
@@ -182,14 +184,14 @@ void init_coeffs(micro_network_t *net) {
 int evolution(void) {
     srand(time(NULL));
     micro_network_t target_net;
-    micronet_init(&target_net, &linear_micronet_map, NULL);
+    micronet_init(&target_net, &linear_micronet_map);
     init_coeffs(&target_net);
     printf("Target microNet initialised!\n");
     micro_network_t c_micronet;
-    micronet_init(&c_micronet, &smart_micronet_map, NULL);
+    micronet_init(&c_micronet, &smart_micronet_map);
     printf("C microNet initialised!\n");
     micro_network_t f_micronet;
-    micronet_init(&f_micronet, &smart_micronet_map, NULL);
+    micronet_init(&f_micronet, &smart_micronet_map);
     printf("F microNet initialised!\n");
 
     // // Dataset generator
@@ -208,18 +210,18 @@ int evolution(void) {
     printf("Init error: %f\n", init_error);
     double current_delta = 0, new_delta = 0;
 
-    for(uint32_t i=0; i<10000; i++) {
+    for(uint32_t i=0; i<100; i++) {
         uint32_t coords[2] = {
             random_int(0, 5),
             random_int(0, 5)
         };
         neuron_set_coeff(&target_net.neurons[coords[0]], coords[1], random_double(-0.5, 0.5));
         init_error = get_error(&target_net, linear_dataset, sizeof_arr(linear_dataset), 1);
-        // printf("Init error: %f; ", init_error);
 
         if(init_error == 0.0) {
             continue;
         }
+        // printf("Init error: %f; ", init_error);
 
         micronet_mutate(&c_micronet);
         micronet_mutate(&f_micronet);

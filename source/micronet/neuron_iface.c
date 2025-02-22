@@ -54,9 +54,13 @@ void neuron_generate_feedbacks(neuron_params_t * n_params, feedback_item_t *feed
     if(n_params->n_type == NLinear) {
         for(uint32_t i=0; i<n_params->num_inputs; i++) {
             uint32_t idx = n_params->indices[i];
+            double feedback_val = 0.0;
+            if(feedbacks[own_index].counter != 0.0) {
+                feedback_val = feedbacks[own_index].value / feedbacks[own_index].counter;
+            }
             double micronet_inputs[5] = {
                 n_params->output,
-                feedbacks[own_index].value / feedbacks[own_index].counter,
+                feedback_val,
                 feedbacks[own_index].stash,
                 n_params->inputs[i],
                 n_params->coeffs[i],
@@ -66,8 +70,8 @@ void neuron_generate_feedbacks(neuron_params_t * n_params, feedback_item_t *feed
             feedbacks[idx].counter ++;
             feedbacks[own_index].stash = outputs[1];
         }
-        feedbacks[own_index].value = 0.0;
-        feedbacks[own_index].counter = 0;
+        // feedbacks[own_index].value = 0.0;
+        // feedbacks[own_index].counter = 0;
     }
     // // Step 0: prepate arrays
     // for(size_t i=1; i<n_params->num_coeffs; i++) {
@@ -102,7 +106,7 @@ void neuron_update_coeffs(neuron_params_t * n_params, feedback_item_t *feedbacks
             double micronet_inputs[5] = {
                 n_params->output,
                 n_params->c_net_stash[i],
-                feedbacks[own_index].stash,
+                feedbacks[own_index].value / feedbacks[own_index].counter,
                 n_params->inputs[i],
                 n_params->coeffs[i],
             };
@@ -111,6 +115,8 @@ void neuron_update_coeffs(neuron_params_t * n_params, feedback_item_t *feedbacks
             n_params->coeffs[i] += outputs[0];
             n_params->c_net_stash[i] = outputs[1];
         }
+        feedbacks[own_index].value = 0.0;
+        feedbacks[own_index].counter = 0;
     }
 }
 

@@ -1,5 +1,8 @@
 add_library(micronet
-    micronet.c
+    micronet_common.c
+    micronet_save_restore.c
+    micronet_train.c
+    micronet_mutations.c
     neuron_iface.c
 )
 

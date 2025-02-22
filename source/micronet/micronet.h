@@ -33,16 +33,23 @@ typedef struct {
     feedback_item_t *feedback_arr;
 } micro_network_t;
 
-void micronet_init(micro_network_t * config, micronet_map_t *net_map, double **bckp_coeffs);
-double *micronet_get_output(micro_network_t *config, double *inputs);
-void micronet_save(micro_network_t * config, char *filename);
-void micronet_restore(micro_network_t * config, char *filename);
-void micronet_mutate(micro_network_t * config);
-void micronet_rollback(micro_network_t * config);
-void micronet_print_coeffs(micro_network_t * config);
-void micronet_set_global_error(micro_network_t * config, double error);
-void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define);
+#include "micronet_common.h"
+#include "micronet_mutations.h"
+#include "micronet_save_restore.h"
+#include "micronet_train.h"
+#include "neuron_iface.h"
 
-void micronet_update_coeffs(micro_network_t *config, micro_network_t *c_net);
-void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net);
-void micronet_clear_feedbacks(micro_network_t *config);
+// void micronet_init(micro_network_t * config, micronet_map_t *net_map);
+// double *micronet_get_output(micro_network_t *config, double *inputs);
+// void micronet_save(micro_network_t * config, char *filename);
+// void micronet_restore(micro_network_t * config, char *filename);
+// void micronet_mutate(micro_network_t * config);
+// void micronet_rollback(micro_network_t * config);
+// void micronet_print_coeffs(micro_network_t * config);
+// void micronet_set_global_error(micro_network_t * config, double error, double *output_errors);
+// void micronet_save_data(micro_network_t * config, char *filename, char *prefix, char *to_define);
+
+// void micronet_update_coeffs(micro_network_t *config, micro_network_t *c_net);
+// void micronet_update_feedbacks(micro_network_t *config, micro_network_t *f_net);
+// void micronet_clear_feedbacks(micro_network_t *config);
+// uint32_t get_neurons_field_size(uint32_t *neurons, uint32_t num_neurons);

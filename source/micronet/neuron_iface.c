@@ -115,6 +115,19 @@ void neuron_update_coeffs(neuron_params_t * n_params, feedback_item_t *feedbacks
             n_params->coeffs[i] += outputs[0];
             n_params->c_net_stash[i] = outputs[1];
         }
+        // Update BIAS
+        double micronet_inputs[5] = {
+            n_params->output,
+            n_params->c_net_stash[n_params->num_inputs],
+            feedbacks[own_index].value / feedbacks[own_index].counter,
+            1.0,
+            n_params->coeffs[n_params->num_inputs],
+        };
+        double *outputs = micronet_get_output(c_micronet, micronet_inputs);
+        // printf("Own index: %d, coeff[%d] = %f, delta = %f, stash value: %f\n", own_index, i, n_params->coeffs[i], outputs[0], n_params->c_net_stash[i]);
+        n_params->coeffs[n_params->num_inputs] += outputs[0];
+        n_params->c_net_stash[n_params->num_inputs] = outputs[1];
+
         feedbacks[own_index].value = 0.0;
         feedbacks[own_index].counter = 0;
     }

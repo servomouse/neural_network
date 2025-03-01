@@ -156,20 +156,29 @@ uint32_t smart_neurons[] = {
        8,   5,          1,   0, 1, 2, 3, 4,
        9,   5,          1,   0, 1, 2, 3, 4,
 
+    //   10,   5,          1,   5, 6, 7, 8, 9,
+    //   11,   5,          1,   5, 6, 7, 8, 9,
+    //   12,   5,          1,   5, 6, 7, 8, 9,
+    //   13,   5,          1,   5, 6, 7, 8, 9,
+    //   14,   5,          1,   5, 6, 7, 8, 9,
+
+    //   15,   6,          1,   10, 11, 12, 13, 14, 19,
+    //   16,   6,          1,   10, 11, 12, 13, 14, 15,
+    //   17,   6,          1,   10, 11, 12, 13, 14, 16,
+    //   18,   6,          1,   10, 11, 12, 13, 14, 17,
+    //   19,   6,          1,   10, 11, 12, 13, 14, 18,
+
       10,   5,          1,   5, 6, 7, 8, 9,
       11,   5,          1,   5, 6, 7, 8, 9,
-
-      12,   2,          1,   10, 11,
-      13,   2,          1,   10, 11,
 };
 
 micronet_map_t smart_micronet_map = {
     .num_inputs = 5,
-    .num_neurons = 9,
-    .net_size = 14,
+    .num_neurons = 7,
+    .net_size = 12,
     .neurons = smart_neurons,
     .num_outputs = 2,
-    .output_indices = {12, 13},
+    .output_indices = {10, 11},
 };
 
 void init_coeffs(micro_network_t *net) {
@@ -294,6 +303,7 @@ int evolution(void) {
         }
         if(i%1000 == 0) {
             printf("Init delta: %f, new_delta: %f\n", init_delta, new_delta);
+            fflush(stdout);
         }
         if(new_delta > 0) {
             pos_new_delta_counter ++;
@@ -305,7 +315,12 @@ int evolution(void) {
     printf("Positive delta counter: %d\n", pos_delta_counter);
     printf("Positive new delta counter: %d\n", pos_new_delta_counter);
     printf("Improved delta counter: %d\n", delta_improved_counter);
+    printf("c_micronet coeffs:\n");
+    micronet_print_coeffs(&c_micronet);
+    printf("f_micronet coeffs:\n");
+    micronet_print_coeffs(&f_micronet);
 
+    remove_folders(BCKP_DIR_PATH);
     micronet_save(&c_micronet, c_net_path);
     micronet_save(&f_micronet, f_net_path);
 

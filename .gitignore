@@ -3,4 +3,5 @@ main.exe
 bin/*
 *.bin
 build/*
+backups/*
 myenv/*

@@ -18,17 +18,17 @@ add_subdirectory(lib)
 add_subdirectory(source)
 add_subdirectory(tests)
 
-# Train micronet target
+# Train micronet targets
 
-add_executable(train_micronet train_micronet.c)
+add_executable(train_linear_micronet train_linear_micronet.c)
 
-target_link_libraries(train_micronet
+target_link_libraries(train_linear_micronet
     PRIVATE
         micronet
         neuron
         utils
 )
-target_include_directories(train_micronet
+target_include_directories(train_linear_micronet
     PRIVATE
         ${TESTS_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -37,7 +37,7 @@ target_include_directories(train_micronet
 set(CMAKE_C_FLAGS "")
 set(CMAKE_CXX_FLAGS "")
 
-target_compile_options(train_micronet
+target_compile_options(train_linear_micronet
     PRIVATE
         -Wall
         -Wextra
@@ -47,7 +47,39 @@ target_compile_options(train_micronet
         -fstack-protector-all
 )
 
-target_compile_definitions(train_micronet
+target_compile_definitions(train_linear_micronet
+    PRIVATE
+        BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
+)
+
+add_executable(train_poly_micronet train_poly_micronet.c)
+
+target_link_libraries(train_poly_micronet
+    PRIVATE
+        micronet
+        neuron
+        utils
+)
+target_include_directories(train_poly_micronet
+    PRIVATE
+        ${TESTS_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set(CMAKE_C_FLAGS "")
+set(CMAKE_CXX_FLAGS "")
+
+target_compile_options(train_poly_micronet
+    PRIVATE
+        -Wall
+        -Wextra
+        -lm
+        -g
+        -lws2_32
+        -fstack-protector-all
+)
+
+target_compile_definitions(train_poly_micronet
     PRIVATE
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )

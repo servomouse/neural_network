@@ -243,8 +243,8 @@ int evolution(void) {
     printf("F microNet initialised!\n");
     
     // char *target_net_path = concat_strings(BCKP_DIR_PATH, "/target_unet");
-    char *c_net_path = concat_strings(BCKP_DIR_PATH, "/c_unet");
-    char *f_net_path = concat_strings(BCKP_DIR_PATH, "/f_unet");
+    char *c_net_path = BCKP_DIR_PATH "/linear/c_unet";
+    char *f_net_path = BCKP_DIR_PATH "/linear/f_unet";
     micronet_restore(&c_micronet, c_net_path);
     micronet_restore(&f_micronet, f_net_path);
 
@@ -339,8 +339,8 @@ int evolution(void) {
     micronet_save(&c_micronet, c_net_path);
     micronet_save(&f_micronet, f_net_path);
 
-    free(c_net_path);
-    free(f_net_path);
+    // free(c_net_path);
+    // free(f_net_path);
 
     return 0;
 }

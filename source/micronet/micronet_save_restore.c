@@ -68,7 +68,7 @@ static void save_neurons(micro_network_t * config, char *path) {
 }
 
 void micronet_save(micro_network_t * config, char *path) {
-    prepare_folders(path);
+    // prepare_folders(path);
     char *map_path = concat_strings(path, "/map.bin");
     char *neurons_path = concat_strings(path, "/neurons.bin");
     // char *neurons_path = concat_strings(path, "/neurons");

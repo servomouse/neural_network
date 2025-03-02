@@ -212,6 +212,23 @@ static double get_delta(micro_network_t *target_net, micro_network_t *c_net, mic
     return delta;
 }
 
+static double get_average_delta(micro_network_t *target_net, micro_network_t *c_net, micro_network_t *f_net, double coeff_inc) {
+    double init_average_delta = 0.0;
+    uint32_t average_delta_counter = 0;
+
+    for(uint32_t n=0; n<5; n++) {
+        for(uint32_t c=0; c<5; c++) {
+            init_coeffs(target_net);
+            neuron_set_coeff(&target_net->neurons[n], c, coeff_inc);
+
+            init_average_delta += get_delta(target_net, c_net, f_net);
+            average_delta_counter++;
+        }
+    }
+
+    return init_average_delta / average_delta_counter;
+}
+
 int evolution(void) {
     srand(time(NULL));
     micro_network_t target_net = {0};
@@ -266,46 +283,44 @@ int evolution(void) {
     uint32_t pos_new_delta_counter = 0;
     uint32_t delta_improved_counter = 0;
 
-    for(uint32_t i=0; i<100000; i++) {
+    for(uint32_t i=0; i<10000; i++) {
         // printf("Round %d:\n", i);
 
-        uint32_t coords[2] = {
-            random_int(0, 5),
-            random_int(0, 5)
-        };
+        // uint32_t coords[2] = {
+        //     random_int(0, 5),
+        //     random_int(0, 5)
+        // };
         double coeff_inc = random_double(-0.5, 0.5);
 
-        init_coeffs(&target_net);
-        neuron_set_coeff(&target_net.neurons[coords[0]], coords[1], coeff_inc);
+        double init_average_delta = get_average_delta(&target_net, &c_micronet, &f_micronet, coeff_inc);
 
-        double init_delta = get_delta(&target_net, &c_micronet, &f_micronet);
-
-        delta_sum += init_delta;
+        delta_sum += init_average_delta;
         delta_counter ++;
-        if(init_delta > 0) {
+        if(init_average_delta > 0) {
             pos_delta_counter ++;
         }
 
-        // Restore coeffs
-        init_coeffs(&target_net);
-        neuron_set_coeff(&target_net.neurons[coords[0]], coords[1], coeff_inc);
-
         micronet_mutate(&c_micronet);
         micronet_mutate(&f_micronet);
-        double new_delta = get_delta(&target_net, &c_micronet, &f_micronet);
 
-        if(new_delta < init_delta) {
+        double after_average_delta = get_average_delta(&target_net, &c_micronet, &f_micronet, coeff_inc);
+
+        if(after_average_delta < init_average_delta) {
             micronet_rollback(&f_micronet);
             micronet_rollback(&c_micronet);
         }
-        if(new_delta > init_delta) {
+        if(after_average_delta > init_average_delta) {
             delta_improved_counter ++;
         }
         if(i%1000 == 0) {
-            printf("Init delta: %f, new_delta: %f\n", init_delta, new_delta);
+            printf("Init delta: %f, new_delta: %f, average delta: %f\n", init_average_delta, after_average_delta, delta_sum/delta_counter);
             fflush(stdout);
+            if(i > 0) {
+                micronet_save(&c_micronet, c_net_path);
+                micronet_save(&f_micronet, f_net_path);
+            }
         }
-        if(new_delta > 0) {
+        if(after_average_delta > 0) {
             pos_new_delta_counter ++;
         }
     }
@@ -320,7 +335,7 @@ int evolution(void) {
     printf("f_micronet coeffs:\n");
     micronet_print_coeffs(&f_micronet);
 
-    remove_folders(BCKP_DIR_PATH);
+    // remove_folders(BCKP_DIR_PATH);
     micronet_save(&c_micronet, c_net_path);
     micronet_save(&f_micronet, f_net_path);
 

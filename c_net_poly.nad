@@ -1,0 +1,17 @@
+# c_net architecture for poly neuron training
+
+inputs: [
+    0:255,      # coeffs
+    256:263,    # inputs
+    264,        # feedback
+    265,        # output
+    266:521     # stash
+]
+groups: [
+    256 x [inputs[0:255] exclude [idx]] type linear,              # inputs complimentary
+    256 x [8 x [group[0][idx[0]], inputs[266:521][idx[0]], inputs[256:265]]] type linear
+]
+outputs: [
+    256 x [group[2]] type poly, # deltas
+    256 x [group[2]] type poly  # stash
+]

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "micronet.h"
 
 uint32_t linear_micronet_neurons[] = {
     // idx  num_inputs  type 	indices
@@ -16,7 +17,7 @@ uint32_t linear_micronet_neurons[] = {
 	   12,	5,			1,		5, 6, 7, 8, 9,
 };
 
-micronet_map_t micronet_map = {
+micronet_map_t linear_micronet_map = {
 	.num_inputs = 5,
 	.num_neurons = 8,
 	.net_size = 13,

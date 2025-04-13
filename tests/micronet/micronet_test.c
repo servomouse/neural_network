@@ -61,47 +61,34 @@ int test_basic_functions(micro_network_t *config) {
     micronet_mutate(config);
     double error_before = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == init_error) {
-        // printf("Error: Mutation doesn't work: error after mutation == error before mutation!!! init_error = %f, error_before = %f\n", init_error, error_before);
         return EXIT_FAILURE;
     }
     micronet_rollback(config);
     double error_after = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == error_after) {
-        // printf("Error: Rollback doesn't work: error after rollback == error before rollback!!! init_error = %f, error_before = %f, error_after = %f\n", init_error, error_before, error_after);
         return EXIT_FAILURE;
     } else if(error_after != init_error) {
-        // printf("Error: Rollback doesn't work: error after rollback != init_error!!! init_error = %f, error_before = %f, error_after = %f\n", init_error, error_before, error_after);
         return EXIT_FAILURE;
     }
-    // printf("Mutations work, test passed!\n");
     return EXIT_SUCCESS;
 }
 
 int test_multiple_mutations(micro_network_t *config) {
     double init_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
-    // printf("Init error: %f\n", init_error);
     double error_before, error_after;
     for(uint32_t i=0; i<10000; i++) {
         micronet_mutate(config);
         error_before = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
         if(error_before != init_error) {
-            // printf("Error: Mutation doesn't work: error after mutation == error before mutation!!! init_error = %f, error_before = %f, i = %d\n",
-            //         init_error, error_before, i);
-            // return;
             micronet_rollback(config);
             error_after = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(error_before == error_after) {
-                // printf("Error: Rollback doesn't work: error after rollback == error before rollback!!! init_error = %f, error_before = %f, error_after = %f, i = %d\n",
-                //         init_error, error_before, error_after, i);
                 return EXIT_FAILURE;
             } else if(error_after != init_error) {
-                // printf("Error: Rollback doesn't work: error after rollback != init_error!!! init_error = %f, error_before = %f, error_after = %f, i = %d\n",
-                //         init_error, error_before, error_after, i);
                 return EXIT_FAILURE;
             }
         }
     }
-    // printf("Multiple mutations work, test passed!\n");
     return EXIT_SUCCESS;
 }
 
@@ -116,22 +103,16 @@ int test_evolution(micro_network_t *config) {
             micronet_rollback(config);
             double temp_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(temp_error != current_error) {
-                // printf("ERROR1: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
                 return EXIT_FAILURE;
             }
         } else {
-            // if(new_error < current_error) {
-            //     printf("New error: %f\n", new_error);
-            // }
             current_error = new_error;
             double temp_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(temp_error != current_error) {
-                // printf("ERROR2: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
                 return EXIT_FAILURE;
             }
         }
         if(new_error < current_error) {
-            // printf("Error: new_error < current_error!!!! new_error = %f, current_error = %f\n", new_error, current_error);
             return EXIT_FAILURE;
         }
     }
@@ -141,8 +122,6 @@ int test_evolution(micro_network_t *config) {
         printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
         return EXIT_FAILURE;
     }
-    // printf("Init error: %f, final error: %f, counter = %lld\n", init_error, after_error, counter);
-    // printf("Evolution works, test passed!\n");
     return EXIT_SUCCESS;
 }
 
@@ -156,76 +135,69 @@ int test_func(int(*foo)(micro_network_t*), micro_network_t *n, const char *test_
     return EXIT_SUCCESS;
 }
 
-int evolution(void) {
-    srand(time(NULL));
-    micro_network_t config;
-    micronet_init(&config, &micronet_map);
-    printf("MicroNet initialised!\n");
+// int evolution(void) {
+//     srand(time(NULL));
+//     micro_network_t config;
+//     micronet_init(&config, &micronet_map);
+//     printf("MicroNet initialised!\n");
 
-    double current_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
-    // printf("Init error: %f\n", current_error);
-    size_t counter = 0;
-    while((current_error > 0.001) && (counter++ < 1000)) {
-        micronet_mutate(&config);
-        double new_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
-        // printf("New error: %f\n", new_error);
-        if(new_error > current_error) {
-            micronet_rollback(&config);
-            double temp_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
-            if(temp_error != current_error) {
-                printf("ERROR1: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
-                return 1;
-            }
-        } else {
-            // if(new_error < current_error) {
-            //     printf("New error: %f\n", new_error);
-            // }
-            // if((counter % 1000) == 0) {
-            //     printf("New error: %f\n", new_error);
-            // }
-            current_error = new_error;
-            double temp_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
-            if(temp_error != current_error) {
-                printf("ERROR2: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
-                return 1;
-            }
-        }
-        if(new_error < current_error) {
-            printf("Error: new_error < current_error!!!! new_error = %f, current_error = %f\n", new_error, current_error);
-            return 1;
-        }
-        // if(counter++ < 10000) {
-        //     break;
-        // }
-    }
+//     double current_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
+//     // printf("Init error: %f\n", current_error);
+//     size_t counter = 0;
+//     while((current_error > 0.001) && (counter++ < 1000)) {
+//         micronet_mutate(&config);
+//         double new_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
+//         // printf("New error: %f\n", new_error);
+//         if(new_error > current_error) {
+//             micronet_rollback(&config);
+//             double temp_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
+//             if(temp_error != current_error) {
+//                 printf("ERROR1: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
+//                 return 1;
+//             }
+//         } else {
+//             // if(new_error < current_error) {
+//             //     printf("New error: %f\n", new_error);
+//             // }
+//             // if((counter % 1000) == 0) {
+//             //     printf("New error: %f\n", new_error);
+//             // }
+//             current_error = new_error;
+//             double temp_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
+//             if(temp_error != current_error) {
+//                 printf("ERROR2: temp_error != current_error: temp_error = %f, current_error = %f\n", temp_error, current_error);
+//                 return 1;
+//             }
+//         }
+//         if(new_error < current_error) {
+//             printf("Error: new_error < current_error!!!! new_error = %f, current_error = %f\n", new_error, current_error);
+//             return 1;
+//         }
+//         // if(counter++ < 10000) {
+//         //     break;
+//         // }
+//     }
     
-    // micronet_print_coeffs(&config);
-    double after_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 1);
-    if(after_error != current_error) {
-        printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
-        return 1;
-    }
-    printf("Final error: %f, counter = %lld\n", after_error, counter);
-    return 0;
-}
-
-#define TESTS_MODE
+//     // micronet_print_coeffs(&config);
+//     double after_error = get_error(&config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 1);
+//     if(after_error != current_error) {
+//         printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
+//         return 1;
+//     }
+//     printf("Final error: %f, counter = %lld\n", after_error, counter);
+//     return 0;
+// }
 
 int main(void) {
-    #ifdef TESTS_MODE
     srand(time(NULL));
     micro_network_t config = {0};
     micronet_init(&config, &micronet_map);
     printf("MicroNet initialised!\n");
-    // get_error(&config, dataset, sizeof_arr(dataset), 1, 0);
 
     if(test_func(test_basic_functions,      &config, "basic functions") ||
        test_func(test_multiple_mutations,   &config, "multiple mutations")||
        test_func(test_evolution,            &config, "evolution")) {
         return EXIT_FAILURE;
     }
-    #else
-    evolution();
-    #endif
     return EXIT_SUCCESS;
 }

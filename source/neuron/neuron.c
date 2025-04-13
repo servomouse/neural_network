@@ -51,15 +51,8 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
         exit(1);
     }
     n_params->mutation_step = 0.01;
-	// n_params->num_outputs = 0;
-    // n_params->output_counter = 0;
-    // n_params->inputs_feedback_counter = 0;
-    // neuron_reset_feedback_error(n_params);
 
     n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(double));
-    // n_params->inputs = alloc_memory(n_params->direct_inputs, n_params->num_inputs, sizeof(double));
-    // n_params->inputs = alloc_memory(n_params->micronet_msg, 5, sizeof(double));
-    // n_params->input_feedbacks = alloc_memory(n_params->input_feedbacks, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, n_params->num_inputs, sizeof(uint32_t));
 
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
@@ -78,30 +71,7 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
     }
 
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
-
-    // if(n_params->coeff_feedback) {
-    //     free(n_params->coeff_feedback);
-    // }
-    // n_params->coeff_feedback = calloc(n_params->num_coeffs, sizeof(double));
-    // n_params->inputs_feedback = alloc_memory(n_params->inputs_feedback, n_params->num_inputs, sizeof(complex_value_t));
-    // for(uint32_t i=0; i<n_params->dataset_size; i++) {
-    //     n_params->inputs_feedback[i] = calloc(n_params->dataset_size, sizeof(complex_item_t));
-    // }
-
     n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
-
-    // if(n_params->part_values) {
-    //     free(n_params->part_values);
-    // }
-    // n_params->part_values = calloc(n_params->num_coeffs, sizeof(double));
-    // if(n_params->outputs) {
-    //     free(n_params->outputs);
-    // }
-    // n_params->outputs = calloc(n_params->dataset_size, sizeof(complex_item_t));
-    // if(n_params->global_errors) {
-    //     free(n_params->global_errors);
-    // }
-    // n_params->global_errors = calloc(n_params->dataset_size, sizeof(double));
 }
 
 void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
@@ -144,29 +114,6 @@ int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_
     return idx;
 }
 
-// // The opposite is neuron_restore
-// void neuron_backup(neuron_params_t *n_params) {
-//     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-//         n_params->backup_coeffs[i] = n_params->coeffs[i];
-//     }
-// }
-
-// // The opposite is neuron_backup
-// void neuron_restore(neuron_params_t *n_params) {
-//     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-//         n_params->coeffs[i] = n_params->backup_coeffs[i];
-//     }
-// }
-
-// void neuron_clear_stashes(neuron_params_t * n_params) {
-//     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
-//         n_params->feedback_micronet_stash[i] = 0.0;
-//     }
-//     for(size_t i=0; i<n_params->num_coeffs * MICRONET_STASH_SIZE; i++) {
-//         n_params->coeffs_micronet_stash[i] = 0.0;
-//     }
-// }
-
 double neuron_get_output(neuron_params_t *n_params, double *inputs) {
     for(size_t i=0; i<n_params->num_inputs; i++) {
         n_params->inputs[i] = inputs[n_params->indices[i]];
@@ -197,71 +144,10 @@ double neuron_get_output(neuron_params_t *n_params, double *inputs) {
     return activation_func(output);
 }
 
-// double neuron_get_output(neuron_params_t * n_params, double *inputs) {
-//     // double part_values[256] = {0};
-//     for(size_t i=0; i<n_params->num_inputs; i++) {
-//         n_params->inputs[i] = inputs[n_params->indices[i]];
-//         // n_params->part_sums[i] = 0.0;
-//     }
-
-//     double output = n_params->coeffs[0];         // BIAS
-//     for(size_t i=1; i<n_params->num_coeffs; i++) {
-//         double temp = 1.0;
-//         for(size_t j=0; j<n_params->num_inputs; j++) {
-//             if(((1 << j) & i) > 0) {
-//                 temp *= n_params->inputs[j];
-//                 // n_params->part_sums[j] += n_params->inputs[j];
-//             }
-//         }
-//         temp *= n_params->coeffs[i];
-//         n_params->part_values[i] = activation_func(temp);
-//         output += temp * n_params->coeffs[i];
-//     }
-//     n_params->output = activation_func(output);
-//     if(n_params->output != n_params->output) {
-//         printf("Error! Coeffs:");
-//         for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-//             printf("%f, ", n_params->coeffs[i]);
-//         }
-//         printf("\n");
-//         exit(0);
-//     }
-//     if(to_print) {
-//         printf("\"part_values\": [");
-//         for(size_t i=0; i<n_params->num_coeffs-1; i++) {
-//             printf("%f, ", n_params->part_values[i]);
-//         }
-//         printf("%f];\n", n_params->part_values[n_params->num_coeffs-1]);
-//         printf("\"coeffs\": [");
-//         for(size_t i=0; i<n_params->num_coeffs-1; i++) {
-//             printf("%f, ", n_params->coeffs[i]);
-//         }
-//         printf("%f];\n", n_params->coeffs[n_params->num_coeffs-1]);
-//         printf("\"output\": %f\n\n", n_params->output);
-//     }
-//     return n_params->output;
-// }
-
-// void neuron_set_feedback_error(neuron_params_t * n_params, double error) {
-//     n_params->feedback_error += error;
-//     n_params->feedback_error_count += 1;
-//     n_params->num_feedbacks_received += 1;
-// }
-
-// void neuron_reset_feedback_error(neuron_params_t * n_params) {
-//     n_params->feedback_error = 0;
-//     n_params->feedback_error_count = 0;
-//     n_params->num_feedbacks_received = 0;
-// }
-
 void neuron_set_global_error(neuron_params_t * n_params, double error) {
     // printf("Global error: %f\n", error);
     n_params->global_error = error;
 }
-
-// uint32_t neuron_get_num_coeffs(neuron_params_t * n_params) {
-//     return n_params->num_coeffs;
-// }
 
 // The opposite is neuron_rollback
 void neuron_stash_state(neuron_params_t * n_params) {
@@ -298,38 +184,6 @@ void neuron_rollback(neuron_params_t * n_params) {
         n_params-> mutated = 0;
     }
 }
-
-// void neuron_save_state(neuron_params_t * n_params, char *filename) {
-//     char *inputs_arr_fname = concat_strings("inputs_", filename);
-//     char *indices_arr_fname = concat_strings("indices_", filename);
-//     char *coeffs_arr_fname = concat_strings("coeffs_", filename);
-//     char *part_values_arr_fname = concat_strings("part_values_", filename);
-//     store_data(&n_params, sizeof(neuron_params_t), filename);
-//     store_data(n_params->inputs, n_params->num_inputs * sizeof(double), inputs_arr_fname);
-//     store_data(n_params->indices, n_params->num_inputs * sizeof(uint32_t), indices_arr_fname);
-//     store_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), coeffs_arr_fname);
-//     store_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), part_values_arr_fname);
-//     free(inputs_arr_fname);
-//     free(indices_arr_fname);
-//     free(coeffs_arr_fname);
-//     free(part_values_arr_fname);
-// }
-
-// void neuron_restore_state(neuron_params_t * n_params, char *filename) {
-//     char *inputs_arr_fname = concat_strings("inputs_", filename);
-//     char *indices_arr_fname = concat_strings("indices_", filename);
-//     char *coeffs_arr_fname = concat_strings("coeffs_", filename);
-//     char *part_values_arr_fname = concat_strings("part_values_", filename);
-//     restore_data(&n_params, sizeof(neuron_params_t), filename);
-//     restore_data(n_params->inputs, n_params->num_inputs * sizeof(double), inputs_arr_fname);
-//     restore_data(n_params->indices, n_params->num_inputs * sizeof(uint32_t), indices_arr_fname);
-//     restore_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), coeffs_arr_fname);
-//     restore_data(n_params->coeffs, (n_params->num_coeffs) * sizeof(double), part_values_arr_fname);
-//     free(inputs_arr_fname);
-//     free(indices_arr_fname);
-//     free(coeffs_arr_fname);
-//     free(part_values_arr_fname);
-// }
 
 void neuron_print_coeffs(neuron_params_t * n_params) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {

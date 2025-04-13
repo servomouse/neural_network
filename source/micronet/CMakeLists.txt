@@ -1,9 +1,9 @@
 add_library(micronet
     micronet_common.c
     micronet_save_restore.c
-    micronet_train.c
+    # micronet_train.c
     micronet_mutations.c
-    neuron_iface.c
+    # neuron_iface.c
 )
 
 target_link_libraries(micronet

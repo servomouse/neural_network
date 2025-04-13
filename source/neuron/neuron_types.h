@@ -59,7 +59,6 @@ typedef struct {
     complex_value_t *inputs_feedback;    // Array for temporary values
     double *feedback_micronet_stash;
     double *coeffs_micronet_stash;
-    // micro_network_t *micro_net;
     uint32_t num_coeffs;
     uint32_t num_inputs;
     double feedback_error;  // Error calculated by neurons connected to the output
@@ -82,39 +81,3 @@ typedef struct {
     double value;
     double stash;
 } feedback_item_t;
-
-// typedef struct {
-//     double *inputs;
-//     uint32_t *indices;
-//     double *coeffs;
-//     double *last_vector;
-//     double *rand_vector;
-//     uint32_t num_coeffs;
-//     uint32_t num_inputs;
-//     uint32_t num_feedbacks_received;
-//     uint32_t output_counter;
-//     uint32_t mutated;
-//     uint32_t bad_mutations_counter;
-//     double mutation_step;
-// } simple_neuron_params_t;
-
-// typedef struct {
-//     double *inputs;
-//     uint32_t *indices;
-//     struct {
-//         double offset;
-//         double amplitude;
-//     } *coeffs;
-//     // micro_network_t *micro_net;
-//     uint32_t num_coeffs;
-//     uint32_t num_inputs;
-//     double feedback_error;  // Error calculated by neurons connected to the output
-//     uint32_t feedback_error_count;
-//     double global_error;    // Error of the entire network
-//     uint32_t last_idx;
-//     struct {
-//         double offset;
-//         double amplitude;
-//     } last_value;
-// } neuron_params_t;
-

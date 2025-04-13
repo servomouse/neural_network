@@ -36,8 +36,8 @@ typedef struct {
 #include "micronet_common.h"
 #include "micronet_mutations.h"
 #include "micronet_save_restore.h"
-#include "micronet_train.h"
-#include "neuron_iface.h"
+// #include "micronet_train.h"
+// #include "neuron_iface.h"
 
 // void micronet_init(micro_network_t * config, micronet_map_t *net_map);
 // double *micronet_get_output(micro_network_t *config, double *inputs);

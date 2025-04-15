@@ -27,11 +27,11 @@ void network_init(network_t * config, network_map_t *net_map, micro_network_t *c
     config->net_size = net_map->net_size;
     config->num_outputs = net_map->num_outputs;
     // config->dataset_size = dataset_size;
-    printf("Creating network with:\n");
-    printf("\t%d inputs;\n", config->num_inputs);
-    printf("\t%d output(s);\n", config->num_outputs);
-    printf("\t%d neurons;\n", config->num_neurons);
-    printf("\ttotal size is %d\n", config->net_size);
+    // printf("Creating network with:\n");
+    // printf("\t%d inputs;\n", config->num_inputs);
+    // printf("\t%d output(s);\n", config->num_outputs);
+    // printf("\t%d neurons;\n", config->num_neurons);
+    // printf("\ttotal size is %d\n", config->net_size);
     
     config->arr = calloc(config->net_size, sizeof(double));
     config->feedback = calloc(config->net_size, sizeof(complex_value_t));

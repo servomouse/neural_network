@@ -43,6 +43,6 @@ void neuron_print_coeffs(neuron_params_t * n_params);
 uint32_t neuron_get_num_outputs(neuron_params_t * n_params);
 uint32_t neuron_get_num_coeffs(neuron_params_t * n_params);
 void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value);
-void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx);
+// void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx);
 uint32_t neuron_get_output_idx(neuron_params_t * n_params);
 void neuron_reset_output_counter(neuron_params_t * n_params);

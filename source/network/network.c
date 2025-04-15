@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
-#include "micro_net.h"
-#include "network_new.h"
+#include "micronet.h"
+#include "network.h"
 #include "neuron.h" // includes neuron_types.h
 #include "utils.h"
 #include <time.h>
-#include "backups/network_backup.h"
+#include "neuron_iface.h"
+// #include "backups/network_backup.h"
 
 // Inputs:
 //          - global error
@@ -48,14 +49,14 @@ void network_init(network_t * config, network_map_t *net_map, micro_network_t *c
         neuron_desc_t *neuron = (neuron_desc_t *)&net_map->neurons[offset];
         uint8_t idx = neuron->idx - config->num_inputs;
         uint8_t num_inputs = neuron->num_inputs;
-        neuron_init(&config->neurons[idx], num_inputs);
-        neuron_set_output_idx(&config->neurons[idx], neuron->output_idx);
+        neuron_init(&config->neurons[idx], 0, num_inputs);  // FIXME: Set neuron type properly
+        // neuron_set_output_idx(&config->neurons[idx], neuron->output_idx);
         for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&config->neurons[idx], j, neuron->indices[j]);
-            if(j >= config->num_inputs) {
-                uint32_t temp_idx = j-config->num_inputs;
-                neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
-            }
+            // if(j >= config->num_inputs) {
+            //     uint32_t temp_idx = j-config->num_inputs;
+            //     neuron_set_num_outputs(&config->neurons[temp_idx], neuron_get_num_outputs(&config->neurons[temp_idx]) + 1);
+            // }
         }
         #ifdef USE_BACKUP
         neuron_set_coeffs(&config->neurons[idx], network_backup_coeffs[idx]);
@@ -70,38 +71,39 @@ void network_init(network_t * config, network_map_t *net_map, micro_network_t *c
 }
 
 void network_backup(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
-        neuron_backup(&config->neurons[i]);
-    }
+    // for(uint32_t i=0; i<config->num_neurons; i++) {
+    //     neuron_backup(&config->neurons[i]);
+    // }
     // memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
-    // memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
+    memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
 }
 
 void network_check_backup(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
-        neuron_check_backup(&config->neurons[i]);
+    for(uint32_t i=0; i<config->num_neurons; i++) {
+        // neuron_check_backup(&config->neurons[i]);
+        ;
     }
 }
 
 void network_restore(network_t * config) {
     // memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
-    // memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
-    for(int i=0; i<config->num_neurons; i++) {
-        #error: fixme!;
-        neuron_restore(&config->neurons[i]);
-    }
+    memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
+    // for(uint32_t i=0; i<config->num_neurons; i++) {
+    //     #error: fixme!;
+    //     neuron_restore(&config->neurons[i]);
+    // }
     printf("Network restored!\n");
 }
 
 double *network_get_outputs(network_t *config, double *inputs, uint32_t to_print) {
-    for(int i=0; i<config->net_size; i++) {
+    for(uint32_t i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
             if(to_print) {
                 printf("{\n");
             }
-            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr, to_print);
+            config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
             if(to_print) {
                 printf("},\n");
             }
@@ -114,18 +116,18 @@ double *network_get_outputs(network_t *config, double *inputs, uint32_t to_print
 }
 
 void network_reset_activations(network_t *config) {
-    for(int i=0; i<config->net_size; i++) {
+    for(uint32_t i=0; i<config->net_size; i++) {
         config->arr[i] = 0;
         config->feedback[i].value = 0;
         config->feedback[i].counter = 0;
     }
-    for(int i=0; i<config->num_neurons; i++) {
+    for(uint32_t i=0; i<config->num_neurons; i++) {
         neuron_clear_stashes(&config->neurons[i]);
     }
 }
 
 void network_set_global_error(network_t * config, double error) {
-    for(int i=0; i<config->num_neurons; i++) {
+    for(uint32_t i=0; i<config->num_neurons; i++) {
         neuron_set_global_error(&config->neurons[i], error);
     }
 }
@@ -225,17 +227,17 @@ void network_save_data(network_t * config, char *filename) {
 // }
 
 void network_stash_neurons(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
+    for(uint32_t i=0; i<config->num_neurons; i++) {
         neuron_stash_state(&config->neurons[i]);
     }
 }
 
 // void network_update_neurons(network_t * config) {
-//     // for(int i=0; i<config->num_neurons; i++) {
+//     // for(uint32_t i=0; i<config->num_neurons; i++) {
 //     //     config->feedback_array[i].counter = 0;
 //     //     config->feedback_array[i].value = 0.0;
 //     // }
-//     for(int i=config->num_neurons-1; i>=0; i--) {   // Go backwards
+//     for(uint32_t i=config->num_neurons-1; i>=0; i--) {   // Go backwards
 //         neuron_update_coeffs(&config->neurons[i],
 //                              config->coeffs_micronet,
 //                              config->feedback_micronet,
@@ -245,7 +247,7 @@ void network_stash_neurons(network_t * config) {
 // }
 
 void network_rollback_neurons(network_t * config) {
-    for(int i=0; i<config->num_neurons; i++) {
+    for(uint32_t i=0; i<config->num_neurons; i++) {
         neuron_rollback(&config->neurons[i]);
     }
 }
@@ -277,7 +279,7 @@ void network_rollback_micronet(network_t * config) {
 }
 
 void network_print_coeffs(network_t * config) {
-    for(int i=config->num_inputs; i<config->net_size; i++) {
+    for(uint32_t i=config->num_inputs; i<config->net_size; i++) {
         neuron_print_coeffs(&config->neurons[i-config->num_inputs]);
     }
 }

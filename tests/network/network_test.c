@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include "utils.h"
-#include "network_new.h"
-#include "micro_net.h"
-#include "backups/f_micronet_backup.h"
-#include "backups/c_micronet_backup.h"
+#include "network.h"
+#include "micronet.h"
+// #include "backups/f_micronet_backup.h"
+// #include "backups/c_micronet_backup.h"
 
 #define DATASET_NUM_OUTPUTS 1
 
@@ -368,15 +368,15 @@ network_t * init_network(void) {
     micro_network_t *f_micronet = calloc(1, sizeof(micro_network_t));
 
     #ifdef USE_C_MICRONET_BACKUP
-    micronet_init(c_micronet, &c_micronet_backup_map, c_micronet_backup_coeffs);
+    micronet_init(c_micronet, &c_micronet_backup_map);
     #else
-    micronet_init(c_micronet, &micronet_map, NULL);
+    micronet_init(c_micronet, &micronet_map);
     #endif
 
     #ifdef USE_F_MICRONET_BACKUP
-    micronet_init(f_micronet, &f_micronet_backup_map, f_micronet_backup_coeffs);
+    micronet_init(f_micronet, &f_micronet_backup_map);
     #else
-    micronet_init(f_micronet, &micronet_map, NULL);
+    micronet_init(f_micronet, &micronet_map);
     #endif
     
     network_init(net, &network_map, c_micronet, f_micronet);
@@ -441,11 +441,11 @@ int main(void) {
     current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
     printf("Init error: %f, final error: %f, init_delta: %f, max_delta: %f, counter = %lld\n", init_error, current_error, init_delta, current_delta, counter);
 
-    if(current_delta > init_delta) {
-        network_save_data(config, "backups/network_backup_output.h");
-        micronet_save_data(config->feedback_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
-        micronet_save_data(config->coeffs_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
-    }
+    // if(current_delta > init_delta) {
+    //     network_save_data(config, "backups/network_backup_output.h");
+    //     micronet_save_data(config->feedback_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
+    //     micronet_save_data(config->coeffs_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
+    // }
     free(config->feedback_micronet);
     free(config->coeffs_micronet);
     free(config);

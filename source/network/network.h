@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "neuron_types.h"
+#include "micronet.h"
 
 typedef struct {
     uint32_t num_inputs;
@@ -11,7 +12,7 @@ typedef struct {
     double *arr;
     uint32_t *output_indices;
     double *outputs;
-    complex_value_t *feedback;
+    feedback_item_t *feedback;
     complex_item_t *feedback_errors;
     complex_item_t *feedback_activations;
     neuron_params_t *neurons;

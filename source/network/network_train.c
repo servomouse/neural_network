@@ -1,4 +1,4 @@
-#include "micronet_train.h"
+#include "neuron_iface.h"
 #include "neuron.h"
 
 void micronet_set_global_error(micro_network_t *config, double error, double *output_errors) {

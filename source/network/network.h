@@ -18,13 +18,21 @@ typedef struct {
     neuron_params_t *neurons;
     uint32_t mutated_neuron_idx;
     uint32_t last_mutated_micronet;
-    micro_network_t *coeffs_micronet;
+    micro_network_t *coeffs_linear_micronet;
+    micro_network_t *coeffs_poly_micronet;
     micro_network_t *feedback_micronet;
     network_map_t *map;
     uint32_t dataset_size;
 } network_t;
 
-void network_init(network_t * config, network_map_t *net_map, micro_network_t *c_micronet, micro_network_t *f_micronet);
+typedef struct {
+    micronet_map_t *net_map;
+    micro_network_t *linear_micronet_map;
+    micro_network_t *poly_micronet_map;
+    micro_network_t *feedback_micronet_map;
+} net_config_t;
+
+void network_init(network_t *net, net_config_t *net_config);
 double *network_get_outputs(network_t * config, double *inputs, uint32_t to_print);
 // void network_set_local_errors(network_t * config, double *errors, uint32_t offset);
 void network_backup(network_t * config);

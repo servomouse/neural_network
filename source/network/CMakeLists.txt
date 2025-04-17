@@ -1,12 +1,13 @@
 add_library(network
-    network.c
-    network_train.c
+    network_common.c
+    network_save_restore.c
+    # network_train.c
+    network_mutations.c
+    # neuron_iface.c
 )
 
 target_link_libraries(network
     PRIVATE
-        nm_iface
-        micronet
         neuron
         utils
 )
@@ -34,3 +35,5 @@ target_compile_definitions(network
     PRIVATE
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )
+
+# target_compile_definitions(network PRIVATE CMAKE_EXPORT_COMPILE_COMMANDS=1)

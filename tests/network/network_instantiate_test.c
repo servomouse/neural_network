@@ -166,9 +166,9 @@ uint32_t neurons[] = {
     6,  4,          1,      0, 1, 2, 3,
     7,  4,          1,      0, 1, 2, 3,
     8,  4,          1,      4, 5, 6, 7,
-}
+};
 
-micronet_map_t network_map = {
+network_map_t network_map = {
     .num_inputs = 4,
 	.num_neurons = 5,
 	.net_size = 9,
@@ -190,144 +190,132 @@ double get_average_error(double *errors, uint32_t num_outputs) {
     return average_error / num_outputs;
 }
 
-double train_network(network_t *config, uint8_t to_print) {
-    // double error = 0;
-    double local_errors[DATASET_NUM_OUTPUTS] = {0.0};
-    double global_errors[sizeof_arr(dataset)] = {0.0};
-    uint32_t dataset_size = sizeof_arr(dataset);
-    uint32_t num_outputs = DATASET_NUM_OUTPUTS;
-    network_reset_activations(config);
-    for(size_t i=0; i<sizeof_arr(dataset); i++) {
-        double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
+// double train_network(network_t *config, uint8_t to_print) {
+//     // double error = 0;
+//     double local_errors[DATASET_NUM_OUTPUTS] = {0.0};
+//     double global_errors[sizeof_arr(dataset)] = {0.0};
+//     uint32_t dataset_size = sizeof_arr(dataset);
+//     uint32_t num_outputs = DATASET_NUM_OUTPUTS;
+//     network_reset_activations(config);
+//     for(size_t i=0; i<sizeof_arr(dataset); i++) {
+//         double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
 
-        for(uint32_t j=0; j<num_outputs; j++) {
-            double diff = dataset[i].output[j] - outputs[j];
-            local_errors[j] = diff * diff;
-        }
-        global_errors[i] = get_average_error(local_errors, num_outputs);
+//         for(uint32_t j=0; j<num_outputs; j++) {
+//             double diff = dataset[i].output[j] - outputs[j];
+//             local_errors[j] = diff * diff;
+//         }
+//         global_errors[i] = get_average_error(local_errors, num_outputs);
 
-        network_set_global_error(config, global_errors[i]); // Set global error first
-        network_set_output_errors(config, local_errors);
-        network_generate_feedbacks(config);
-        network_update_weights(config);
+//         network_set_global_error(config, global_errors[i]); // Set global error first
+//         network_set_output_errors(config, local_errors);
+//         network_generate_feedbacks(config);
+//         network_update_weights(config);
 
-        if(to_print) {
-            printf("\"global_error\": %f\n},\n", global_errors[i]);
-            // printf("Desired outputs: [");
-            // for(uint32_t j=0; j<num_outputs; j++) {
-            //     printf("%f, ", dataset[i].output[j]);
-            // }
-            // printf("]; real outputs: [");
-            // for(uint32_t j=0; j<num_outputs; j++) {
-            //     printf("%f, ", outputs[j]);
-            // }
-            // printf("]\n");
-        }
-        // error += e;
-    }
+//         if(to_print) {
+//             printf("\"global_error\": %f\n},\n", global_errors[i]);
+//             // printf("Desired outputs: [");
+//             // for(uint32_t j=0; j<num_outputs; j++) {
+//             //     printf("%f, ", dataset[i].output[j]);
+//             // }
+//             // printf("]; real outputs: [");
+//             // for(uint32_t j=0; j<num_outputs; j++) {
+//             //     printf("%f, ", outputs[j]);
+//             // }
+//             // printf("]\n");
+//         }
+//         // error += e;
+//     }
     
-    // for(uint32_t j=0; j<num_outputs; j++) {
-    //     global_errors[j] / dataset_size;
-    // }
-    return get_average_error(global_errors, dataset_size);
-}
+//     // for(uint32_t j=0; j<num_outputs; j++) {
+//     //     global_errors[j] / dataset_size;
+//     // }
+//     return get_average_error(global_errors, dataset_size);
+// }
 
 uint32_t counter = 0;
 
-double get_error(network_t *config, uint32_t num_outputs, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
-    // double error = 0;
-    double *local_errors = calloc(num_outputs, sizeof(double));
-    double *global_errors = calloc(dataset_size, sizeof(double));
-    // network_reset_counters(config);
-    counter = 0;
-    for(uint32_t i=0; i<dataset_size; i++) {
-        if(to_print) {
-            printf("\"stage_%d_%s: {\n", i, stages[counter]);
-        }
-        double *outputs = network_get_outputs(config, dataset[i].inputs, to_print);
-        // double e = 0;
+// static double get_error(network_t *config, dataset_entry_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
+//     // Works only with single output networks
+//     double error = 0;
+//     for(size_t i=0; i<dataset_size; i++) {
+//         double *outputs = network_get_output(config, dataset[i].inputs);
+//         double e = 0.0;
+//         for(uint32_t j=0; j<num_outputs; j++) {
+//             double delta = dataset[i].output[j] - outputs[j];
+//             e += delta * delta;
+//         }
+//         if(to_print) {
+//             printf("Desired outputs: [");
+//             for(uint32_t j=0; j<num_outputs-1; j++) {
+//                 printf("%f, ", dataset[i].output[j]);
+//             }
+//             printf("%f], ", dataset[i].output[num_outputs-1]);
 
-        for(uint32_t j=0; j<num_outputs; j++) {
-            double diff = dataset[i].output[j] - outputs[j];
-            local_errors[j] = diff * diff;
-        }
-        // network_set_local_errors(config, local_errors, i);
-        global_errors[i] = get_average_error(local_errors, num_outputs);
-        if(global_errors[i] != global_errors[i]) {
-            printf("outputs[0] = %f\n", outputs[0]);
-        }
-        printf("global_errors[%d] = %f\n", i, global_errors[i]);
-        // network_set_global_error(config, global_errors[i], i);
+//             printf("real outputs: [");
+//             for(uint32_t j=0; j<num_outputs-1; j++) {
+//                 printf("%f, ", outputs[j]);
+//             }
+//             printf("%f];\n", outputs[num_outputs-1]);
+//         }
+//         error += e;
+//     }
+//     return error / dataset_size;
+// }
 
-        if(to_print) {
-            printf("\"global_error\": %f\n},\n", global_errors[i]);
-            // printf("Desired outputs: [");
-            // for(uint32_t j=0; j<num_outputs; j++) {
-            //     printf("%f, ", dataset[i].output[j]);
-            // }
-            // printf("]; real outputs: [");
-            // for(uint32_t j=0; j<num_outputs; j++) {
-            //     printf("%f, ", outputs[j]);
-            // }
-            // printf("]\n");
-        }
-        // error += e;
-    }
-    counter ++;
-    
-    // for(uint32_t j=0; j<num_outputs; j++) {
-    //     global_errors[j] / dataset_size;
-    // }
-    double err = get_average_error(global_errors, dataset_size);
-    free(local_errors);
-    free(global_errors);
-    return err;
-}
+// int test_mutations(network_t *config) {
+//     double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+//     printf("Error before mutation: %f\n", init_error);
 
-int test_mutations(network_t *config) {
-    double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    printf("Error before mutation: %f\n", init_error);
+//     network_mutate(config);
+//     double current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+//     printf("Error after mutation: %f\n", current_error);
 
-    network_mutate(config);
-    double current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    printf("Error after mutation: %f\n", current_error);
+//     network_rollback(config);
+//     double final_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+//     printf("Error after rollback: %f\n", final_error);
 
-    network_rollback(config);
-    double final_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    printf("Error after rollback: %f\n", final_error);
+//     if(final_error != init_error) {
+//         printf("Error: final_error != int_error!!: final_error = %f, init_error = %f\n", final_error, init_error);
+//         return EXIT_FAILURE;
+//     }
+//     return EXIT_SUCCESS;
+// }
 
-    if(final_error != init_error) {
-        printf("Error: final_error != int_error!!: final_error = %f, init_error = %f\n", final_error, init_error);
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
+// double get_delta(network_t *config, double current_error) {
+//     double temp_error = 0;
+//     double new_delta = 0.0;
+//     uint32_t delta_counter = 0;
+//     for(uint32_t i=0; i<10; i++) {
+//         train_network(config, 0);
+//         temp_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+//         printf("temp_error: %f\n", temp_error);
+//         new_delta += current_error - temp_error;
+//         delta_counter ++;
+//         current_error = temp_error;
+//     }
+//     printf("new_delta: %f; delta_counter: %d\n", new_delta, delta_counter);
+//     return new_delta / delta_counter;
+// }
 
-double get_delta(network_t *config, double current_error) {
-    double temp_error = 0;
-    double new_delta = 0.0;
-    uint32_t delta_counter = 0;
-    for(uint32_t i=0; i<10; i++) {
-        train_network(config, 0);
-        temp_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-        printf("temp_error: %f\n", temp_error);
-        new_delta += current_error - temp_error;
-        delta_counter ++;
-        current_error = temp_error;
-    }
-    printf("new_delta: %f; delta_counter: %d\n", new_delta, delta_counter);
-    return new_delta / delta_counter;
+void init_micronet(network_t *net, network_map_t *net_map) {
+    net_config_t unet_config = {
+        .net_map = net_map,
+        .c_linear_micronet = NULL,
+        .c_poly_micronet = NULL,
+        .f_micronet = NULL
+    };
+    network_init(net, &unet_config);
 }
 
 network_t * init_network(void) {
-    network_t       *net               = calloc(1, sizeof(network_t));
-    micro_network_t *c_linear_micronet = calloc(1, sizeof(micro_network_t));
-    micro_network_t *c_poly_micronet   = calloc(1, sizeof(micro_network_t));
-    micro_network_t *f_micronet        = calloc(1, sizeof(micro_network_t));
+    network_t *net               = calloc(1, sizeof(network_t));
+    network_t *c_linear_micronet = calloc(1, sizeof(network_t));
+    network_t *c_poly_micronet   = calloc(1, sizeof(network_t));
+    network_t *f_micronet        = calloc(1, sizeof(network_t));
 
-    micronet_init(c_linear_micronet, &linear_micronet_map);
-    micronet_init(c_poly_micronet, &poly_micronet_map);
-    micronet_init(f_micronet, &feedback_micronet_map);
+    init_micronet(c_linear_micronet, &linear_micronet_map);
+    init_micronet(c_poly_micronet, &poly_micronet_map);
+    init_micronet(f_micronet, &feedback_micronet_map);
     
     net_config_t net_config = {
         .net_map = &network_map,
@@ -346,14 +334,14 @@ int main(void) {
     printf("Network initialised! arr_size = %lld\n", sizeof_arr(dataset));
     return 0;
 
-    double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    double current_error = init_error;
-    network_stash_neurons(config);
-    double init_delta = get_delta(config, current_error);
-    double current_delta = init_delta;
-    printf("Init error: %f, init_delta: %f\n", current_error, init_delta);
-    fflush(stdout);
-    return 0;
+    // double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    // double current_error = init_error;
+    // network_stash_neurons(config);
+    // double init_delta = get_delta(config, current_error);
+    // double current_delta = init_delta;
+    // printf("Init error: %f, init_delta: %f\n", current_error, init_delta);
+    // fflush(stdout);
+    // return 0;
 
     // Network mutations
     // size_t counter = 0;
@@ -377,39 +365,39 @@ int main(void) {
     // }
 
     // Micronet mutations
-    size_t counter = 0;
-    double new_delta = 0;
-    while(counter++ < 100) {
-        network_mutate_micronet(config);
-        new_delta = get_delta(config, init_error);
-        network_rollback_neurons(config);
-        if(new_delta < current_delta) {
-            // network_rollback_neurons(config);
-            network_rollback_micronet(config);
-        } else {
-            if(new_delta > current_delta) {
-                // network_stash_neurons(config);
-                printf("New delta: %f\n", new_delta);
-                fflush(stdout);
-                current_delta = new_delta;
-            }
-        }
-    }
+    // size_t counter = 0;
+    // double new_delta = 0;
+    // while(counter++ < 100) {
+    //     network_mutate_micronet(config);
+    //     new_delta = get_delta(config, init_error);
+    //     network_rollback_neurons(config);
+    //     if(new_delta < current_delta) {
+    //         // network_rollback_neurons(config);
+    //         network_rollback_micronet(config);
+    //     } else {
+    //         if(new_delta > current_delta) {
+    //             // network_stash_neurons(config);
+    //             printf("New delta: %f\n", new_delta);
+    //             fflush(stdout);
+    //             current_delta = new_delta;
+    //         }
+    //     }
+    // }
     
-    current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
-    printf("Init error: %f, final error: %f, init_delta: %f, max_delta: %f, counter = %lld\n", init_error, current_error, init_delta, current_delta, counter);
+    // current_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    // printf("Init error: %f, final error: %f, init_delta: %f, max_delta: %f, counter = %lld\n", init_error, current_error, init_delta, current_delta, counter);
 
     // if(current_delta > init_delta) {
     //     network_save_data(config, "backups/network_backup_output.h");
     //     micronet_save_data(config->feedback_micronet, "backups/f_micronet_backup_output.h", "f_micronet_", "USE_F_MICRONET_BACKUP");
     //     micronet_save_data(config->coeffs_micronet, "backups/c_micronet_backup_output.h", "c_micronet_", "USE_C_MICRONET_BACKUP");
     // }
-    free(config->feedback_micronet);
-    free(config->coeffs_micronet);
-    free(config);
+    // free(config->feedback_micronet);
+    // free(config->coeffs_micronet);
+    // free(config);
 
 
-    return 0;
+    // return 0;
 }
 
 // // #define USE_BACKUP

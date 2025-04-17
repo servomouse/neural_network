@@ -23,26 +23,26 @@ void free_if_needed(void *ptr) {
     }
 }
 
-void network_init(micro_network_t * config, network_map_t *net_map) {
+void network_init(network_t * config, net_config_t *net_conf) {
     free_if_needed(config->map);
     config->map = calloc(1, sizeof(network_map_t) + (sizeof(uint32_t) * config->num_outputs));
-    config->map->net_size = net_map->net_size;
-    config->map->num_inputs = net_map->num_inputs;
-    config->map->num_neurons = net_map->num_neurons;
-    config->map->num_outputs = net_map->num_outputs;
-    for(uint32_t i=0; i<net_map->num_outputs; i++) {
-        config->map->output_indices[i] = net_map->output_indices[i];
+    config->map->net_size = net_conf->net_map->net_size;
+    config->map->num_inputs = net_conf->net_map->num_inputs;
+    config->map->num_neurons = net_conf->net_map->num_neurons;
+    config->map->num_outputs = net_conf->net_map->num_outputs;
+    for(uint32_t i=0; i<net_conf->net_map->num_outputs; i++) {
+        config->map->output_indices[i] = net_conf->net_map->output_indices[i];
     }
-    uint32_t n_field_size = get_neurons_field_size(net_map->neurons, net_map->num_neurons);
+    uint32_t n_field_size = get_neurons_field_size(net_conf->net_map->neurons, net_conf->net_map->num_neurons);
     free_if_needed(config->map->neurons);
     config->map->neurons = calloc(n_field_size, 1);
-    memcpy(config->map->neurons, net_map->neurons, n_field_size);
+    memcpy(config->map->neurons, net_conf->net_map->neurons, n_field_size);
 
-    config->map->neurons = &net_map->neurons[0];
-    config->num_inputs = net_map->num_inputs;
-    config->num_neurons = net_map->num_neurons;
-    config->net_size = net_map->net_size;
-    config->num_outputs = net_map->num_outputs;
+    config->map->neurons = &net_conf->net_map->neurons[0];
+    config->num_inputs = net_conf->net_map->num_inputs;
+    config->num_neurons = net_conf->net_map->num_neurons;
+    config->net_size = net_conf->net_map->net_size;
+    config->num_outputs = net_conf->net_map->num_outputs;
     config->mutated_neuron_idx = 0;
     // printf("Creating micro network with:\n");
     // printf("\t%d inputs;\n", config->num_inputs);
@@ -55,11 +55,11 @@ void network_init(micro_network_t * config, network_map_t *net_map) {
     config->outputs = calloc(config->num_outputs, sizeof(double));
     // printf("\toutput indices: [");
     for(uint32_t i=0; i<config->num_outputs; i++) {
-        config->output_indices[i] = net_map->output_indices[i];
+        config->output_indices[i] = net_conf->net_map->output_indices[i];
         // if(i == config->num_outputs-1)
-        //     printf("%d]\n", net_map->output_indices[i]);
+        //     printf("%d]\n", net_conf->net_map->output_indices[i]);
         // else
-        //     printf("%d, ", net_map->output_indices[i]);
+        //     printf("%d, ", net_conf->net_map->output_indices[i]);
     }
     // printf("\ttotal network size is %d\n", config->net_size);
 
@@ -74,7 +74,7 @@ void network_init(micro_network_t * config, network_map_t *net_map) {
 
     uint32_t offset = 0;
     for(uint32_t i=0; i<config->num_neurons; i++) {
-        subneuron_description_t *neuron = (subneuron_description_t *)&net_map->neurons[offset];
+        subneuron_description_t *neuron = (subneuron_description_t *)&net_conf->net_map->neurons[offset];
         uint32_t idx        = neuron->idx - config->num_inputs;
         uint32_t num_inputs = neuron->num_inputs;
         uint32_t n_type = neuron->n_type;
@@ -87,7 +87,7 @@ void network_init(micro_network_t * config, network_map_t *net_map) {
     }
 }
 
-double *network_get_output(micro_network_t * config, double *inputs) {
+double *network_get_output(network_t * config, double *inputs) {
     // for(int i=0; i<config->num_neurons; i++) {
     //     neuron_reset_output_counter(&config->neurons[i]);
     // }
@@ -120,7 +120,7 @@ double *network_get_output(micro_network_t * config, double *inputs) {
     return config->outputs;
 }
 
-void network_print_coeffs(micro_network_t * config) {
+void network_print_coeffs(network_t * config) {
     for(uint32_t i=config->num_inputs; i<config->net_size; i++) {
         neuron_print_coeffs(&config->neurons[i-config->num_inputs]);
     }

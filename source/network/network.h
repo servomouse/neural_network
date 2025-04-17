@@ -31,7 +31,14 @@ typedef struct {
     uint32_t mutated_neuron_idx;
     network_map_t *map;
     feedback_item_t *feedback_arr;
-} micro_network_t;
+} network_t;
+
+typedef struct {
+    network_map_t *net_map;
+    network_t *c_linear_micronet;
+    network_t *c_poly_micronet;
+    network_t *f_micronet;
+} net_config_t;
 
 #include "network_common.h"
 #include "network_mutations.h"

@@ -313,6 +313,9 @@ network_t * init_network(void) {
     network_t *c_poly_micronet   = calloc(1, sizeof(network_t));
     network_t *f_micronet        = calloc(1, sizeof(network_t));
 
+    if((net == NULL) || (c_linear_micronet == NULL) || (c_poly_micronet == NULL) || (f_micronet == NULL))
+        exit(EXIT_FAILURE); // Failed to allocate memory
+
     init_micronet(c_linear_micronet, &linear_micronet_map);
     init_micronet(c_poly_micronet, &poly_micronet_map);
     init_micronet(f_micronet, &feedback_micronet_map);

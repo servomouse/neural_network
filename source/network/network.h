@@ -19,7 +19,7 @@ typedef struct {
     uint32_t output_indices[];
 } network_map_t;
 
-typedef struct {
+typedef struct network_t {
     uint32_t num_inputs;
     uint32_t num_neurons;
     uint32_t net_size;
@@ -31,6 +31,9 @@ typedef struct {
     uint32_t mutated_neuron_idx;
     network_map_t *map;
     feedback_item_t *feedback_arr;
+    struct network_t * c_linear_micronet;
+    struct network_t * c_poly_micronet;
+    struct network_t * f_micronet;
 } network_t;
 
 typedef struct {

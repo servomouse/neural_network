@@ -234,33 +234,33 @@ double get_average_error(double *errors, uint32_t num_outputs) {
 
 uint32_t counter = 0;
 
-// static double get_error(network_t *config, dataset_entry_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
-//     // Works only with single output networks
-//     double error = 0;
-//     for(size_t i=0; i<dataset_size; i++) {
-//         double *outputs = network_get_output(config, dataset[i].inputs);
-//         double e = 0.0;
-//         for(uint32_t j=0; j<num_outputs; j++) {
-//             double delta = dataset[i].output[j] - outputs[j];
-//             e += delta * delta;
-//         }
-//         if(to_print) {
-//             printf("Desired outputs: [");
-//             for(uint32_t j=0; j<num_outputs-1; j++) {
-//                 printf("%f, ", dataset[i].output[j]);
-//             }
-//             printf("%f], ", dataset[i].output[num_outputs-1]);
+static double get_error(network_t *net, dataset_entry_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
+    // Works only with single output networks
+    double error = 0;
+    for(size_t i=0; i<dataset_size; i++) {
+        double *outputs = network_get_output(net, dataset[i].inputs);
+        double e = 0.0;
+        for(uint32_t j=0; j<num_outputs; j++) {
+            double delta = dataset[i].output[j] - outputs[j];
+            e += delta * delta;
+        }
+        if(to_print) {
+            printf("Desired outputs: [");
+            for(uint32_t j=0; j<num_outputs-1; j++) {
+                printf("%f, ", dataset[i].output[j]);
+            }
+            printf("%f], ", dataset[i].output[num_outputs-1]);
 
-//             printf("real outputs: [");
-//             for(uint32_t j=0; j<num_outputs-1; j++) {
-//                 printf("%f, ", outputs[j]);
-//             }
-//             printf("%f];\n", outputs[num_outputs-1]);
-//         }
-//         error += e;
-//     }
-//     return error / dataset_size;
-// }
+            printf("real outputs: [");
+            for(uint32_t j=0; j<num_outputs-1; j++) {
+                printf("%f, ", outputs[j]);
+            }
+            printf("%f];\n", outputs[num_outputs-1]);
+        }
+        error += e;
+    }
+    return error / dataset_size;
+}
 
 // int test_mutations(network_t *config) {
 //     double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
@@ -335,16 +335,17 @@ int main(void) {
     srand(time(NULL));
     network_t *config = init_network();
     printf("Network initialised! arr_size = %lld\n", sizeof_arr(dataset));
-    return 0;
+    // return 0;
 
-    // double init_error = get_error(config, network_map.num_outputs, dataset, sizeof_arr(dataset), 0);
+    double init_error = get_error(config, dataset, sizeof_arr(dataset), network_map.num_outputs, 0);
+    printf("Init error: %f\n", init_error);
     // double current_error = init_error;
     // network_stash_neurons(config);
     // double init_delta = get_delta(config, current_error);
     // double current_delta = init_delta;
     // printf("Init error: %f, init_delta: %f\n", current_error, init_delta);
     // fflush(stdout);
-    // return 0;
+    return 0;
 
     // Network mutations
     // size_t counter = 0;

@@ -43,7 +43,6 @@ network_map_t * network_copy_map(network_map_t *src) {
 }
 
 void network_init(network_t *net, net_config_t *net_conf) {
-    uint32_t num_outputs = net_conf->net_map->num_outputs;
     free_if_needed(net->map);
     net->map = network_copy_map(net_conf->net_map);
     net->num_inputs = net_conf->net_map->num_inputs;
@@ -92,6 +91,9 @@ void network_init(network_t *net, net_config_t *net_conf) {
         }
         offset += 3 + num_inputs;
     }
+    net->c_linear_micronet = net_conf->c_linear_micronet;
+    net->c_poly_micronet = net_conf->c_poly_micronet;
+    net->f_micronet = net_conf->f_micronet;
 }
 
 double *network_get_output(network_t * config, double *inputs) {

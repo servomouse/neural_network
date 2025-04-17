@@ -3,12 +3,12 @@
 #include <time.h>
 #include "utils.h"
 #include "network.h"
-#include "micronet.h"
+// #include "micronet.h"
 // #include "backups/f_micronet_backup.h"
 // #include "backups/c_micronet_backup.h"
-#include "micromaps/config_feedback_module.h"
-#include "micromaps/config_linear_module.h"
-#include "micromaps/config_poly_module.h"
+#include "micro_maps/config_feedback_module.h"
+#include "micro_maps/config_linear_micronet.h"
+#include "micro_maps/config_poly_micronet.h"
 
 #define DATASET_NUM_OUTPUTS 1
 

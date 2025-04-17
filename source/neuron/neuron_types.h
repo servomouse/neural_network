@@ -24,12 +24,12 @@ typedef struct {
     double value;
 } complex_value_t;
 
-typedef struct {
-    uint32_t num_inputs;
-    uint32_t net_size;      // Total net size, including inputs
-    uint32_t num_outputs;
-    uint32_t neurons[];    // neuron_desc_t is used here
-} network_map_t;
+// typedef struct {
+//     uint32_t num_inputs;
+//     uint32_t net_size;      // Total net size, including inputs
+//     uint32_t num_outputs;
+//     uint32_t neurons[];    // neuron_desc_t is used here
+// } network_map_t;
 
 typedef enum uint32_t {
     NLinear = 0,

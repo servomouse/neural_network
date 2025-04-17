@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "micronet.h"
+#include "network.h"
 
 uint32_t feedback_module_neurons[] = {
     // idx  num_inputs  type 	indices
@@ -25,7 +25,7 @@ uint32_t feedback_module_neurons[] = {
 	   12,	8,			1,		3, 4, 5, 6, 7, 8, 9, 10,
 };
 
-micronet_map_t feedback_micronet_map = {
+network_map_t feedback_micronet_map = {
 	.num_inputs = 3,
 	.num_neurons = 10,
 	.net_size = 13,

@@ -16,4 +16,5 @@ add_custom_target(runtests
         micronet_test
         micronet_test_save_restore
         network_instantiate_test
+        network_test_micronet
 )

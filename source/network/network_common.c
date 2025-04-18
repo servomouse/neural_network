@@ -23,7 +23,29 @@ void free_if_needed(void *ptr) {
     }
 }
 
-network_map_t * network_copy_map(network_map_t *src) {
+// Frees the prt if it is not NULL, then callocs the necessary amount of memory
+// and checks if allocated successfully
+static void * allocate(void *ptr, uint32_t num_elements, uint32_t sizeof_element) {
+    free_if_needed(ptr);
+    void * new_ptr = calloc(num_elements, sizeof_element);
+    if(new_ptr == NULL) {
+        printf("Error: failed to allocate memory!");
+        exit(EXIT_FAILURE);
+    }
+    return new_ptr;
+}
+
+void network_init_micronet(network_t *net, network_map_t *net_map) {
+    net_config_t unet_config = {
+        .net_map = net_map,
+        .c_linear_micronet = NULL,
+        .c_poly_micronet = NULL,
+        .f_micronet = NULL
+    };
+    network_init(net, &unet_config);
+}
+
+static network_map_t * network_copy_map(network_map_t *src) {
     uint32_t num_outputs = src->num_outputs;
     network_map_t *dst = calloc(1, sizeof(network_map_t) + (sizeof(uint32_t) * num_outputs));
     dst->net_size = src->net_size;
@@ -50,33 +72,16 @@ void network_init(network_t *net, net_config_t *net_conf) {
     net->net_size = net_conf->net_map->net_size;
     net->num_outputs = net_conf->net_map->num_outputs;
     net->mutated_neuron_idx = 0;
-    // printf("Creating micro network with:\n");
-    // printf("\t%d inputs;\n", net->num_inputs);
-    // printf("\t%d neurons;\n", net->num_neurons);
-    // printf("\tnum outputs: %d;\n", net->num_outputs);
 
-    free_if_needed(net->output_indices);
-    net->output_indices = calloc(net->num_outputs, sizeof(uint32_t));
-    free_if_needed(net->outputs);
-    net->outputs = calloc(net->num_outputs, sizeof(double));
-    // printf("\toutput indices: [");
+    net->output_indices = allocate(net->output_indices, net->num_outputs, sizeof(uint32_t));
+    net->outputs = allocate(net->outputs, net->num_outputs, sizeof(double));
     for(uint32_t i=0; i<net->num_outputs; i++) {
         net->output_indices[i] = net_conf->net_map->output_indices[i];
-        // if(i == net->num_outputs-1)
-        //     printf("%d]\n", net_conf->net_map->output_indices[i]);
-        // else
-        //     printf("%d, ", net_conf->net_map->output_indices[i]);
     }
-    // printf("\ttotal network size is %d\n", net->net_size);
 
-    free_if_needed(net->arr);
-    net->arr = calloc(net->net_size, sizeof(double));
-
-    free_if_needed(net->feedback_arr);
-    net->feedback_arr = calloc(net->net_size, sizeof(feedback_item_t));
-
-    free_if_needed(net->neurons);
-    net->neurons = calloc(net->num_neurons, sizeof(neuron_params_t));
+    net->arr = allocate(net->arr, net->net_size, sizeof(double));
+    net->feedback_arr = allocate(net->feedback_arr, net->net_size, sizeof(feedback_item_t));
+    net->neurons = allocate(net->neurons, net->num_neurons, sizeof(neuron_params_t));
 
     uint32_t offset = 0;
     for(uint32_t i=0; i<net->num_neurons; i++) {
@@ -84,7 +89,6 @@ void network_init(network_t *net, net_config_t *net_conf) {
         uint32_t idx        = neuron->idx - net->num_inputs;
         uint32_t num_inputs = neuron->num_inputs;
         uint32_t n_type = neuron->n_type;
-        // printf("Neuron %d: idx = %d, num_inputs = %d, offset = %d\n", i, idx, num_inputs, offset);
         neuron_init(&net->neurons[idx], n_type, num_inputs);
         for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&net->neurons[idx], j, neuron->indices[j]);

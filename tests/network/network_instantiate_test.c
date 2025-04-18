@@ -297,16 +297,6 @@ static double get_error(network_t *net, dataset_entry_t *dataset, size_t dataset
 //     return new_delta / delta_counter;
 // }
 
-void init_micronet(network_t *net, network_map_t *net_map) {
-    net_config_t unet_config = {
-        .net_map = net_map,
-        .c_linear_micronet = NULL,
-        .c_poly_micronet = NULL,
-        .f_micronet = NULL
-    };
-    network_init(net, &unet_config);
-}
-
 network_t * init_network(void) {
     network_t *net               = calloc(1, sizeof(network_t));
     network_t *c_linear_micronet = calloc(1, sizeof(network_t));
@@ -316,9 +306,9 @@ network_t * init_network(void) {
     if((net == NULL) || (c_linear_micronet == NULL) || (c_poly_micronet == NULL) || (f_micronet == NULL))
         exit(EXIT_FAILURE); // Failed to allocate memory
 
-    init_micronet(c_linear_micronet, &linear_micronet_map);
-    init_micronet(c_poly_micronet, &poly_micronet_map);
-    init_micronet(f_micronet, &feedback_micronet_map);
+    network_init_micronet(c_linear_micronet, &linear_micronet_map);
+    network_init_micronet(c_poly_micronet, &poly_micronet_map);
+    network_init_micronet(f_micronet, &feedback_micronet_map);
     
     net_config_t net_config = {
         .net_map = &network_map,

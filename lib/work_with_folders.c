@@ -35,8 +35,8 @@ int mkdir_recursive(const char *dir) {
 }
 
 // Function to open a file, creating any missing directories
-FILE* fopen_no_matter_what(const char *file_name, const char *access_mode) {
-    char *dir_name = strdup(file_name);
+FILE* fopen_no_matter_what(const char *filename, const char *access_mode) {
+    char *dir_name = strdup(filename);
     char *last_slash = strrchr(dir_name, '/');
     if (last_slash != NULL) {
         *last_slash = '\0';
@@ -46,7 +46,12 @@ FILE* fopen_no_matter_what(const char *file_name, const char *access_mode) {
         }
     }
     free(dir_name);
-    return fopen(file_name, access_mode);
+    // Now let's try to open the file
+    FILE *file = fopen(filename, access_mode);
+    if (file == NULL) {
+        printf("ERROR: Failed to open file %s\n", filename);
+        return EXIT_FAILURE;
+    }
 }
 
 int is_dir_exist(const char *folder)

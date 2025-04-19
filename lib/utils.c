@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <math.h>
 #include <stdio.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -98,15 +99,12 @@ typedef struct {
 } stored_data_t;
 
 int store_data(void *data, size_t size, char *filename) {
-    FILE *file = fopen(filename, "wb");
-    if (file == NULL) {
-        printf("ERROR: Failed to open file %s\n", filename);
-        return EXIT_FAILURE;
-    }
     stored_data_t data_struct = {
         .size = size,
         .hash = get_hash((uint8_t*)data, size)
     };
+
+    FILE *file = fopen_no_matter_what(filename, "wb");
     fwrite(&data_struct, sizeof(stored_data_t), 1, file);
     fwrite((uint8_t *)data, 1, size, file);
     fclose(file);

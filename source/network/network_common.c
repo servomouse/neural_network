@@ -42,7 +42,7 @@ void network_init_micronet(network_t *net, network_map_t *net_map) {
         .c_poly_micronet = NULL,
         .f_micronet = NULL
     };
-    network_init(net, &unet_config);
+    network_init(net, &unet_config, 1);
 }
 
 static network_map_t * network_copy_map(network_map_t *src) {
@@ -64,7 +64,7 @@ static network_map_t * network_copy_map(network_map_t *src) {
     return dst;
 }
 
-void network_init(network_t *net, net_config_t *net_conf) {
+void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
     free_if_needed(net->map);
     net->map = network_copy_map(net_conf->net_map);
     net->num_inputs = net_conf->net_map->num_inputs;
@@ -95,9 +95,11 @@ void network_init(network_t *net, net_config_t *net_conf) {
         }
         offset += 3 + num_inputs;
     }
-    net->c_linear_micronet = net_conf->c_linear_micronet;
-    net->c_poly_micronet = net_conf->c_poly_micronet;
-    net->f_micronet = net_conf->f_micronet;
+    if(is_micronet == 0) {
+        net->c_linear_micronet = net_conf->c_linear_micronet;
+        net->c_poly_micronet = net_conf->c_poly_micronet;
+        net->f_micronet = net_conf->f_micronet;
+    }
 }
 
 double *network_get_output(network_t * config, double *inputs) {

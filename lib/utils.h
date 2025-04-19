@@ -22,3 +22,10 @@ void gen_vector(uint32_t n, double len, double* result);double round_to_precisio
 uint8_t count_bits(size_t value);
 void write_buf_to_file(const char *buffer, const char *filename);
 void clear_buffer(char *buffer, uint32_t buffer_size);
+
+void sleep_ms(int ms);
+void sleep_s(int s);
+
+int is_dir_exist(const char *folder);
+FILE* fopen_no_matter_what(const char *file_name, const char *access_mode);
+int remove_directory(const char *dir);

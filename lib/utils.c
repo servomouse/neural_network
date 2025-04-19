@@ -1,7 +1,26 @@
-#include  <time.h>
+#include <time.h>
 #include <string.h>
 #include "utils.h"
 #include <math.h>
+#include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+void sleep_ms(int ms) {
+    fflush(stdout); // Need to flush the stdout buffer to not delay the prints
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    usleep(ms * 1000);
+#endif
+}
+
+void sleep_s(int s) {
+    sleep_ms(s * 1000);
+}
 
 /* generate a random double number from min to max */
 double random_double(double min, double max) {

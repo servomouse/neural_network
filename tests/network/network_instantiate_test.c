@@ -317,7 +317,7 @@ network_t * init_network(void) {
         .f_micronet = f_micronet
     };
     
-    network_init(net, &net_config);
+    network_init(net, &net_config, 0);
     return net;
 }
 

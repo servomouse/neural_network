@@ -38,6 +38,14 @@ typedef enum uint32_t {
 } neuron_type_t;
 
 typedef struct {
+    uint32_t size;  // Size of the resulting structure, bytes
+    neuron_type_t n_type;
+    uint32_t num_inputs;
+    uint32_t num_coeffs;
+    double coeffs[0];
+} compressed_neuron_t;
+
+typedef struct {
     neuron_type_t n_type;
     double *inputs;
     double *direct_inputs;

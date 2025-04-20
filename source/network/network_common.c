@@ -80,7 +80,7 @@ void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
     }
 
     net->arr = allocate(net->arr, net->net_size, sizeof(double));
-    net->feedback_arr = allocate(net->feedback_arr, net->net_size, sizeof(feedback_item_t));
+    // net->feedback_arr = allocate(net->feedback_arr, net->net_size, sizeof(double));
     net->neurons = allocate(net->neurons, net->num_neurons, sizeof(neuron_params_t));
 
     uint32_t offset = 0;
@@ -95,6 +95,7 @@ void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
         }
         offset += 3 + num_inputs;
     }
+    net->is_micronet = is_micronet;
     if(is_micronet == 0) {
         net->c_linear_micronet = net_conf->c_linear_micronet;
         net->c_poly_micronet = net_conf->c_poly_micronet;

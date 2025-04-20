@@ -57,14 +57,15 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
 
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
     n_params->c_net_stash = alloc_memory(n_params->c_net_stash, n_params->num_coeffs, sizeof(double));
-    n_params->f_net_stash = alloc_memory(n_params->f_net_stash, n_params->num_coeffs, sizeof(double));
+    n_params->c_deltas = alloc_memory(n_params->c_deltas, n_params->num_coeffs, sizeof(double));
+    // n_params->f_net_stash = alloc_memory(n_params->f_net_stash, n_params->num_coeffs, sizeof(double));
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
     n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
     n_params->backup_coeffs = alloc_memory(n_params->backup_coeffs, n_params->num_coeffs, sizeof(double));
-    n_params->part_feedbacks = alloc_memory(n_params->part_feedbacks, n_params->num_coeffs, sizeof(double));
-    n_params->part_sums = alloc_memory(n_params->part_sums, n_params->num_coeffs, sizeof(double));
-    n_params->feedback_micronet_stash = alloc_memory(n_params->feedback_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
-    n_params->coeffs_micronet_stash   = alloc_memory(n_params->coeffs_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
+    // n_params->part_feedbacks = alloc_memory(n_params->part_feedbacks, n_params->num_coeffs, sizeof(double));
+    // n_params->part_sums = alloc_memory(n_params->part_sums, n_params->num_coeffs, sizeof(double));
+    // n_params->feedback_micronet_stash = alloc_memory(n_params->feedback_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
+    // n_params->coeffs_micronet_stash   = alloc_memory(n_params->coeffs_micronet_stash, n_params->num_coeffs * MICRONET_STASH_SIZE, sizeof(double));
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.1, 0.1);
         n_params->backup_coeffs[i] = n_params->coeffs[i];

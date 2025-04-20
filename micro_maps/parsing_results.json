@@ -3,9 +3,9 @@
 	{
 		"name": "linear_micronet",
 		"inputs": {
-			"size": 5,
+			"size": 6,
 			"offset": 0,
-			"range": [0, 5],
+			"range": [0, 6],
 			"groups": [
 				{
 					"name": "prev_input",
@@ -36,18 +36,24 @@
 					"size": 1,
 					"offset": 4,
 					"range": [4, 5]
+				},
+				{
+					"name": "global_error",
+					"size": 1,
+					"offset": 5,
+					"range": [5, 6]
 				}
 			]
 		},
 		"groups": {
 			"size": 5,
-			"offset": 5,
-			"range": [5, 10],
+			"offset": 6,
+			"range": [6, 11],
 			"groups": [
 				{
 					"name": "undefined",
 					"size": 5,
-					"offset": 5,
+					"offset": 6,
 					"range": [0, 5],
 					"type": "poly",
 					"inputs": [
@@ -64,13 +70,13 @@
 		},
 		"outputs": {
 			"size": 3,
-			"offset": 10,
-			"range": [10, 13],
+			"offset": 11,
+			"range": [11, 14],
 			"groups": [
 				{
 					"name": "feedback_out",
 					"size": 1,
-					"offset": 10,
+					"offset": 11,
 					"range": [0, 1],
 					"type": "poly",
 					"inputs": [
@@ -86,7 +92,7 @@
 				{
 					"name": "delta",
 					"size": 1,
-					"offset": 11,
+					"offset": 12,
 					"range": [1, 2],
 					"type": "poly",
 					"inputs": [
@@ -102,7 +108,7 @@
 				{
 					"name": "stash_out",
 					"size": 1,
-					"offset": 12,
+					"offset": 13,
 					"range": [2, 3],
 					"type": "poly",
 					"inputs": [
@@ -121,9 +127,9 @@
 	{
 		"name": "poly_micronet",
 		"inputs": {
-			"size": 267,
+			"size": 268,
 			"offset": 0,
-			"range": [0, 267],
+			"range": [0, 268],
 			"groups": [
 				{
 					"name": "coeffs",
@@ -154,18 +160,24 @@
 					"size": 1,
 					"offset": 266,
 					"range": [266, 267]
+				},
+				{
+					"name": "global_error",
+					"size": 1,
+					"offset": 267,
+					"range": [267, 268]
 				}
 			]
 		},
 		"groups": {
 			"size": 512,
-			"offset": 267,
-			"range": [267, 779],
+			"offset": 268,
+			"range": [268, 780],
 			"groups": [
 				{
 					"name": "undefined",
 					"size": 256,
-					"offset": 267,
+					"offset": 268,
 					"range": [0, 256],
 					"type": "linear",
 					"inputs": [
@@ -181,7 +193,7 @@
 				{
 					"name": "undefined",
 					"size": 256,
-					"offset": 523,
+					"offset": 524,
 					"range": [256, 512],
 					"type": "poly",
 					"inputs": [
@@ -198,13 +210,13 @@
 		},
 		"outputs": {
 			"size": 265,
-			"offset": 779,
-			"range": [779, 1044],
+			"offset": 780,
+			"range": [780, 1045],
 			"groups": [
 				{
 					"name": "deltas",
 					"size": 256,
-					"offset": 779,
+					"offset": 780,
 					"range": [0, 256],
 					"type": "poly",
 					"inputs": [
@@ -255,7 +267,7 @@
 				{
 					"name": "feedback_out",
 					"size": 8,
-					"offset": 1035,
+					"offset": 1036,
 					"range": [256, 264],
 					"type": "linear",
 					"inputs": [
@@ -271,7 +283,7 @@
 				{
 					"name": "stash_out",
 					"size": 1,
-					"offset": 1043,
+					"offset": 1044,
 					"range": [264, 265],
 					"type": "linear",
 					"inputs": [
@@ -290,9 +302,9 @@
 	{
 		"name": "feedback_module",
 		"inputs": {
-			"size": 3,
+			"size": 4,
 			"offset": 0,
-			"range": [0, 3],
+			"range": [0, 4],
 			"groups": [
 				{
 					"name": "feedback_in",
@@ -307,22 +319,28 @@
 					"range": [1, 2]
 				},
 				{
-					"name": "stash_in",
+					"name": "prev_error",
 					"size": 1,
 					"offset": 2,
+					"range": [2, 3]
+				},
+				{
+					"name": "global_error",
+					"size": 1,
+					"offset": 3,
 					"range": [3, 4]
 				}
 			]
 		},
 		"groups": {
 			"size": 8,
-			"offset": 3,
-			"range": [3, 11],
+			"offset": 4,
+			"range": [4, 12],
 			"groups": [
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 3,
+					"offset": 4,
 					"range": [0, 1],
 					"type": "poly",
 					"inputs": [
@@ -345,7 +363,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 4,
+					"offset": 5,
 					"range": [1, 2],
 					"type": "poly",
 					"inputs": [
@@ -368,7 +386,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 5,
+					"offset": 6,
 					"range": [2, 3],
 					"type": "poly",
 					"inputs": [
@@ -391,7 +409,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 6,
+					"offset": 7,
 					"range": [3, 4],
 					"type": "poly",
 					"inputs": [
@@ -414,7 +432,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 7,
+					"offset": 8,
 					"range": [4, 5],
 					"type": "poly",
 					"inputs": [
@@ -437,7 +455,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 8,
+					"offset": 9,
 					"range": [5, 6],
 					"type": "poly",
 					"inputs": [
@@ -460,7 +478,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 9,
+					"offset": 10,
 					"range": [6, 7],
 					"type": "poly",
 					"inputs": [
@@ -483,7 +501,7 @@
 				{
 					"name": "undefined",
 					"size": 1,
-					"offset": 10,
+					"offset": 11,
 					"range": [7, 8],
 					"type": "poly",
 					"inputs": [
@@ -506,31 +524,15 @@
 			]
 		},
 		"outputs": {
-			"size": 2,
-			"offset": 11,
-			"range": [11, 13],
+			"size": 1,
+			"offset": 12,
+			"range": [12, 13],
 			"groups": [
 				{
-					"name": "feedback_out",
-					"size": 1,
-					"offset": 11,
-					"range": [0, 1],
-					"type": "poly",
-					"inputs": [
-						{
-							"name": "groups",
-							"idx": null,
-							"range": "full",
-							"except": [],
-							"exclude": []
-						}
-					]
-				},
-				{
-					"name": "stash_out",
+					"name": "new_error",
 					"size": 1,
 					"offset": 12,
-					"range": [1, 2],
+					"range": [0, 1],
 					"type": "poly",
 					"inputs": [
 						{

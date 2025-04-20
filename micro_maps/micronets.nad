@@ -2,11 +2,12 @@
 module: linear_micronet
 
     inputs: [
-        prev_input  0,
-        coeff       1,
-        feedback_in 2,
-        stash_in    3,
-        neuron_output 4
+        prev_input      0,
+        coeff           1,
+        feedback_in     2,
+        stash_in        3,
+        neuron_output   4,
+        global_error    5
     ]
 
     groups: [
@@ -22,11 +23,12 @@ module: linear_micronet
 module: poly_micronet
 
     inputs: [
-        coeffs      0:256,
-        prev_inputs 256:264,
-        feedback_in 264,
-        neuron_output 265, 
-        stash_in    266
+        coeffs            0:256,
+        prev_inputs     256:264,
+        feedback_in         264,
+        neuron_output       265, 
+        stash_in            266,
+        global_error        267
     ]
 
     groups: [
@@ -45,7 +47,8 @@ module: feedback_module
     inputs: [
         feedback_in     0,
         neuron_output   1,
-        stash_in        3
+        prev_error      2,
+        global_error    3
     ]
 
     groups: [
@@ -60,6 +63,5 @@ module: feedback_module
     ]
 
     outputs: [
-        feedback_out    1 x [groups[:]] type poly,
-        stash_out       1 x [groups[:]] type poly,
+        new_error       1 x [groups[:]] type poly,
     ]

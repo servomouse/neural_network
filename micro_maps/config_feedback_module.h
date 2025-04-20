@@ -1,35 +1,32 @@
 #include <stdint.h>
-#include "network.h"
 
 uint32_t feedback_module_neurons[] = {
     // idx  num_inputs  type 	indices
 	// groups.undefined:
-	   3,	4,			1,		0, 1, 2, 10,
+	   4,	5,			1,		0, 1, 2, 3, 11,
 	// groups.undefined:
-	   4,	4,			1,		0, 1, 2, 3,
+	   5,	5,			1,		0, 1, 2, 3, 4,
 	// groups.undefined:
-	   5,	4,			1,		0, 1, 2, 4,
+	   6,	5,			1,		0, 1, 2, 3, 5,
 	// groups.undefined:
-	   6,	4,			1,		0, 1, 2, 5,
+	   7,	5,			1,		0, 1, 2, 3, 6,
 	// groups.undefined:
-	   7,	4,			1,		0, 1, 2, 6,
+	   8,	5,			1,		0, 1, 2, 3, 7,
 	// groups.undefined:
-	   8,	4,			1,		0, 1, 2, 7,
+	   9,	5,			1,		0, 1, 2, 3, 8,
 	// groups.undefined:
-	   9,	4,			1,		0, 1, 2, 8,
+	   10,	5,			1,		0, 1, 2, 3, 9,
 	// groups.undefined:
-	   10,	4,			1,		0, 1, 2, 9,
-	// outputs.feedback_out:
-	   11,	8,			1,		3, 4, 5, 6, 7, 8, 9, 10,
-	// outputs.stash_out:
-	   12,	8,			1,		3, 4, 5, 6, 7, 8, 9, 10,
+	   11,	5,			1,		0, 1, 2, 3, 10,
+	// outputs.new_error:
+	   12,	8,			1,		4, 5, 6, 7, 8, 9, 10, 11,
 };
 
-network_map_t feedback_micronet_map = {
-	.num_inputs = 3,
-	.num_neurons = 10,
+micronet_map_t feedback_module_micronet_map = {
+	.num_inputs = 4,
+	.num_neurons = 9,
 	.net_size = 13,
 	.neurons = feedback_module_neurons,
-	.num_outputs = 2,
-	.output_indices = {11, 12},
+	.num_outputs = 1,
+	.output_indices = {12},
 };

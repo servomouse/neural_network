@@ -1,5 +1,5 @@
 add_library(nm_iface
-    neuron_iface.c
+    neuron_micronet_iface.c
 )
 
 target_link_libraries(nm_iface

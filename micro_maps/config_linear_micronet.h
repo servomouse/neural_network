@@ -16,7 +16,7 @@ uint32_t linear_micronet_neurons[] = {
 	   13,	5,			1,		6, 7, 8, 9, 10,
 };
 
-micronet_map_t linear_micronet_micronet_map = {
+network_map_t linear_micronet_map = {
 	.num_inputs = 6,
 	.num_neurons = 8,
 	.net_size = 14,

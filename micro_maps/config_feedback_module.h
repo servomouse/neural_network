@@ -22,7 +22,7 @@ uint32_t feedback_module_neurons[] = {
 	   12,	8,			1,		4, 5, 6, 7, 8, 9, 10, 11,
 };
 
-micronet_map_t feedback_module_micronet_map = {
+network_map_t feedback_micronet_map = {
 	.num_inputs = 4,
 	.num_neurons = 9,
 	.net_size = 13,

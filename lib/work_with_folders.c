@@ -50,7 +50,7 @@ FILE* fopen_no_matter_what(const char *filename, const char *access_mode) {
     FILE *file = fopen(filename, access_mode);
     if (file == NULL) {
         printf("ERROR: Failed to open file %s\n", filename);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 }
 

@@ -33,7 +33,7 @@ static void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) 
 void neuron_clear_stashes(neuron_params_t *n_params) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->c_net_stash[i] = 0.0;
-        n_params->f_net_stash[i] = 0.0;
+        // n_params->f_net_stash[i] = 0.0;
     }
 }
 

@@ -83,3 +83,8 @@ target_compile_definitions(train_poly_micronet
     PRIVATE
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )
+
+add_custom_target(cleanup-build-folder
+  COMMAND ${CMAKE_COMMAND} -E echo "Cleaning up build folder..."
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cleanup.cmake
+  )

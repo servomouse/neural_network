@@ -39,7 +39,7 @@ void neuron_clear_stashes(neuron_params_t *n_params) {
 
 void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_inputs) {
     // srand(time(NULL));   // Should be called by controller
-    printf("Creating neuron with %d inputs, %s\n", num_inputs, BCKP_DIR_PATH);
+    // printf("Creating neuron with %d inputs, %s\n", num_inputs, BCKP_DIR_PATH);
     n_params->n_type = n_type;
     n_params->num_inputs = num_inputs;
     if(n_type == NLinear) {

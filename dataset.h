@@ -3,7 +3,7 @@ typedef struct {
 	double output;
 } dataset_item_t;
 
-dataset_item_t dataset[100] = {
+dataset_item_t btc_dataset[] = {
 	{.inputs = {0.001, 0.0, 0.0005, 0.5589}, .output = 0.0007},
 	{.inputs = {0.0007, -0.0009, 0.0007, 0.7104}, .output = 0.0004},
 	{.inputs = {0.0004, -0.0005, 0.0004, 0.5485}, .output = -0.0008},

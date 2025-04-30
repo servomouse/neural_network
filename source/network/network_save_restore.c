@@ -133,7 +133,7 @@ static void restore_neurons_new(network_t *net, char *path) {
 }
 
 void network_restore(network_t * config, char *path, uint8_t is_micronet) {
-    printf("Network: restoring network");
+    // printf("Network: restoring network");
     char *map_path = concat_strings(path, "/map.bin");
     char *neurons_path = concat_strings(path, "/neurons.bin");
     network_map_t *map = restore_data(map_path);

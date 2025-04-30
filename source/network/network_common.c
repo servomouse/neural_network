@@ -103,6 +103,12 @@ void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
     }
 }
 
+void network_clear_outputs(network_t * config) {
+    for(uint32_t i=0; i<config->net_size; i++) {
+        config->arr[i] = 0;
+    }
+}
+
 double *network_get_output(network_t * config, double *inputs) {
     // for(int i=0; i<config->num_neurons; i++) {
     //     neuron_reset_output_counter(&config->neurons[i]);
@@ -119,7 +125,7 @@ double *network_get_output(network_t * config, double *inputs) {
     for(uint32_t i=0; i<config->num_outputs; i++) {
         config->outputs[i] = config->arr[config->output_indices[i]];
     }
-    if(config->outputs[0] != config->outputs[0]) {
+    if(config->outputs[0] != config->outputs[0]) {  // Check for NaN
         printf("Micornet error! array:\n");
         for(uint32_t i=0; i<config->net_size; i++) {
             printf("%f, ", config->arr[i]);

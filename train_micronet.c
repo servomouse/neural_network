@@ -43,6 +43,8 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
     // Works only with single output networks
     double error = 0;
     uint32_t correct_sign_count = 0;
+    uint32_t correct_high_count = 0;
+    uint32_t high_count = 0;
     for(size_t i=0; i<dataset_size; i++) {
         double *outputs = network_get_output(config, dataset[i].inputs);
         double delta = 0;
@@ -60,21 +62,28 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
             if(delta < 1) {
                 correct_sign_count += 100;
             }
-            printf("Desired outputs: [");
-            printf("%f], ", target_value);
-
-            printf("real outputs: [");
-            for(uint32_t j=0; j<num_outputs-1; j++) {
-                printf("%f, ", outputs[j]);
+            if(outputs[0] > 0) {
+                high_count += 1;
+                if(dataset[i].output > 0) {
+                    correct_high_count += 1;
+                }
             }
-            printf("%f]; ", outputs[num_outputs-1]);
-            printf("error = %f;\n", delta);
+            // printf("Desired outputs: [");
+            // printf("%f], ", target_value);
+
+            // printf("real outputs: [");
+            // for(uint32_t j=0; j<num_outputs-1; j++) {
+            //     printf("%f, ", outputs[j]);
+            // }
+            // printf("%f]; ", outputs[num_outputs-1]);
+            // printf("error = %f;\n", delta);
         }
         error += delta;
     }
     network_clear_outputs(config);  // Clear neurons outputs to not affect the next round
     if(to_print) {
-        printf("Correct sign counter = %f percent\n", (double) correct_sign_count / dataset_size);
+        printf("\tCorrect sign counter = %f percent\n", (double) correct_sign_count / dataset_size);
+        printf("\tCorrect high counter = %d of %d\n", correct_high_count, high_count);
     }
     return error / dataset_size;
 }
@@ -82,7 +91,7 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
 int run_evolution(network_t *config) {
     double current_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 1, 0);
     size_t counter = 0, print_counter = 0;
-    while((current_error > 0.001) && (counter++ < 10000)) {
+    while((current_error > 0.001) && (counter++ < 1000)) {
         network_mutate(config);
         double new_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 1, 0);
         // printf("New error: %f, counter = %lld\n", new_error, counter);
@@ -118,13 +127,14 @@ int main(void) {
     printf("MicroNet initialised!\n");
 
     // Restore network
-    network_restore(unet, n_path, 1);
+    // network_restore(unet, n_path, 1);
 
-    run_evolution(unet);
+    for(int i=0; i<100; i++) {
+        run_evolution(unet);
 
-    // Save network
-    network_save(unet, n_path);
-
+        // Save network
+        network_save(unet, n_path);
+    }
     free(n_path);
 
     return EXIT_SUCCESS;

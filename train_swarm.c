@@ -11,34 +11,14 @@
 #define NUM_NETWORKS 100
 #define NUM_TO_SAVE  50
 
+#define BUF_SIZE 128
+
 #define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
 
 typedef struct {
     network_t *net;
     double error;
 } swarm_item_t;
-
-// Neuron types:
-// 0 - linear
-// 1 - polynomial
-
-// uint32_t neurons[] = {
-//     // idx  num_inputs  type indices
-//        4,   4,          1,   0, 1, 2, 3,
-//        5,   4,          1,   0, 1, 2, 3,
-//        6,   4,          1,   0, 1, 2, 3,
-//        7,   4,          1,   0, 1, 2, 3,
-//        8,   4,          1,   4, 5, 6, 7,
-// };
-
-// network_map_t micronet_map = {
-//     .num_inputs = 4,
-//     .num_neurons = 5,
-//     .net_size = 9,
-//     .neurons = neurons,
-//     .num_outputs = 1,
-//     .output_indices = {8},
-// };
 
 double update_value(double value) {
     double temp = value * 100;
@@ -47,8 +27,7 @@ double update_value(double value) {
     return temp;
 }
 
-static double get_error(network_t *config, dataset_item_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
-    // Works only with single output networks
+static double get_error(network_t *config, dataset_item_t *dataset, size_t dataset_size, uint8_t to_print) {
     double error = 0;
     uint32_t correct_sign_count = 0;
     uint32_t correct_high_count = 0;
@@ -65,7 +44,6 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
         if(delta < 0) {
             delta = -1 * delta;
         }
-        // double e = delta * delta;
         if(to_print) {
             if(delta < 1) {
                 correct_sign_count += 100;
@@ -76,15 +54,6 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
                     correct_high_count += 1;
                 }
             }
-            // printf("Desired outputs: [");
-            // printf("%f], ", target_value);
-
-            // printf("real outputs: [");
-            // for(uint32_t j=0; j<num_outputs-1; j++) {
-            //     printf("%f, ", outputs[j]);
-            // }
-            // printf("%f]; ", outputs[num_outputs-1]);
-            // printf("error = %f;\n", delta);
         }
         error += delta;
     }
@@ -97,10 +66,11 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
 }
 
 int run_evolution(network_t *config) {
-    double current_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 1, 0);
+    double current_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 0);
+    uint32_t counter = 0;
     while(counter++ < 1000) {
         network_mutate(config);
-        double new_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 1, 0);
+        double new_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 0);
         if(new_error > current_error) {
             network_rollback(config);
         } else {
@@ -111,9 +81,7 @@ int run_evolution(network_t *config) {
     return EXIT_SUCCESS;
 }
 
-#define BUF_SIZE 128
-
-swarm_item_t swarm_init(uint32_t swarm_size) {
+swarm_item_t *swarm_init(uint32_t swarm_size) {
     swarm_item_t *swarm = calloc(swarm_size, sizeof(swarm_item_t));
     for(uint32_t i=0; i<swarm_size; i++) {
         swarm[i].net = calloc(1, sizeof(network_t));
@@ -123,13 +91,13 @@ swarm_item_t swarm_init(uint32_t swarm_size) {
     return swarm;
 }
 
-void swarm_run_evolution(swarm_t *swarm, uint32_t num_rounds) {
+void swarm_run_evolution(swarm_item_t *swarm, uint32_t num_rounds) {
     for(uint32_t i=0; i<num_rounds; i++) {
         run_evolution(swarm[i].net);
     }
 }
 
-void swarm_sort(swarm_t *swarm, uint32_t swarm_size) {
+void swarm_sort(swarm_item_t *swarm, uint32_t swarm_size) {
     uint8_t sorted;
     uint32_t counter = 0;
     while(1) {
@@ -155,7 +123,7 @@ void swarm_sort(swarm_t *swarm, uint32_t swarm_size) {
     }
 }
 
-void swarm_save_update(network_t swarm, uint32_t swarm_size, uint32_t num_to_save) {
+void swarm_save_update(swarm_item_t *swarm, uint32_t swarm_size, uint32_t num_to_save, const char* path) {
     char buf[BUF_SIZE];
     // Save networks on disk:
     for(uint32_t i=0; i<num_to_save; i++) {
@@ -166,7 +134,7 @@ void swarm_save_update(network_t swarm, uint32_t swarm_size, uint32_t num_to_sav
         free(n_path);
     }
     // Overwrite the remaining networks
-    for(uint32_t n=num_to_save; n<swatm_size; n++) {
+    for(uint32_t n=num_to_save; n<swarm_size; n++) {
         clear_buffer(buf, BUF_SIZE);
         uint32_t idx = n%num_to_save;
         snprintf(buf, BUF_SIZE, "/swarm/network_%d", idx);
@@ -176,7 +144,7 @@ void swarm_save_update(network_t swarm, uint32_t swarm_size, uint32_t num_to_sav
     }
 }
 
-void swarm_restore(network_t swarm, uint32_t num_to_save) {
+void swarm_restore(swarm_item_t *swarm, uint32_t num_to_save, const char* path) {
     char buf[BUF_SIZE];
     for(uint32_t i=0; i<num_to_save; i++) {
         clear_buffer(buf, BUF_SIZE);
@@ -187,19 +155,22 @@ void swarm_restore(network_t swarm, uint32_t num_to_save) {
     }
 }
 
-void swarm_print_results(network_t swarm) {
-    get_error(swarm[0].net, btc_dataset, sizeof_arr(btc_dataset), 1, 1);
+void swarm_print_results(swarm_item_t *swarm) {
+    get_error(swarm[0].net, btc_dataset, sizeof_arr(btc_dataset), 1);
 }
 
 int main(void) {
-    network_t *swarm = swarm_init(NUM_NETWORKS);
-    // swarm_restore(swarm, NUM_TO_SAVE);
+    srand(time(NULL));
+    char *n_path = concat_strings(BCKP_DIR_PATH, "/td_micronet");
+    swarm_item_t *swarm = swarm_init(NUM_NETWORKS);
+    // swarm_restore(swarm, NUM_TO_SAVE, n_path);
     printf("Swarm initialised!\n");
     for(uint32_t i=0; i<100; i++) {
         swarm_run_evolution(swarm, 10);
-        swarm_sort(swarm);
-        swarm_save_update(swarm, NUM_NETWORKS, NUM_TO_SAVE);
+        swarm_sort(swarm, NUM_NETWORKS);
+        swarm_save_update(swarm, NUM_NETWORKS, NUM_TO_SAVE, n_path);
         swarm_print_results(swarm);
     }
+    free(n_path);
     return EXIT_SUCCESS;
 }

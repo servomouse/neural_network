@@ -116,7 +116,39 @@ target_compile_definitions(train_micronet
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )
 
+add_executable(train_swarm train_swarm.c)
+
+target_link_libraries(train_swarm
+    PRIVATE
+        network
+        neuron
+        utils
+)
+target_include_directories(train_swarm
+    PRIVATE
+        ${TESTS_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set(CMAKE_C_FLAGS "")
+set(CMAKE_CXX_FLAGS "")
+
+target_compile_options(train_swarm
+    PRIVATE
+        -Wall
+        -Wextra
+        -lm
+        -g
+        -lws2_32
+        -fstack-protector-all
+)
+
+target_compile_definitions(train_swarm
+    PRIVATE
+        BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
+)
+
 add_custom_target(cleanup-build-folder
-  COMMAND ${CMAKE_COMMAND} -E echo "Cleaning up build folder..."
-  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cleanup.cmake
-  )
+    COMMAND ${CMAKE_COMMAND} -E echo "Cleaning up build folder..."
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cleanup.cmake
+)

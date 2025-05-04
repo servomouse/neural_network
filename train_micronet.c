@@ -84,6 +84,7 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
     if(to_print) {
         printf("\tCorrect sign counter = %f percent\n", (double) correct_sign_count / dataset_size);
         printf("\tCorrect high counter = %d of %d\n", correct_high_count, high_count);
+        fflush(stdout);
     }
     return error / dataset_size;
 }
@@ -101,7 +102,7 @@ int run_evolution(network_t *config) {
             network_rollback(config);
         } else {
             current_error = new_error;
-            if(print_counter++ == 100) {
+            if(print_counter++ == 10) {
                 printf("New error: %f, counter = %lld\n", new_error, counter);
                 fflush(stdout);
                 print_counter = 0;
@@ -126,10 +127,10 @@ int main(void) {
     network_init_micronet(unet, &network_map);
     printf("MicroNet initialised!\n");
 
-    // Restore network
-    // network_restore(unet, n_path, 1);
+    // Restore network 976629 946359
+    network_restore(unet, n_path, 1);
 
-    for(int i=0; i<100; i++) {
+    for(int i=0; i<1000; i++) {
         run_evolution(unet);
 
         // Save network

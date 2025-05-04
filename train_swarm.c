@@ -15,6 +15,19 @@
 
 #define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
 
+// uint32_t network_neurons[] = {
+// 	   4,	4,  1,		0, 1, 2, 3,
+// };
+
+// network_map_t network_map = {
+// 	.num_inputs = 4,
+// 	.num_neurons = 1,
+// 	.net_size = 5,
+// 	.neurons = network_neurons,
+// 	.num_outputs = 1,
+// 	.output_indices = {4},
+// };
+
 typedef struct {
     network_t *net;
     double error;
@@ -58,27 +71,34 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
         error += delta;
     }
     network_clear_outputs(config);  // Clear neurons outputs to not affect the next round
+    error /= dataset_size;
     if(to_print) {
+        printf("Best_error: %f\n", (double) error);
         printf("\tCorrect sign counter = %f percent\n", (double) correct_sign_count / dataset_size);
         printf("\tCorrect high counter = %d of %d\n", correct_high_count, high_count);
+        fflush(stdout);
     }
-    return error / dataset_size;
+    return error;
 }
 
-int run_evolution(network_t *config) {
+double run_evolution(network_t *config) {
     double current_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 0);
-    uint32_t counter = 0;
-    while(counter++ < 1000) {
+    uint32_t counter = 0, useful_mutations = 0;
+    while(counter++ < 100) {
         network_mutate(config);
         double new_error = get_error(config, btc_dataset, sizeof_arr(btc_dataset), 0);
         if(new_error > current_error) {
             network_rollback(config);
         } else {
             current_error = new_error;
+            useful_mutations += 1;
+        }
+        if(useful_mutations >= 10) {
+            break;
         }
     }
 
-    return EXIT_SUCCESS;
+    return current_error;
 }
 
 swarm_item_t *swarm_init(uint32_t swarm_size) {
@@ -91,25 +111,24 @@ swarm_item_t *swarm_init(uint32_t swarm_size) {
     return swarm;
 }
 
-void swarm_run_evolution(swarm_item_t *swarm, uint32_t num_rounds) {
-    for(uint32_t i=0; i<num_rounds; i++) {
-        run_evolution(swarm[i].net);
+void swarm_run_evolution(swarm_item_t *swarm, uint32_t swarm_size) {
+    for(uint32_t i=0; i<swarm_size; i++) {
+        swarm[i].error = run_evolution(swarm[i].net);
     }
 }
 
 void swarm_sort(swarm_item_t *swarm, uint32_t swarm_size) {
-    uint8_t sorted;
     uint32_t counter = 0;
     while(1) {
-        sorted = 1;
-        for(uint32_t i=1; i<swarm_size; i++) {
-            if(swarm[i].error < swarm[i-1].error) {
+        uint8_t sorted = 1;
+        for(uint32_t i=0; i<swarm_size-1; i++) {
+            if(swarm[i].error > swarm[i+1].error) {
                 double error = swarm[i].error;
                 network_t *net = swarm[i].net;
-                swarm[i].net = swarm[i-1].net;
-                swarm[i].error = swarm[i-1].error;
-                swarm[i-1].net = net;
-                swarm[i-1].error = error;
+                swarm[i].net = swarm[i+1].net;
+                swarm[i].error = swarm[i+1].error;
+                swarm[i+1].net = net;
+                swarm[i+1].error = error;
                 sorted = 0;
             }
         }
@@ -121,6 +140,10 @@ void swarm_sort(swarm_item_t *swarm, uint32_t swarm_size) {
             exit(1);
         }
     }
+    // printf("Sorted errors:\n");
+    // for(uint32_t i=0; i<swarm_size-1; i++) {
+    //     printf("\t%f\n", swarm[i].error);
+    // }
 }
 
 void swarm_save_update(swarm_item_t *swarm, uint32_t swarm_size, uint32_t num_to_save, const char* path) {
@@ -128,7 +151,7 @@ void swarm_save_update(swarm_item_t *swarm, uint32_t swarm_size, uint32_t num_to
     // Save networks on disk:
     for(uint32_t i=0; i<num_to_save; i++) {
         clear_buffer(buf, BUF_SIZE);
-        snprintf(buf, BUF_SIZE, "/swarm/network_%d", i);
+        snprintf(buf, BUF_SIZE, "/network_%d", i);
         char *n_path = concat_strings(path, buf);
         network_save(swarm[i].net, n_path);
         free(n_path);
@@ -136,8 +159,9 @@ void swarm_save_update(swarm_item_t *swarm, uint32_t swarm_size, uint32_t num_to
     // Overwrite the remaining networks
     for(uint32_t n=num_to_save; n<swarm_size; n++) {
         clear_buffer(buf, BUF_SIZE);
-        uint32_t idx = n%num_to_save;
-        snprintf(buf, BUF_SIZE, "/swarm/network_%d", idx);
+        uint32_t idx = n % num_to_save;
+        // printf("Reinit network[%d] with params from network[%d]\n", n, idx);
+        snprintf(buf, BUF_SIZE, "/network_%d", idx);
         char *n_path = concat_strings(path, buf);
         network_restore(swarm[n].net, n_path, 1);
         free(n_path);
@@ -148,7 +172,7 @@ void swarm_restore(swarm_item_t *swarm, uint32_t num_to_save, const char* path) 
     char buf[BUF_SIZE];
     for(uint32_t i=0; i<num_to_save; i++) {
         clear_buffer(buf, BUF_SIZE);
-        snprintf(buf, BUF_SIZE, "/swarm/network_%d", i);
+        snprintf(buf, BUF_SIZE, "/network_%d", i);
         char *n_path = concat_strings(path, buf);
         network_restore(swarm[i].net, n_path, 1);
         free(n_path);
@@ -161,12 +185,18 @@ void swarm_print_results(swarm_item_t *swarm) {
 
 int main(void) {
     srand(time(NULL));
-    char *n_path = concat_strings(BCKP_DIR_PATH, "/td_micronet");
+    char *n_path = concat_strings(BCKP_DIR_PATH, "/swarm");
     swarm_item_t *swarm = swarm_init(NUM_NETWORKS);
     // swarm_restore(swarm, NUM_TO_SAVE, n_path);
     printf("Swarm initialised!\n");
+    fflush(stdout);
     for(uint32_t i=0; i<100; i++) {
-        swarm_run_evolution(swarm, 10);
+        printf("Running evolution . . .\n");
+        fflush(stdout);
+        swarm_run_evolution(swarm, NUM_NETWORKS);
+
+        printf("Processing . . .\n");
+        fflush(stdout);
         swarm_sort(swarm, NUM_NETWORKS);
         swarm_save_update(swarm, NUM_NETWORKS, NUM_TO_SAVE, n_path);
         swarm_print_results(swarm);

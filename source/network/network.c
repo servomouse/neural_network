@@ -38,7 +38,6 @@ void network_init(network_t *net, net_config_t *net_config) {
     net->arr_backup = calloc(net->net_size, sizeof(double));
     net->neurons = calloc(net->num_neurons, sizeof(neuron_params_t));
     net->feedback_errors = calloc(net->net_size, sizeof(complex_item_t));
-    // net->feedback_ = calloc(net->net_size, sizeof(complex_value_t));
     net->feedback_activations = calloc(net->net_size, sizeof(complex_item_t));
     neurons_backup = calloc(net->num_neurons, sizeof(neuron_params_t));
     net->output_indices = calloc(net->num_outputs, sizeof(uint32_t));
@@ -50,17 +49,9 @@ void network_init(network_t *net, net_config_t *net_config) {
         uint8_t idx = neuron->idx - net->num_inputs;
         uint8_t num_inputs = neuron->num_inputs;
         neuron_init(&net->neurons[idx], 0, num_inputs);  // FIXME: Set neuron type properly
-        // neuron_set_output_idx(&net->neurons[idx], neuron->output_idx);
         for(size_t j=0; j<num_inputs; j++) {
             neuron_set_input_idx(&net->neurons[idx], j, neuron->indices[j]);
-            // if(j >= net->num_inputs) {
-            //     uint32_t temp_idx = j-net->num_inputs;
-            //     neuron_set_num_outputs(&net->neurons[temp_idx], neuron_get_num_outputs(&net->neurons[temp_idx]) + 1);
-            // }
         }
-        // #ifdef USE_BACKUP
-        // neuron_set_coeffs(&net->neurons[idx], network_backup_coeffs[idx]);
-        // #endif
         if(neuron->output_idx != NOT_OUTPUT) {
             net->output_indices[neuron->output_idx] = net->num_inputs + i;
         }
@@ -72,27 +63,11 @@ void network_init(network_t *net, net_config_t *net_config) {
 }
 
 void network_backup(network_t * config) {
-    // for(uint32_t i=0; i<config->num_neurons; i++) {
-    //     neuron_backup(&config->neurons[i]);
-    // }
-    // memcpy(neurons_backup, config->neurons, sizeof(neuron_params_t) * config->num_neurons);
     memcpy(arr_backup, config->arr, sizeof(double) * config->net_size);
 }
 
-void network_check_backup(network_t * config) {
-    for(uint32_t i=0; i<config->num_neurons; i++) {
-        // neuron_check_backup(&config->neurons[i]);
-        ;
-    }
-}
-
 void network_restore(network_t * config) {
-    // memcpy(config->neurons, neurons_backup, sizeof(neuron_params_t) * config->num_neurons);
     memcpy(config->arr, arr_backup, sizeof(double) * config->net_size);
-    // for(uint32_t i=0; i<config->num_neurons; i++) {
-    //     #error: fixme!;
-    //     neuron_restore(&config->neurons[i]);
-    // }
     printf("Network restored!\n");
 }
 
@@ -213,39 +188,11 @@ void network_save_data(network_t * config, char *filename) {
     write_buf_to_file("#define USE_BACKUP\n", filename);
 }
 
-// void network_restore_data(network_t * config, char *filename) {
-//     // if(!config->neurons) {
-//     //     printf("Call init() before calling restore_state()!");
-//     //     exit(1);
-//     // }
-//     // char *arr_fname = concat_strings("arr_", filename);
-//     // restore_data(&config, sizeof(config), filename);
-//     // restore_data(config->arr, config->net_size * sizeof(double), arr_fname);
-//     // free(arr_fname);
-//     for(uint32_t i=0; i<config->num_neurons; i++) {
-//         neuron_restore_data(&config->neurons[i], i);
-//     }
-// }
-
 void network_stash_neurons(network_t * config) {
     for(uint32_t i=0; i<config->num_neurons; i++) {
         neuron_stash_state(&config->neurons[i]);
     }
 }
-
-// void network_update_neurons(network_t * config) {
-//     // for(uint32_t i=0; i<config->num_neurons; i++) {
-//     //     config->feedback_array[i].counter = 0;
-//     //     config->feedback_array[i].value = 0.0;
-//     // }
-//     for(uint32_t i=config->num_neurons-1; i>=0; i--) {   // Go backwards
-//         neuron_update_coeffs(&config->neurons[i],
-//                              config->coeffs_micronet,
-//                              config->feedback_micronet,
-//                              config->feedback_errors,
-//                              config->feedback_activations, config->num_inputs+i);
-//     }
-// }
 
 void network_rollback_neurons(network_t * config) {
     for(uint32_t i=0; i<config->num_neurons; i++) {

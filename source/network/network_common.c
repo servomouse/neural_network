@@ -80,7 +80,6 @@ void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
     }
 
     net->arr = allocate(net->arr, net->net_size, sizeof(double));
-    // net->feedback_arr = allocate(net->feedback_arr, net->net_size, sizeof(double));
     net->neurons = allocate(net->neurons, net->num_neurons, sizeof(neuron_params_t));
 
     uint32_t offset = 0;
@@ -110,17 +109,12 @@ void network_clear_outputs(network_t * config) {
 }
 
 double *network_get_output(network_t * config, double *inputs) {
-    // for(int i=0; i<config->num_neurons; i++) {
-    //     neuron_reset_output_counter(&config->neurons[i]);
-    // }
-    // printf("network array: ");
     for(uint32_t i=0; i<config->net_size; i++) {
         if(i < config->num_inputs) {
             config->arr[i] = inputs[i];
         } else {
             config->arr[i] = neuron_get_output(&config->neurons[i-config->num_inputs], config->arr);
         }
-        // printf("%f, ", config->arr[i]);
     }
     for(uint32_t i=0; i<config->num_outputs; i++) {
         config->outputs[i] = config->arr[config->output_indices[i]];
@@ -138,7 +132,6 @@ double *network_get_output(network_t * config, double *inputs) {
         printf("\n");
         exit(0);
     }
-    // printf("\n");
     return config->outputs;
 }
 

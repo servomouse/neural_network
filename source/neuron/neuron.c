@@ -50,7 +50,7 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
         printf("Error: unknown neuron type: %d; exit\n", n_type);
         exit(1);
     }
-    n_params->mutation_step = 0.01;
+    n_params->mutation_step = 0.1;
 
     n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, n_params->num_inputs, sizeof(uint32_t));

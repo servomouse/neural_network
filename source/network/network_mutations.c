@@ -3,10 +3,11 @@
 
 // Complementary function is network_rollback
 void network_mutate(network_t * config) {
+    uint32_t indices[2] = {0, config->num_neurons};
     // config->mutated_neuron_idx = random_int(0, config->num_neurons);
     config->mutated_neuron_idx++;
-    if(config->mutated_neuron_idx == config->num_neurons) {
-        config->mutated_neuron_idx = 0;
+    if(config->mutated_neuron_idx == indices[1]) {
+        config->mutated_neuron_idx = indices[0];
     }
     neuron_mutate(&config->neurons[config->mutated_neuron_idx]);
 }

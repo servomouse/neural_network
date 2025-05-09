@@ -24,21 +24,6 @@ static void prepare_path_for_windows(char *path_string) {
     strcpy(path_string, buf2);
 }
 
-// static void prepare_folders(char *path) {
-//     char buf[BUF_SIZE] = {0};
-//     snprintf(buf, BUF_SIZE, "mkdir -p %s/neurons", path);
-
-//     /* Special preprocessing for windows */
-//     #ifdef _WIN32   // Update path to make it work in windows
-//         prepare_path_for_windows(buf);
-//     #endif
-//     /* !Special preprocessing for windows */
-
-//     printf("Creating folder: %s, ", buf);
-//     int ret_val = system(buf);
-//     printf("result: %d\n", ret_val);
-// }
-
 void remove_folders(char *path) {
     char buf[BUF_SIZE] = {0};
     snprintf(buf, BUF_SIZE, "rd _s _q \"%s\"", path);
@@ -78,7 +63,6 @@ static void save_neurons_new(network_t * config, char *path) {
         data_size += neuron_get_data_size(&config->neurons[i]);
     }
     uint8_t *n_data = calloc(data_size, 1);
-    // n_data->data_size = data_size;
     uint32_t n_data_offset = 0;
     for(uint32_t i=0; i<config->num_neurons; i++) {
         compressed_neuron_t *c_neuron = neuron_save_new(&config->neurons[i]);
@@ -97,10 +81,8 @@ static void save_neurons_new(network_t * config, char *path) {
 }
 
 void network_save(network_t * config, char *path) {
-    // prepare_folders(path);
     char *map_path = concat_strings(path, "/map.bin");
     char *neurons_path = concat_strings(path, "/neurons.bin");
-    // char *neurons_path = concat_strings(path, "/neurons");
     store_data(config->map, sizeof(network_map_t) + (sizeof(uint32_t) * config->num_outputs), map_path);
     store_data(config->map->neurons, get_neurons_field_size(config->map->neurons, config->num_neurons), neurons_path);
     save_neurons_new(config, path);
@@ -126,14 +108,10 @@ static void restore_neurons_new(network_t *net, char *path) {
     uint32_t n_data_offset = 0;
     for(uint32_t i=0; i<net->num_neurons; i++) {
         n_data_offset += neuron_restore_new(&net->neurons[i], (compressed_neuron_t *)&n_data[n_data_offset]);
-        // clear_buffer(buf, BUF_SIZE);
-        // snprintf(buf, BUF_SIZE, "/neurons_data.bin");
-        // neuron_restore(&config->neurons[i], n_path);
     }
 }
 
 void network_restore(network_t * config, char *path, uint8_t is_micronet) {
-    // printf("Network: restoring network");
     char *map_path = concat_strings(path, "/map.bin");
     char *neurons_path = concat_strings(path, "/neurons.bin");
     network_map_t *map = restore_data(map_path);

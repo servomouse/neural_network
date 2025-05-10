@@ -1,11 +1,9 @@
 #pragma once
-// python new_build.py controller
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "neuron_types.h"
-
-#define MICRONET_STASH_SIZE 6
 
 void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_inputs);
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
@@ -15,14 +13,9 @@ void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs);
 double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx);
 int neuron_get_coeffs_as_string(neuron_params_t *n_params, char *buffer, uint32_t buffer_size);
 
-// Old version
-void neuron_save(neuron_params_t * n_params, char *filename);
-void neuron_restore(neuron_params_t * n_params, char *filename);
-
-// New version
 uint32_t neuron_get_data_size(neuron_params_t *neuron);
-compressed_neuron_t * neuron_save_new(neuron_params_t * n_params);
-uint32_t neuron_restore_new(neuron_params_t * n_params, compressed_neuron_t * n_data);
+compressed_neuron_t * neuron_save(neuron_params_t * n_params);
+uint32_t neuron_restore(neuron_params_t * n_params, compressed_neuron_t * n_data);
 
 void neuron_stash_state(neuron_params_t * n_params);
 void neuron_mutate(neuron_params_t * n_params);

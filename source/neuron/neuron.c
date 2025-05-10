@@ -44,7 +44,7 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
     n_params->num_inputs = num_inputs;
     if(n_type == NLinear) {
         n_params->num_coeffs = num_inputs+1;    // +1 for BIAS
-    } else if((n_type == NPoly) || (n_type == NSmart)) {
+    } else if(n_type == NPoly) {
         n_params->num_coeffs = 1 << num_inputs;
     } else {
         printf("Error: unknown neuron type: %d; exit\n", n_type);
@@ -126,7 +126,7 @@ double neuron_get_output(neuron_params_t *n_params, double *inputs) {
             uint32_t idx = n_params->indices[i];
             output += inputs[idx] * n_params->coeffs[i];
         }
-    } else if((n_params->n_type == NPoly) || (n_params->n_type == NSmart)) {
+    } else if(n_params->n_type == NPoly) {
         output = n_params->coeffs[0];         // BIAS
         for(size_t i=1; i<n_params->num_coeffs; i++) {
             double temp = 1.0;

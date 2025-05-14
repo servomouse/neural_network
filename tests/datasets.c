@@ -1,5 +1,22 @@
 #include "datasets.h"
 
+dataset_entry_t linear_dataset[] = {
+    // Expected coeffs: -0.02, -0.01, 0.01, 0.02, 0.03
+    {.inputs = {1.0, 0.0, 0.0, 0.0}, .output = 0.01},
+    {.inputs = {0.0, 1.0, 0.0, 0.0}, .output = 0.02},
+    {.inputs = {0.0, 0.0, 1.0, 0.0}, .output = 0.04},
+    {.inputs = {0.0, 0.0, 0.0, 1.0}, .output = 0.05},
+    {.inputs = {-1.0, 0.0, 0.0, 0.0}, .output = 0.05},
+    {.inputs = {0.0, -1.0, 0.0, 0.0}, .output = 0.04},
+    {.inputs = {0.0, 0.0, -1.0, 0.0}, .output = 0.02},
+    {.inputs = {0.0, 0.0, 0.0, -1.0}, .output = 0.01},
+    {.inputs = {0.0, 0.0, 0.0, 0.0}, .output = 0.03},
+    {.inputs = {1.0, 1.0, 1.0, 1.0}, .output = 0.03},
+    {.inputs = {-1.0, -1.0, -1.0, -1.0}, .output = 0.03},
+    {.inputs = {-1.0, -1.0, 1.0, 1.0}, .output = 0.09},
+    {.inputs = {1.0, 1.0, -1.0, -1.0}, .output = -0.03},
+};
+
 dataset_entry_t polynome_dataset[] = {
     {.inputs = {0.01, 0.05, 0.02, 0.03}, .output = 0.0},
     {.inputs = {0.07, 0.02, 0.05, 0.01}, .output = 0.0},

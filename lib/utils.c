@@ -201,3 +201,9 @@ void write_buf_to_file(const char *buffer, const char *filename) {
         printf("File write error, here are coeffs: %s", buffer);
     }
 }
+
+// Free if not NULL and then allocate the memory
+void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
+    if(p) { free(p); }
+    return calloc(num_elements, sizeof_element);
+}

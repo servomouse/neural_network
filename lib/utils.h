@@ -28,8 +28,8 @@ void sleep_s(int s);
 
 // Returns 1 if the folder exists, 0 if it doesn't
 int is_dir_exist(const char *folder);
-
 // Opens the given file, creates any missing paths of the path if needed
 FILE* fopen_no_matter_what(const char *filename, const char *access_mode);
-
 int remove_directory(const char *dir);
+
+void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element);

@@ -8,7 +8,5 @@
 
 void neuron_generate_feedbacks(neuron_params_t * n_params, network_t *c_micronet, network_t *f_micronet, uint32_t own_index);
 void neuron_update_coeffs(neuron_params_t * n_params, network_t *c_micronet, uint32_t own_index);
-// void neuron_set_feedback_error(neuron_params_t * n_params, double error);
-// void neuron_reset_feedback_error(neuron_params_t * n_params);
 void neuron_clear_stashes(neuron_params_t * n_params);
 void neuron_set_global_error(neuron_params_t * n_params, double error);

@@ -1,9 +1,12 @@
-set(neuron_sources
+set(NEURON_SOURCES
     neuron.c
+    neuron_linear.c
+    neuron_poly.c
+    neuron_mutations.c
     neuron_save_restore.c
 )
 
-add_library(neuron ${neuron_sources})
+add_library(neuron ${NEURON_SOURCES})
 
 target_link_libraries(neuron
     PRIVATE

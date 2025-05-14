@@ -29,10 +29,6 @@ void neuron_restore_data(neuron_params_t * n_params, uint32_t neuron_idx);
 
 void neuron_restore_state(neuron_params_t * n_params, char *filename);
 double neuron_get_output(neuron_params_t * n_params, double *inputs);
-void neuron_set_feedback_error(neuron_params_t * n_params, double error);
-void neuron_reset_feedback_error(neuron_params_t * n_params);
-void neuron_clear_stashes(neuron_params_t * n_params);
-void neuron_set_global_error(neuron_params_t * n_params, double error);
 
 
 void neuron_backup(neuron_params_t *n_params);
@@ -45,3 +41,11 @@ void neuron_set_num_outputs(neuron_params_t * n_params, uint32_t new_value);
 // void neuron_set_output_idx(neuron_params_t * n_params, uint32_t output_idx);
 uint32_t neuron_get_output_idx(neuron_params_t * n_params);
 void neuron_reset_output_counter(neuron_params_t * n_params);
+
+// For internal use:
+
+void neuron_linear_init(neuron_params_t * n_params, uint32_t num_inputs);
+void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs);
+
+double neuron_linear_get_output(neuron_params_t *n_params, double *inputs);
+double neuron_poly_get_output(neuron_params_t *n_params, double *inputs);

@@ -62,4 +62,5 @@ typedef struct {
     uint32_t mutated;
     uint32_t bad_mutations_counter;
     double mutation_step;
+    uint8_t is_mutable;
 } neuron_params_t;

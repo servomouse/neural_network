@@ -177,6 +177,17 @@
 //     feedbacks[own_index].counter = 0;
 // }
 
+void neuron_set_global_error(neuron_params_t * n_params, double error) {
+    n_params->global_error = error;
+}
+
+void neuron_clear_stashes(neuron_params_t *n_params) {
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        n_params->c_net_stash[i] = 0.0;
+        // n_params->f_net_stash[i] = 0.0;
+    }
+}
+
 void neuron_add_feedback(neuron_params_t * neuron, network_t *f_micronet, double fb_value) {
     double f_micronet_inputs[4] = {
         fb_value,

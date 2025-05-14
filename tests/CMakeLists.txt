@@ -12,6 +12,8 @@ add_custom_target(runtests
         neuron_test_mutation
         neuron_test_rollback
         neuron_test_save_restore
+        neuron_linear_test
+        neuron_poly_test
         save_restore_test
         # micronet_test
         # micronet_test_save_restore

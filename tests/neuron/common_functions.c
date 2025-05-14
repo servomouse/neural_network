@@ -29,5 +29,5 @@ double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t datas
         }
         error += e;
     }
-    return error / dataset_size;
+    return round_to_precision(error / dataset_size, 6);
 }

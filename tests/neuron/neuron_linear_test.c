@@ -23,6 +23,12 @@ int test_mutation(neuron_params_t *n) {
         printf("Error: mutation doesn't work, error after mutation == 0");
         exit(EXIT_FAILURE);
     }
+    neuron_rollback(n);
+    error = get_error(n, linear_dataset, sizeof_arr(linear_dataset), 0);
+    if(error != 0) {
+        printf("Error: rollback after mutation doesn't work, error after rollback != 0");
+        exit(EXIT_FAILURE);
+    }
     return EXIT_SUCCESS;
 }
 

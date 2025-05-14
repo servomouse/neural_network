@@ -2,30 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include "neuron.h"
+#include "tests/neuron/common_functions.h"
 #include "utils.h"
-#include "dataset.h"
-
-double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
-    double error = 0;
-    neuron_reset_output_counter(config);
-    for(size_t i=0; i<dataset_size; i++) {
-        if(to_print) {
-            printf("Stage %lld:\n", i);
-        }
-        double output = neuron_get_output(config, dataset[i].inputs);
-
-        double diff = dataset[i].output - output;
-        double e = diff * diff;
-        // network_set_global_error(config, e);
-
-        if(to_print) {
-            printf("Error: %f\n", e);
-            printf("Desired output: %f; real output: %f;\n", dataset[i].output, output);
-        }
-        error += e;
-    }
-    return error / dataset_size;
-}
+#include "tests/datasets.c"
 
 int test_mutation(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
@@ -72,14 +51,15 @@ int test_rollback(neuron_params_t *n) {
 
 int test_save_restore(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    neuron_save_coeffs(n, 123);
+    compressed_neuron_t *c_neuron = neuron_save(n);
     neuron_set_coeff(n, 0, 0.5);
     neuron_set_coeff(n, 1, 0.5);
     neuron_set_coeff(n, 2, 0.5);
     neuron_set_coeff(n, 3, 0.5);
     // double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error after setting coeffs = %f;\n", error);
-    neuron_restore_data(n, 123);
+    neuron_restore(n, c_neuron);
+    free(c_neuron);
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     if(init_error != error) {
         printf("Error: save-restore doesn't work: error after restore != error before save");
@@ -105,27 +85,17 @@ int test_output(neuron_params_t *n) {
     return EXIT_FAILURE;
 }
 
-int test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_name) {
-    printf("Testing %s . . . ", test_name);
-    if(foo(n) == EXIT_FAILURE) {
-        printf(" ERROR!\n");
-        return EXIT_FAILURE;
-    }
-    printf("SUCCESS!\n");
-    return EXIT_SUCCESS;
-}
-
 int main() {
     srand(time(NULL));
-    neuron_params_t test_neuron = {0};
-    neuron_init(&test_neuron, 4);
+    neuron_params_t poly_neuron = {0};
+    neuron_init(&poly_neuron, NPoly, 4);
     for(size_t j=0; j<4; j++) {
-        neuron_set_input_idx(&test_neuron, j, j);
+        neuron_set_input_idx(&poly_neuron, j, j);
     }
-    if(test_func(test_output,       &test_neuron, "output") ||
-       test_func(test_mutation,     &test_neuron, "mutations")||
-       test_func(test_rollback,     &test_neuron, "rollback")||
-       test_func(test_save_restore, &test_neuron, "save-restore")) {
+    if(test_func(test_output,       &poly_neuron, "poly neuron output")     ||
+       test_func(test_mutation,     &poly_neuron, "poly neuron mutations")  ||
+       test_func(test_rollback,     &poly_neuron, "poly neuron rollback")   ||
+       test_func(test_save_restore, &poly_neuron, "poly neuron save-restore")) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

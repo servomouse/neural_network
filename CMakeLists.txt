@@ -148,6 +148,8 @@ target_compile_definitions(train_swarm
         BCKP_DIR_PATH="${PROJECT_SOURCE_DIR}/backups"
 )
 
+include("${PROJECT_SOURCE_DIR}/train_embedded_micronet.cmake")
+
 add_custom_target(cleanup-build-folder
     COMMAND ${CMAKE_COMMAND} -E echo "Cleaning up build folder..."
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cleanup.cmake

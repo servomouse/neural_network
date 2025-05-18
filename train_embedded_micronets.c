@@ -282,7 +282,7 @@ dataset_item_t train_dataset[] = {
 
 uint32_t train_micronet_neurons[] = {
     // idx  num_inputs  type 	indices
-    // Layer 1
+    // Layer 1:
 	   8,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
 	   9,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
 	   10,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
@@ -291,7 +291,7 @@ uint32_t train_micronet_neurons[] = {
 	   13,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
 	   14,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
 	   15,	8,			1,		0, 1, 2, 3, 4, 5, 6, 7,
-    // Layer 2
+    // Layer 2:
 	   16,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
 	   17,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
 	   18,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
@@ -300,7 +300,7 @@ uint32_t train_micronet_neurons[] = {
 	   21,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
 	   22,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
 	   23,	8,			1,		8, 9, 10, 11, 12, 13, 14, 15,
-	// Outputs:
+	// Layer 3:
 	   24,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
 	   25,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
 	   26,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
@@ -309,15 +309,23 @@ uint32_t train_micronet_neurons[] = {
 	   29,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
 	   30,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
 	   31,	8,			1,		16, 17, 18, 19, 20, 21, 22, 23,
+	// Outputs:
+	   32,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   33,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   34,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   35,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   36,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   37,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   38,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
+	   39,	8,			1,		24, 25, 26, 27, 28, 29, 30, 31,
 };
 
 network_map_t train_micronet_map = {
 	.num_inputs = 8,
-	.num_neurons = 24,
-	.net_size = 32,
+	.num_neurons = 32,
 	.neurons = train_micronet_neurons,
 	.num_outputs = 8,
-	.output_indices = {24, 25, 26, 27, 28, 29, 30, 31, 32},
+	.output_indices = {32, 33, 34, 35, 36, 37, 38, 39},
 };
 
 static double get_error(network_t *config, dataset_item_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
@@ -338,19 +346,9 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
                 local_error = -1 * local_error;
             }
             round_error += local_error;
-            if(local_error > 2) {
-                printf("Error: local error is too large: %f\n", local_error);
-                printf("outputs[%d] = %f\n", j, outputs[j]);
-                printf("dataset[%d].output[%d] = %f\n", i, j, dataset[i].output[j]);
-                exit(EXIT_FAILURE);
-            }
         }
         round_error /= num_outputs;
         error += round_error;
-        if(round_error > 2) {
-            to_print = 1;
-            printf("Error: round error is too large!\n");
-        }
 
         if(to_print) {
             printf("Iteration %d:\n", i);
@@ -367,7 +365,6 @@ static double get_error(network_t *config, dataset_item_t *dataset, size_t datas
             printf("error = %f;\n", round_error);
             fflush(stdout);
         }
-        if(round_error > 2) exit(EXIT_FAILURE);
     }
     network_clear_outputs(config);  // Clear neurons outputs to not affect the next round
     return error / dataset_size;
@@ -379,9 +376,6 @@ int run_evolution(network_t *config) {
     while((current_error > 0.001) && (counter++ < 1000)) {
         network_mutate(config);
         double new_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0);
-        // printf("New error: %f, counter = %lld\n", new_error, counter);
-        // fflush(stdout);
-        // break;
         if(new_error > current_error) {
             network_rollback(config);
         } else {
@@ -395,12 +389,6 @@ int run_evolution(network_t *config) {
     }
     current_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 1);
     printf("Final error: %f\n", current_error);
-    
-    // double after_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0);
-    // if(after_error != current_error) {
-    //     printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
-    //     return EXIT_FAILURE;
-    // }
 
     return EXIT_SUCCESS;
 }
@@ -414,8 +402,6 @@ int main(void) {
 
     // Restore network
     network_restore(unet, n_path, 1);
-    // network_print_coeffs(unet);
-    // return EXIT_SUCCESS;
 
     printf("Initial error: %f\n", get_error(unet, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0));
     fflush(stdout);

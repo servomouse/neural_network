@@ -90,8 +90,19 @@ static void restore_neurons(network_t *net, char *path) {
 }
 
 void network_restore(network_t * config, char *path, uint8_t is_micronet) {
+    // Main network:
     char *map_path = concat_strings(path, "/map.bin");
     char *neurons_path = concat_strings(path, "/neurons.bin");
+    // // Linear c_micronet:
+    // char *linear_c_map_path = concat_strings(path, "/linear_cnet_map.bin");
+    // char *linear_c_neurons_path = concat_strings(path, "/linear_cnet_neurons.bin");
+    // // Poly c_micronet:
+    // char *poly_c_map_path = concat_strings(path, "/poly_cnet_map.bin");
+    // char *poly_c_neurons_path = concat_strings(path, "/poly_cnet_neurons.bin");
+    // // Feedback micronet:
+    // char *fb_map_path = concat_strings(path, "/feedback_cnet_map.bin");
+    // char *fb_neurons_path = concat_strings(path, "/feedback_cnet_neurons.bin");
+
     network_map_t *map = restore_data(map_path);
     map->neurons = restore_data(neurons_path);
     net_config_t net_config = {

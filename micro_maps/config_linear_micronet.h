@@ -19,7 +19,6 @@ uint32_t linear_micronet_neurons[] = {
 network_map_t linear_micronet_map = {
 	.num_inputs = 6,
 	.num_neurons = 8,
-	.net_size = 14,
 	.neurons = linear_micronet_neurons,
 	.num_outputs = 3,
 	.output_indices = {11, 12, 13},

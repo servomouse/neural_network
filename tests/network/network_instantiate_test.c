@@ -171,7 +171,6 @@ uint32_t neurons[] = {
 network_map_t network_map = {
     .num_inputs = 4,
 	.num_neurons = 5,
-	.net_size = 9,
 	.neurons = neurons,
 	.num_outputs = 1,
 	.output_indices = {8},

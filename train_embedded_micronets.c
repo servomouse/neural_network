@@ -276,6 +276,10 @@ dataset_item_t train_dataset[] = {
     {{1, 1, 1, 1, 1, 1, 1, 1}, {1, 0, 0, 0, 0, 0, 0, 0}}
 };
 
+#define DATASET train_dataset
+#define DATASET_SIZE sizeof_arr(DATASET)
+#define NUM_OUTPUTS sizeof_arr(DATASET[0].output)
+
 uint32_t train_micronet_neurons[] = {
     // idx  num_inputs  type 	indices
     // Layer 1
@@ -316,76 +320,65 @@ network_map_t train_micronet_map = {
 	.output_indices = {24, 25, 26, 27, 28, 29, 30, 31, 32},
 };
 
-double update_value(double value) {
-    double temp = value * 100;
-    if(temp > 1) {temp = 1;}
-    else if(temp < -1) {temp = -1;}
-    return temp;
-}
-
 static double get_error(network_t *config, dataset_item_t *dataset, size_t dataset_size, uint32_t num_outputs, uint8_t to_print) {
     double error = 0;
-    uint32_t correct_sign_count = 0;
-    uint32_t correct_high_count = 0;
-    uint32_t high_count = 0;
-    for(size_t i=0; i<dataset_size; i++) {
+    for(uint32_t i=0; i<dataset_size; i++) {
+        double round_error = 0;
+
         double *outputs = network_get_output(config, dataset[i].inputs);
-        double delta = 0;
-        uint32_t delta_counter = 0;
-        for(uint32_t j=0; j<num_outputs-1; j++) {
-            double local_delta = 0;
-            double target_value = update_value(dataset[i].output[j]);
+        for(uint32_t j=0; j<num_outputs; j++) {
+            double local_error = 0;
+            double target_value = dataset[i].output[j];
             if(target_value == 0) {
-                local_delta = outputs[j];
+                local_error = outputs[j];
             } else {
-                local_delta = (outputs[j] - target_value) / target_value;
+                local_error = (outputs[j] - target_value) / target_value;
             }
-            if(local_delta < 0) {
-                local_delta = -1 * local_delta;
+            if(local_error < 0) {
+                local_error = -1 * local_error;
             }
-            delta += local_delta;
-            delta_counter ++;
+            round_error += local_error;
+            if(local_error > 2) {
+                printf("Error: local error is too large: %f\n", local_error);
+                printf("outputs[%d] = %f\n", j, outputs[j]);
+                printf("dataset[%d].output[%d] = %f\n", i, j, dataset[i].output[j]);
+                exit(EXIT_FAILURE);
+            }
         }
-        delta /= delta_counter;
+        round_error /= num_outputs;
+        error += round_error;
+        if(round_error > 2) {
+            to_print = 1;
+            printf("Error: round error is too large!\n");
+        }
 
-        // double e = delta * delta;
         if(to_print) {
-            if(delta < 1) {
-                correct_sign_count += 100;
+            printf("Iteration %d:\n", i);
+            printf("Desired outputs: [");
+            for(uint32_t j=0; j<num_outputs; j++) {
+                printf("%.2f ", dataset[i].output[j]);
             }
-            if(outputs[0] > 0) {
-                high_count += 1;
-                if(dataset[i].output[num_outputs-1] > 0) {
-                    correct_high_count += 1;
-                }
+            printf("]\n");
+            printf("   Real outputs: [");
+            for(uint32_t j=0; j<num_outputs; j++) {
+                printf("%.2f ", outputs[j]);
             }
-            // printf("Desired outputs: [");
-            // printf("%f], ", target_value);
-
-            // printf("real outputs: [");
-            // for(uint32_t j=0; j<num_outputs-1; j++) {
-            //     printf("%f, ", outputs[j]);
-            // }
-            // printf("%f]; ", outputs[num_outputs-1]);
-            // printf("error = %f;\n", delta);
+            printf("]\n");
+            printf("error = %f;\n", round_error);
+            fflush(stdout);
         }
-        error += delta;
+        if(round_error > 2) exit(EXIT_FAILURE);
     }
     network_clear_outputs(config);  // Clear neurons outputs to not affect the next round
-    if(to_print) {
-        printf("\tCorrect sign counter = %f percent\n", (double) correct_sign_count / dataset_size);
-        printf("\tCorrect high counter = %d of %d\n", correct_high_count, high_count);
-        fflush(stdout);
-    }
     return error / dataset_size;
 }
 
 int run_evolution(network_t *config) {
-    double current_error = get_error(config, train_dataset, sizeof_arr(train_dataset), 8, 0);
+    double current_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0);
     size_t counter = 0, print_counter = 0;
     while((current_error > 0.001) && (counter++ < 1000)) {
         network_mutate(config);
-        double new_error = get_error(config, train_dataset, sizeof_arr(train_dataset), 8, 0);
+        double new_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0);
         // printf("New error: %f, counter = %lld\n", new_error, counter);
         // fflush(stdout);
         // break;
@@ -400,9 +393,10 @@ int run_evolution(network_t *config) {
             }
         }
     }
-    get_error(config, train_dataset, sizeof_arr(train_dataset), 71, 1);
+    current_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 1);
+    printf("Final error: %f\n", current_error);
     
-    // double after_error = get_error(config, train_dataset, sizeof_arr(train_dataset), 71, 0);
+    // double after_error = get_error(config, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0);
     // if(after_error != current_error) {
     //     printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
     //     return EXIT_FAILURE;
@@ -419,11 +413,11 @@ int main(void) {
     printf("MicroNet initialised!\n");
 
     // Restore network
-    // network_restore(unet, n_path, 1);
+    network_restore(unet, n_path, 1);
     // network_print_coeffs(unet);
     // return EXIT_SUCCESS;
 
-    printf("Initial error: %f\n", get_error(unet, train_dataset, sizeof_arr(train_dataset), 8, 1));
+    printf("Initial error: %f\n", get_error(unet, DATASET, DATASET_SIZE, NUM_OUTPUTS, 0));
     fflush(stdout);
 
     for(int i=0; i<1000; i++) {

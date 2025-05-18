@@ -24,7 +24,6 @@ uint32_t feedback_micronet_neurons[] = {
 network_map_t feedback_micronet_map = {
 	.num_inputs = 4,
 	.num_neurons = 9,
-	.net_size = 13,
 	.neurons = feedback_micronet_neurons,
 	.num_outputs = 1,
 	.output_indices = {12},

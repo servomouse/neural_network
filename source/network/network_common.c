@@ -48,7 +48,6 @@ void network_init_micronet(network_t *net, network_map_t *net_map) {
 static network_map_t * network_copy_map(network_map_t *src) {
     uint32_t num_outputs = src->num_outputs;
     network_map_t *dst = calloc(1, sizeof(network_map_t) + (sizeof(uint32_t) * num_outputs));
-    dst->net_size = src->net_size;
     dst->num_inputs = src->num_inputs;
     dst->num_neurons = src->num_neurons;
     dst->num_outputs = num_outputs;
@@ -69,7 +68,7 @@ void network_init(network_t *net, net_config_t *net_conf, uint8_t is_micronet) {
     net->map = network_copy_map(net_conf->net_map);
     net->num_inputs = net_conf->net_map->num_inputs;
     net->num_neurons = net_conf->net_map->num_neurons;
-    net->net_size = net_conf->net_map->net_size;
+    net->net_size = net->num_inputs + net->num_neurons;
     net->num_outputs = net_conf->net_map->num_outputs;
     net->mutated_neuron_idx = 0;
 

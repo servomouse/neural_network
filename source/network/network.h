@@ -13,7 +13,6 @@ typedef struct {
 typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
-    uint32_t net_size;
     uint32_t *neurons;  // subneuron_description_t is used here
     uint32_t num_outputs;
     uint32_t output_indices[];

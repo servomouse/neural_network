@@ -6,42 +6,32 @@
 #include "utils.h"
 #include "tests/datasets.c"
 
+#define DATASET polynome_dataset
+#define DATASET_SIZE sizeof_arr(DATASET)
+
 int test_mutation(neuron_params_t *n) {
-    double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error before mutation = %f;\n", init_error);
+    double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
 
     neuron_mutate(n);
-    double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error after mutation = %f;\n", error);
+    double error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(error == init_error) {
         printf("Error: mutation doesn't work, error == init_error");
         return EXIT_FAILURE;
     }
-
-    // neuron_rollback(n);
-    // error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error after mutation = %f;\n", error);
-    // if(error != init_error) {
-    //     printf("Error: rollback doesn't work, error != init_error");
-    //     return EXIT_FAILURE;
-    // }
     return EXIT_SUCCESS;
 }
 
 int test_rollback(neuron_params_t *n) {
-    double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error before mutation = %f;\n", init_error);
+    double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
     neuron_stash_state(n);
 
     double error;
     for(uint32_t i=0; i<4; i++) {
         neuron_set_coeff(n, i, 0.5);
-        error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-        // printf("Error after setting coeff %d = %f;\n", i, error);
+        error = get_error(n, DATASET, DATASET_SIZE, 0);
         neuron_rollback(n);
     }
-    error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error after rollback = %f;\n", error);
+    error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(error != init_error) {
         printf("Error: rollback doesn't work, error != init_error");
         return EXIT_FAILURE;
@@ -50,34 +40,29 @@ int test_rollback(neuron_params_t *n) {
 }
 
 int test_save_restore(neuron_params_t *n) {
-    double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
     compressed_neuron_t *c_neuron = neuron_save(n);
     neuron_set_coeff(n, 0, 0.5);
     neuron_set_coeff(n, 1, 0.5);
     neuron_set_coeff(n, 2, 0.5);
     neuron_set_coeff(n, 3, 0.5);
-    // double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    // printf("Error after setting coeffs = %f;\n", error);
     neuron_restore(n, c_neuron);
     free(c_neuron);
-    double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    double error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(init_error != error) {
         printf("Error: save-restore doesn't work: error after restore != error before save");
         return EXIT_FAILURE;
     }
-    // printf("Error after restore = %f;\n", error);
     return EXIT_SUCCESS;
 }
 
 int test_output(neuron_params_t *n) {
     neuron_stash_state(n);
     for(uint32_t i=0; i<16; i++) {
-        // printf("Setting coeff[%d] to %f\n", i, 0.02 * i);
         neuron_set_coeff(n, i, 0.02 * i+1);
     }
-    double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    double error = get_error(n, DATASET, DATASET_SIZE, 0);
     neuron_rollback(n);
-    // printf("Error after setting coeffs = %f;\n", error);
     if(round_to_precision(error, 6) == 0.517241) {
         return EXIT_SUCCESS;
     }

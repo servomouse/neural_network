@@ -151,7 +151,7 @@ add_subdirectory(train_micronets)
 
 # include("${PROJECT_SOURCE_DIR}/train_embedded_micronet.cmake")
 
-add_custom_target(cleanup-build-folder
+add_custom_target(cleanup
     COMMAND ${CMAKE_COMMAND} -E echo "Cleaning up build folder..."
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cleanup.cmake
 )

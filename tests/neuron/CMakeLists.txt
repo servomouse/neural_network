@@ -52,3 +52,6 @@ add_neuron_test(neuron_linear_test)
 
 # Test poly neuron functionality
 add_neuron_test(neuron_poly_test)
+
+# Test poly neuron adaptation
+add_neuron_test(neuron_poly_test_adaptation)

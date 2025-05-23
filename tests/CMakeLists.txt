@@ -20,4 +20,5 @@ add_custom_target(runtests
         network_instantiate_test
         network_test_micronet
         network_test_save_restore
+        neuron_poly_test_adaptation
 )

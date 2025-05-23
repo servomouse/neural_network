@@ -17,6 +17,25 @@ dataset_entry_t linear_dataset[] = {
     {.inputs = {1.0, 1.0, -1.0, -1.0}, .output = -0.03},
 };
 
+dataset_entry_t xor_dataset[] = {
+    {.inputs = {0, 0, 0, 0}, .output = 0.0},
+    {.inputs = {0, 0, 0, 1}, .output = 1.0},
+    {.inputs = {0, 0, 1, 0}, .output = 1.0},
+    {.inputs = {0, 0, 1, 1}, .output = 1.0},
+    {.inputs = {0, 1, 0, 0}, .output = 1.0},
+    {.inputs = {0, 1, 0, 1}, .output = 1.0},
+    {.inputs = {0, 1, 1, 0}, .output = 1.0},
+    {.inputs = {0, 1, 1, 1}, .output = 1.0},
+    {.inputs = {1, 0, 0, 0}, .output = 1.0},
+    {.inputs = {1, 0, 0, 1}, .output = 1.0},
+    {.inputs = {1, 0, 1, 0}, .output = 1.0},
+    {.inputs = {1, 0, 1, 1}, .output = 1.0},
+    {.inputs = {1, 1, 0, 0}, .output = 1.0},
+    {.inputs = {1, 1, 0, 1}, .output = 1.0},
+    {.inputs = {1, 1, 1, 0}, .output = 1.0},
+    {.inputs = {1, 1, 1, 1}, .output = 0.0},
+};
+
 dataset_entry_t polynome_dataset[] = {
     {.inputs = {0.01, 0.05, 0.02, 0.03}, .output = 0.0},
     {.inputs = {0.07, 0.02, 0.05, 0.01}, .output = 0.0},

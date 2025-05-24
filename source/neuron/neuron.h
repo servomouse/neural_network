@@ -32,7 +32,7 @@ void neuron_rollback(neuron_params_t * n_params);
 // For internal use:
 
 void neuron_linear_init(neuron_params_t * n_params, uint32_t num_inputs);
-void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs);
+// void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs);
 
 double neuron_linear_get_output(neuron_params_t *n_params, double *inputs);
-double neuron_poly_get_output(neuron_params_t *n_params, double *inputs);
+// double neuron_poly_get_output(neuron_params_t *n_params, double *inputs);

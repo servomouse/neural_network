@@ -1,8 +1,9 @@
+add_subdirectory(linear)
 add_subdirectory(poly)
 
 set(NEURON_SOURCES
     neuron.c
-    neuron_linear.c
+    # neuron_linear.c
     # neuron_poly.c
     neuron_mutations.c
     neuron_save_restore.c
@@ -14,6 +15,7 @@ target_link_libraries(neuron
     PRIVATE
         utils
         poly_neuron
+        linear_neuron
 )
 
 target_include_directories(neuron

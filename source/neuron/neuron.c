@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "neuron.h"
 #include "poly/poly_neuron.h"
+#include "linear/linear_neuron.h"
 
 static double activation_func(double sum) {
     if(sum > 1.0) {

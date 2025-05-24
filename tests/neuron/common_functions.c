@@ -14,9 +14,9 @@ double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t datas
     double error = 0;
     // neuron_reset_output_counter(config);
     for(size_t i=0; i<dataset_size; i++) {
-        if(to_print) {
-            printf("Stage %lld:\n", i);
-        }
+        // if(to_print) {
+        //     printf("Stage %lld:\n", i);
+        // }
         double output = neuron_get_output(config, dataset[i].inputs);
 
         double diff = dataset[i].output - output;
@@ -24,7 +24,7 @@ double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t datas
         // network_set_global_error(config, e);
 
         if(to_print) {
-            printf("Error: %f\n", e);
+            // printf("Error: %f\n", e);
             printf("Desired output: %f; real output: %f;\n", dataset[i].output, output);
         }
         error += e;

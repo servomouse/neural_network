@@ -1,72 +1,40 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
-#include <math.h>
-#include "utils.h"
 #include "neuron.h"
+#include "linear_neuron.h"
 #include "poly_neuron.h"
-
-static double control_coeffs_func(double coeff) {
-    if(coeff > 1.0) {
-        return 1.0;
-    } else if(coeff < -1.0) {
-        return -1.0;
-    } else {
-        return coeff;
-    }
-}
 
 // The opposite is neuron_rollback
 void neuron_stash_state(neuron_params_t * n_params) {
-    if(n_params->n_type == NPoly) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_stash_state(n_params);
+    } else if(n_params->n_type == NPoly) {
         neuron_poly_stash_state(n_params);
     } else {
-        for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-            n_params->last_vector[i] = n_params->coeffs[i];
-        }
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
-    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
-    // exit(EXIT_FAILURE);
 }
 
 void neuron_mutate(neuron_params_t * n_params) {
-    if(n_params->n_type == NPoly) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_mutate(n_params);
+    } else if(n_params->n_type == NPoly) {
         neuron_poly_mutate(n_params);
     } else {
-        neuron_stash_state(n_params);
-        
-        if(n_params->mutated == 1) {    // If previuos mutation was successfull, keep going in the same direction
-            n_params->bad_mutations_counter = 0;
-        } else {
-            if(n_params->bad_mutations_counter >= 10000) {
-                // If there was many unsuccessfull mutations, try a large mutation
-                gen_vector(n_params->num_coeffs, random_double(0, 1), n_params->rand_vector);
-            } else {
-                gen_vector(n_params->num_coeffs, random_double(0, n_params->mutation_step), n_params->rand_vector);
-            }
-        }
-        for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-            n_params->coeffs[i] = control_coeffs_func(n_params->coeffs[i] + n_params->rand_vector[i]);
-        }
-        n_params->mutated = 1;
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
-    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
-    // exit(EXIT_FAILURE);
 }
 
 // The opposite is neuron_stash_state
 void neuron_rollback(neuron_params_t * n_params) {
-    if(n_params->n_type == NPoly) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_rollback(n_params);
+    } else if(n_params->n_type == NPoly) {
         neuron_poly_rollback(n_params);
     } else {
-        for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-            n_params->coeffs[i] = n_params->last_vector[i];
-        }
-        if(n_params->mutated == 1) {
-            n_params->bad_mutations_counter ++;
-            n_params-> mutated = 0;
-        }
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
-    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
-    // exit(EXIT_FAILURE);
 }

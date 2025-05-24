@@ -25,6 +25,8 @@ void neuron_stash_state(neuron_params_t * n_params) {
             n_params->last_vector[i] = n_params->coeffs[i];
         }
     }
+    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+    // exit(EXIT_FAILURE);
 }
 
 void neuron_mutate(neuron_params_t * n_params) {
@@ -48,6 +50,8 @@ void neuron_mutate(neuron_params_t * n_params) {
         }
         n_params->mutated = 1;
     }
+    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+    // exit(EXIT_FAILURE);
 }
 
 // The opposite is neuron_stash_state
@@ -63,4 +67,6 @@ void neuron_rollback(neuron_params_t * n_params) {
             n_params-> mutated = 0;
         }
     }
+    // printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+    // exit(EXIT_FAILURE);
 }

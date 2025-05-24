@@ -4,10 +4,8 @@
 #include <math.h>
 #include "utils.h"
 #include "poly_neuron.h"
-// #include "neuron.h"
 
 void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
-    // printf("Creating neuron with %d inputs, %s\n", num_inputs, BCKP_DIR_PATH);
     n_params->n_type = NPoly;
     n_params->num_inputs = num_inputs;
     n_params->num_coeffs = 1 << num_inputs;
@@ -33,9 +31,6 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
 }
 
 double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
-    for(size_t i=0; i<n_params->num_inputs; i++) {
-        n_params->inputs[i] = inputs[n_params->indices[i]];
-    }
     double output = n_params->coeffs[0];         // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;

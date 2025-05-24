@@ -3,8 +3,6 @@ add_subdirectory(poly)
 
 set(NEURON_SOURCES
     neuron.c
-    # neuron_linear.c
-    # neuron_poly.c
     neuron_mutations.c
     neuron_save_restore.c
 )

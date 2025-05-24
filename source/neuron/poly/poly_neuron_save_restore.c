@@ -25,15 +25,12 @@ compressed_neuron_t * neuron_poly_save(neuron_params_t * n_params) {
 }
 
 uint32_t neuron_poly_restore(neuron_params_t * n_params, compressed_neuron_t * n_data) {
-    // compressed_neuron_t *n_data = restore_data(filename);
     uint32_t ret_val = n_data->size;
-    // printf("Neuron: restoring %d bytes\n", ret_val);
     n_params->n_type = n_data->n_type;
     n_params->num_inputs = n_data->num_inputs;
     n_params->num_coeffs = n_data->num_coeffs;
     for(uint32_t i=0; i<n_data->num_coeffs; i++) {
         n_params->coeffs[i] = n_data->coeffs[i];
     }
-    // free(n_data);
     return ret_val;
 }

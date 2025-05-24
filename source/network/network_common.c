@@ -56,7 +56,7 @@ static network_map_t * network_copy_map(network_map_t *src) {
     }
     uint32_t n_field_size = get_neurons_field_size(src->neurons, src->num_neurons);
     free_if_needed(dst->neurons);
-    dst->neurons = calloc(n_field_size, 1);
+    dst->neurons = calloc(n_field_size, sizeof(uint32_t));
     memcpy(dst->neurons, src->neurons, n_field_size);
 
     dst->neurons = &src->neurons[0];

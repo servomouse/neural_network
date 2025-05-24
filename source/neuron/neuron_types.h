@@ -24,6 +24,11 @@ typedef struct {
     double value;
 } complex_value_t;
 
+typedef struct {
+    double mul;
+    double div;
+} complex_coeff_t;
+
 typedef enum uint32_t {
     NLinear = 0,    // Simple perceptron
     NPoly,          // Polynomial neuron

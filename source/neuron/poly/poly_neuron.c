@@ -16,14 +16,10 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
     n_params->indices = alloc_memory(n_params->indices, n_params->num_inputs, sizeof(uint32_t));
 
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
-    n_params->c_net_stash = alloc_memory(n_params->c_net_stash, n_params->num_coeffs, sizeof(double));
-    n_params->c_deltas = alloc_memory(n_params->c_deltas, n_params->num_coeffs, sizeof(double));
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
     n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
-    n_params->backup_coeffs = alloc_memory(n_params->backup_coeffs, n_params->num_coeffs, sizeof(double));
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         n_params->coeffs[i] = random_double(-0.1, 0.1);
-        n_params->backup_coeffs[i] = n_params->coeffs[i];
     }
 
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));

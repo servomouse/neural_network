@@ -51,21 +51,22 @@ typedef struct {
 
 typedef struct {
     neuron_type_t n_type;
+    // Inputs:
+    uint32_t num_inputs;
     double *inputs;
     uint32_t *indices;
+    // Coeffitients:
     double *coeffs;
-    double *c_deltas;
-    double *c_net_stash;
-    double *backup_coeffs;
-    double *last_vector;
-    double *rand_vector;
-    double output;
     uint32_t num_coeffs;
-    uint32_t num_inputs;
-    feedback_item_t feedback;
-    double global_error;    // Error of the entire network
+
+    double output;
+    // Mutations:
+    double *last_vector;    // Used for the rollback functionality
+    double *rand_vector;    // Random vector for a mutation
     uint32_t mutated;
     uint32_t bad_mutations_counter;
     double mutation_step;
     uint8_t is_mutable;
+    // Adaptation:
+    double global_error;    // Error of the entire network
 } neuron_params_t;

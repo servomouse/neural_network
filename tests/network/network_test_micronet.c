@@ -60,13 +60,16 @@ int test_basic_functions(network_t *config) {
     network_mutate(config);
     double error_before = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == init_error) {
+        printf("Error: error after mutation == initial error!\n");
         return EXIT_FAILURE;
     }
     network_rollback(config);
     double error_after = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == error_after) {
+        printf("Error: error after rollback == error after mutation!\n");
         return EXIT_FAILURE;
     } else if(error_after != init_error) {
+        printf("Error: error after rollback != initial error!\n");
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

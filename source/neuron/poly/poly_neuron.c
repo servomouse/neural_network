@@ -15,22 +15,20 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
     n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, n_params->num_inputs, sizeof(uint32_t));
 
-    n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
-    n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
-    n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
+    n_params->coeffs      = alloc_memory(n_params->coeffs,      n_params->num_coeffs, sizeof(complex_coeff_t));
+    n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(complex_coeff_t));
+    n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(complex_coeff_t));
 
-    double *coeffs = (double*)n_params->coeffs;
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        coeffs[i] = random_double(-0.1, 0.1);
+        coeffs[i].val[MUL] = random_double(-0.1, 0.1);
+        coeffs[i].val[DIV] = random_double(DIV_LOW_LIMIT, 1.0);
     }
-
-    // n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
-    // n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
 }
 
 double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
-    double *coeffs = (double*)n_params->coeffs;
-    double output = coeffs[0];         // BIAS
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    double output = coeffs[0].val[MUL];     // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;
         for(size_t j=0; j<n_params->num_inputs; j++) {
@@ -39,7 +37,7 @@ double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
                 temp *= inputs[idx];
             }
         }
-        output += temp * coeffs[i];
+        output += (temp * coeffs[i].val[MUL]) / coeffs[i].val[DIV];
     }
     return output;
 }

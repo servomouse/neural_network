@@ -25,8 +25,7 @@ typedef struct {
 } complex_value_t;
 
 typedef struct {
-    double mul;
-    double div;
+    double val[2];
 } complex_coeff_t;
 
 typedef enum uint32_t {
@@ -41,7 +40,8 @@ typedef struct {
     neuron_type_t n_type;
     uint32_t num_inputs;
     uint32_t num_coeffs;
-    double coeffs[0];
+    uint8_t coeffs[0];  // Treat this field as plain bytes
+                        // Will be casrted to the correct type when needed
 } compressed_neuron_t;
 
 typedef struct {

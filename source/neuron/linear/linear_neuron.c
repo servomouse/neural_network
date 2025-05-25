@@ -22,9 +22,6 @@ void neuron_linear_init(neuron_params_t * n_params, uint32_t num_inputs) {
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
         coeffs[i] = random_double(-0.1, 0.1);
     }
-
-    // n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
-    // n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
 }
 
 double neuron_linear_get_output(neuron_params_t *n_params, double *inputs) {

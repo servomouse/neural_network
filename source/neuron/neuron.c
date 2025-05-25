@@ -25,7 +25,7 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
         neuron_poly_init(n_params, num_inputs);
     } else {
         printf("Error: unknown neuron type: %d; exit\n", n_type);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -35,7 +35,7 @@ void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint
         return;
     }
     printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 void neuron_set_coeffs(neuron_params_t * n_params, double *new_coeffs) {

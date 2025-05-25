@@ -19,8 +19,9 @@ compressed_neuron_t * neuron_linear_save(neuron_params_t * n_params) {
     n_data->n_type = n_params->n_type;
     n_data->num_inputs = n_params->num_inputs;
     n_data->num_coeffs = n_params->num_coeffs;
+    double *c_coeffs = (double*)n_data->coeffs;
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        n_data->coeffs[i] = coeffs[i];
+        c_coeffs[i] = coeffs[i];
     }
     return n_data;
 }
@@ -31,8 +32,9 @@ uint32_t neuron_linear_restore(neuron_params_t * n_params, compressed_neuron_t *
     n_params->n_type = n_data->n_type;
     n_params->num_inputs = n_data->num_inputs;
     n_params->num_coeffs = n_data->num_coeffs;
+    double *c_coeffs = (double*)n_data->coeffs;
     for(uint32_t i=0; i<n_data->num_coeffs; i++) {
-        coeffs[i] = n_data->coeffs[i];
+        coeffs[i] = c_coeffs[i];
     }
     return ret_val;
 }

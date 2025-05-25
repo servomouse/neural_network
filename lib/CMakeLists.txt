@@ -1,5 +1,6 @@
 add_library(utils
     utils.c
+    mymath.c
     work_with_folders.c
 )
 

@@ -18,16 +18,19 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
     n_params->coeffs = alloc_memory(n_params->coeffs, n_params->num_coeffs, sizeof(double));
     n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
     n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
+
+    double *coeffs = (double*)n_params->coeffs;
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        n_params->coeffs[i] = random_double(-0.1, 0.1);
+        coeffs[i] = random_double(-0.1, 0.1);
     }
 
-    n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
-    n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
+    // n_params->last_vector = alloc_memory(n_params->last_vector, n_params->num_coeffs, sizeof(double));
+    // n_params->rand_vector = alloc_memory(n_params->rand_vector, n_params->num_coeffs, sizeof(double));
 }
 
 double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
-    double output = n_params->coeffs[0];         // BIAS
+    double *coeffs = (double*)n_params->coeffs;
+    double output = coeffs[0];         // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;
         for(size_t j=0; j<n_params->num_inputs; j++) {
@@ -36,7 +39,7 @@ double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
                 temp *= inputs[idx];
             }
         }
-        output += temp * n_params->coeffs[i];
+        output += temp * coeffs[i];
     }
     return output;
 }

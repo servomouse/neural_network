@@ -12,7 +12,7 @@ double neuron_get_output(neuron_params_t * n_params, double *inputs);
 // Helper functions:
 void neuron_set_input_idx(neuron_params_t * n_params, uint32_t input_number, uint32_t input_idx);
 void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value);
-void neuron_set_coeffs(neuron_params_t * n_params, double *coeffs);
+void neuron_set_coeffs(neuron_params_t * n_params, double *new_coeffs);
 double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx);
 void neuron_print_coeffs(neuron_params_t * n_params);
 

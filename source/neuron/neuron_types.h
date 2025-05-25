@@ -56,13 +56,13 @@ typedef struct {
     double *inputs;
     uint32_t *indices;
     // Coeffitients:
-    double *coeffs;
+    void *coeffs;
     uint32_t num_coeffs;
 
     double output;
     // Mutations:
-    double *last_vector;    // Used for the rollback functionality
-    double *rand_vector;    // Random vector for a mutation
+    void *last_vector;    // Used for the rollback functionality
+    void *rand_vector;    // Random vector for a mutation
     uint32_t mutated;
     uint32_t bad_mutations_counter;
     double mutation_step;

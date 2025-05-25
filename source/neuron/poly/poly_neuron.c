@@ -41,3 +41,34 @@ double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
     }
     return output;
 }
+
+void neuron_poly_set_coeffs(neuron_params_t * n_params, void *new_coeffs) {
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    complex_coeff_t *new_values = (complex_coeff_t*)new_coeffs;
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        coeffs[i].val[MUL] = new_values[i].val[MUL];
+        coeffs[i].val[DIV] = new_values[i].val[DIV];
+    }
+}
+
+void neuron_poly_set_coeff(neuron_params_t * n_params, uint32_t idx, void *new_coeff) {
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    complex_coeff_t *new_value = (complex_coeff_t*)new_coeff;
+    if(idx < n_params->num_coeffs) {
+        coeffs[idx].val[MUL] = new_value[0].val[MUL];
+        coeffs[idx].val[DIV] = new_value[0].val[DIV];
+    }
+}
+
+double neuron_poly_get_coeff(neuron_params_t * n_params, uint32_t idx) {
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    return coeffs[idx].val[MUL];
+}
+
+void neuron_poly_print_coeffs(neuron_params_t * n_params) {
+    complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        printf("[%f, %f], ", coeffs[i].val[MUL], coeffs[i].val[DIV]);
+    }
+    printf("\n");
+}

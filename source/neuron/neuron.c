@@ -38,25 +38,6 @@ void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint
     exit(EXIT_FAILURE);
 }
 
-void neuron_set_coeffs(neuron_params_t * n_params, double *new_coeffs) {
-    double *coeffs = (double*)n_params->coeffs;
-    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        coeffs[i] = new_coeffs[i];
-    }
-}
-
-void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, double new_value) {
-    double *coeffs = (double*)n_params->coeffs;
-    if(idx < n_params->num_coeffs) {
-        coeffs[idx] = new_value;
-    }
-}
-
-double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx) {
-    double *coeffs = (double*)n_params->coeffs;
-    return coeffs[idx];
-}
-
 double neuron_get_output(neuron_params_t *n_params, double *inputs) {
     for(size_t i=0; i<n_params->num_inputs; i++) {
         n_params->inputs[i] = inputs[n_params->indices[i]];
@@ -73,10 +54,46 @@ double neuron_get_output(neuron_params_t *n_params, double *inputs) {
     return activation_func(output);
 }
 
-void neuron_print_coeffs(neuron_params_t * n_params) {
-    double *coeffs = (double*)n_params->coeffs;
-    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
-        printf("%f, ", coeffs[i]);
+void neuron_set_coeffs(neuron_params_t * n_params, void *new_coeffs) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_set_coeffs(n_params, new_coeffs);
+    } else if(n_params->n_type == NPoly) {
+        neuron_poly_set_coeffs(n_params, new_coeffs);
+    } else {
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
-    printf("\n");
+}
+
+void neuron_set_coeff(neuron_params_t * n_params, uint32_t idx, void *new_coeff) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_set_coeff(n_params, idx, new_coeff);
+    } else if(n_params->n_type == NPoly) {
+        neuron_poly_set_coeff(n_params, idx, new_coeff);
+    } else {
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
+}
+
+double neuron_get_coeff(neuron_params_t * n_params, uint32_t idx) {
+    if(n_params->n_type == NLinear) {
+        return neuron_linear_get_coeff(n_params, idx);
+    } else if(n_params->n_type == NPoly) {
+        return neuron_poly_get_coeff(n_params, idx);
+    } else {
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void neuron_print_coeffs(neuron_params_t * n_params) {
+    if(n_params->n_type == NLinear) {
+        neuron_linear_print_coeffs(n_params);
+    } else if(n_params->n_type == NPoly) {
+        neuron_poly_print_coeffs(n_params);
+    } else {
+        printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
 }

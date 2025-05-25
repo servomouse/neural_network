@@ -22,3 +22,9 @@ void neuron_poly_rollback(neuron_params_t * n_params);
 uint32_t neuron_poly_get_data_size(neuron_params_t *neuron);
 compressed_neuron_t * neuron_poly_save(neuron_params_t * n_params); // Free the returned value after use
 uint32_t neuron_poly_restore(neuron_params_t * n_params, compressed_neuron_t * n_data);
+
+// Helper functions:
+void neuron_poly_set_coeffs(neuron_params_t * n_params, void *new_coeffs);
+void neuron_poly_set_coeff(neuron_params_t * n_params, uint32_t idx, void *new_value);
+double neuron_poly_get_coeff(neuron_params_t * n_params, uint32_t idx);
+void neuron_poly_print_coeffs(neuron_params_t * n_params);

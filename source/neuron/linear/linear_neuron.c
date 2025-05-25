@@ -33,3 +33,31 @@ double neuron_linear_get_output(neuron_params_t *n_params, double *inputs) {
     }
     return output;
 }
+
+void neuron_linear_set_coeffs(neuron_params_t * n_params, void *new_coeffs) {
+    double *coeffs = (double*)n_params->coeffs;
+    double *new_values = (double*)new_coeffs;
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        coeffs[i] = new_values[i];
+    }
+}
+
+void neuron_linear_set_coeff(neuron_params_t * n_params, uint32_t idx, void *new_coeff) {
+    double *coeffs = (double*)n_params->coeffs;
+    if(idx < n_params->num_coeffs) {
+        coeffs[idx] = *(double*)new_coeff;
+    }
+}
+
+double neuron_linear_get_coeff(neuron_params_t * n_params, uint32_t idx) {
+    double *coeffs = (double*)n_params->coeffs;
+    return coeffs[idx];
+}
+
+void neuron_linear_print_coeffs(neuron_params_t * n_params) {
+    double *coeffs = (double*)n_params->coeffs;
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        printf("%f, ", coeffs[i]);
+    }
+    printf("\n");
+}

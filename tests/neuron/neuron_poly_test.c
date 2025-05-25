@@ -26,8 +26,9 @@ int test_rollback(neuron_params_t *n) {
     neuron_stash_state(n);
 
     double error;
+    double coeff_values[] = {0.5, 1.0};
     for(uint32_t i=0; i<4; i++) {
-        neuron_set_coeff(n, i, 0.5);
+        neuron_set_coeff(n, i, (void*)&coeff_values);
         error = get_error(n, DATASET, DATASET_SIZE, 0);
         neuron_rollback(n);
     }
@@ -42,10 +43,10 @@ int test_rollback(neuron_params_t *n) {
 int test_save_restore(neuron_params_t *n) {
     double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
     compressed_neuron_t *c_neuron = neuron_save(n);
-    neuron_set_coeff(n, 0, 0.5);
-    neuron_set_coeff(n, 1, 0.5);
-    neuron_set_coeff(n, 2, 0.5);
-    neuron_set_coeff(n, 3, 0.5);
+    double coeff_values[] = {0.5, 1.0};
+    for(uint32_t i=0; i<4; i++) {
+        neuron_set_coeff(n, i, (void*)&coeff_values);
+    }
     neuron_restore(n, c_neuron);
     free(c_neuron);
     double error = get_error(n, DATASET, DATASET_SIZE, 0);
@@ -59,14 +60,15 @@ int test_save_restore(neuron_params_t *n) {
 int test_output(neuron_params_t *n) {
     neuron_stash_state(n);
     for(uint32_t i=0; i<16; i++) {
-        neuron_set_coeff(n, i, 0.02 * i+1);
+        double coeff_values[] = {0.02 * i+1, 1.0};
+        neuron_set_coeff(n, i, (void*)&coeff_values);
     }
     double error = get_error(n, DATASET, DATASET_SIZE, 0);
     neuron_rollback(n);
     if(round_to_precision(error, 6) == 0.517241) {
         return EXIT_SUCCESS;
     }
-    printf("Error: error value differs from expected!");
+    printf("Error: error value differs from expected! Error: %f\n", error);
     return EXIT_FAILURE;
 }
 

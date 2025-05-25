@@ -10,7 +10,7 @@ void neuron_init_coeffs(neuron_params_t *n) {
     double coeffs[5] = {-0.02, -0.01, 0.01, 0.02, 0.03};
 
     for(uint32_t i=0; i<5; i++) {
-        neuron_set_coeff(n, i, coeffs[i]);
+        neuron_set_coeff(n, i, (void*)&coeffs[i]);
     }
 }
 
@@ -39,8 +39,9 @@ int test_rollback(neuron_params_t *n) {
     neuron_stash_state(n);
 
     double error;
+    double coeff_value = 0.5;
     for(uint32_t i=0; i<5; i++) {
-        neuron_set_coeff(n, i, 0.5);
+        neuron_set_coeff(n, i, (void*)&coeff_value);
         error = get_error(n, linear_dataset, sizeof_arr(linear_dataset), 0);
         if(error == init_error) {
             printf("Test rollback error: changing coeffitient does not affect neuron output!");
@@ -60,10 +61,11 @@ int test_save_restore(neuron_params_t *n) {
     neuron_init_coeffs(n);
 
     compressed_neuron_t *c_neuron = neuron_save(n);
-    neuron_set_coeff(n, 0, 0.5);
-    neuron_set_coeff(n, 1, 0.5);
-    neuron_set_coeff(n, 2, 0.5);
-    neuron_set_coeff(n, 3, 0.5);
+    double coeff_value = 0.5;
+    neuron_set_coeff(n, 0, (void*)&coeff_value);
+    neuron_set_coeff(n, 1, (void*)&coeff_value);
+    neuron_set_coeff(n, 2, (void*)&coeff_value);
+    neuron_set_coeff(n, 3, (void*)&coeff_value);
     double error = get_error(n, linear_dataset, sizeof_arr(linear_dataset), 0);
     if(0 == error) {
         printf("Save-restore error: error after modification == 0!\n");

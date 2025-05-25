@@ -1,16 +1,45 @@
 #include "common_functions.h"
 #include "datasets.c"
 
-int test_rollback(neuron_params_t *n) {
+int test_linear_rollback(neuron_params_t *n) {
     double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
     // printf("Error before mutation = %f;\n", init_error);
     neuron_stash_state(n);
 
     double error;
+    double coeff_value = 0.5;
     for(uint32_t i=0; i<4; i++) {
-        neuron_set_coeff(n, i, 0.5);
+        neuron_set_coeff(n, i, (void*)&coeff_value);
         error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-        // printf("Error after setting coeff %d = %f;\n", i, error);
+        if(error == init_error) {
+            printf("Error: neuron_set_coeff doesn't work, error == init_error");
+            return EXIT_FAILURE;
+        }
+        neuron_rollback(n);
+    }
+    error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    // printf("Error after rollback = %f;\n", error);
+    if(error != init_error) {
+        printf("Error: rollback doesn't work, error != init_error");
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+int test_poly_rollback(neuron_params_t *n) {
+    double init_error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    // printf("Error before mutation = %f;\n", init_error);
+    neuron_stash_state(n);
+
+    double error;
+    double coeff_values[] = {0.5, 1.0};
+    for(uint32_t i=0; i<4; i++) {
+        neuron_set_coeff(n, i, (void*)&coeff_values);
+        error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+        if(error == init_error) {
+            printf("Error: neuron_set_coeff doesn't work, error == init_error");
+            return EXIT_FAILURE;
+        }
         neuron_rollback(n);
     }
     error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
@@ -29,15 +58,16 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&poly_neuron, j, j);
     }
-    if(test_func(test_rollback, &poly_neuron, "poly neuron rollback")) {
+    if(test_func(test_poly_rollback, &poly_neuron, "poly neuron rollback")) {
         return EXIT_FAILURE;
     }
+
     neuron_params_t linear_neuron = {0};
     neuron_init(&linear_neuron, NLinear, 4);
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&linear_neuron, j, j);
     }
-    if(test_func(test_rollback, &linear_neuron, "linear neuron rollback")) {
+    if(test_func(test_linear_rollback, &linear_neuron, "linear neuron rollback")) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

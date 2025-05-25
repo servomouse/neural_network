@@ -1,19 +1,29 @@
 #include "common_functions.h"
 #include "datasets.c"
 
-int test_output(neuron_params_t *n) {
-    neuron_stash_state(n);
+int test_linear_output(neuron_params_t *n) {
     for(uint32_t i=0; i<16; i++) {
-        // printf("Setting coeff[%d] to %f\n", i, 0.02 * i);
-        neuron_set_coeff(n, i, 0.02 * i+1);
+        double value = 0.02 * i+1;
+        neuron_set_coeff(n, i, (void*)&value);
     }
     double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
-    neuron_rollback(n);
-    // printf("Error after setting coeffs = %f;\n", error);
     if(round_to_precision(error, 6) == 0.517241) {
         return EXIT_SUCCESS;
     }
-    printf("Error: error value differs from expected!");
+    printf("Error: error value differs from expected! Value = %f", error);
+    return EXIT_FAILURE;
+}
+
+int test_poly_output(neuron_params_t *n) {
+    for(uint32_t i=0; i<16; i++) {
+        double vals[] = {0.02 * i+1, 1.0};
+        neuron_set_coeff(n, i, (void*)&vals);
+    }
+    double error = get_error(n, polynome_dataset, sizeof_arr(polynome_dataset), 0);
+    if(round_to_precision(error, 6) == 0.517241) {
+        return EXIT_SUCCESS;
+    }
+    printf("Error: error value differs from expected! Value = %f", error);
     return EXIT_FAILURE;
 }
 
@@ -24,7 +34,7 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&poly_neuron, j, j);
     }
-    if(test_func(test_output, &poly_neuron, "poly neuron output")) {
+    if(test_func(test_poly_output, &poly_neuron, "poly neuron output")) {
         return EXIT_FAILURE;
     }
     neuron_params_t linear_neuron = {0};
@@ -32,7 +42,7 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&linear_neuron, j, j);
     }
-    if(test_func(test_output, &linear_neuron, "linear neuron output")) {
+    if(test_func(test_linear_output, &linear_neuron, "linear neuron output")) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

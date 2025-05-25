@@ -88,7 +88,7 @@ void init_coeffs(network_t *net) {
         for(uint32_t j=0; j<5; j++) {
             // double coeff = random_double(-0.75, 0.75);
             // printf("%f, ", coeff);
-            neuron_set_coeff(&net->neurons[i], j, linear_coeffs[i][j]);
+            neuron_set_coeff(&net->neurons[i], j, (void*)&linear_coeffs[i][j]);
         }
         // printf("},\n");
     }
@@ -115,9 +115,10 @@ int main(void) {
     // return 0;
 
     // Update coeffs
+    double coeff_val = 0.1;
     for(uint32_t i=0; i<5; i++) {
         for(uint32_t j=0; j<5; j++) {
-            neuron_set_coeff(&target_net->neurons[i], j, 0.1);
+            neuron_set_coeff(&target_net->neurons[i], j, (void*)&coeff_val);
         }
     }
 

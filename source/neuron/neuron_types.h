@@ -69,4 +69,6 @@ typedef struct {
     uint8_t is_mutable;
     // Adaptation:
     double global_error;    // Error of the entire network
+    // Misc:
+    uint8_t inputs_set;
 } neuron_params_t;

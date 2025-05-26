@@ -32,6 +32,7 @@ void neuron_init(neuron_params_t * n_params, neuron_type_t n_type, uint32_t num_
 void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint32_t input_idx) {
     if(input_number < n_params->num_inputs) {
         n_params->indices[input_number] = input_idx;
+        n_params->inputs_set = 1;
         return;
     }
     printf("ERROR: index out of range: input_number = %d, network size = %d\n", input_number, n_params->num_inputs);
@@ -39,14 +40,18 @@ void neuron_set_input_idx(neuron_params_t *n_params, uint32_t input_number, uint
 }
 
 double neuron_get_output(neuron_params_t *n_params, double *inputs) {
+    if(n_params->inputs_set == 0) {
+        printf("Error: input indices was not set!\n");
+        exit(EXIT_FAILURE);
+    }
     for(size_t i=0; i<n_params->num_inputs; i++) {
         n_params->inputs[i] = inputs[n_params->indices[i]];
     }
     double output;
     if(n_params->n_type == NLinear) {
-        output = neuron_linear_get_output(n_params, inputs);
+        output = neuron_linear_get_output(n_params);
     } else if(n_params->n_type == NPoly) {
-        output = neuron_poly_get_output(n_params, inputs);
+        output = neuron_poly_get_output(n_params);
     } else {
         printf("Error: Unknown neuron type: %d! %s:%d\n", n_params->n_type, __FILE__, __LINE__);
         exit(EXIT_FAILURE);

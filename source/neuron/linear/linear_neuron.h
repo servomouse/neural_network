@@ -6,7 +6,7 @@
 #include "neuron_types.h"
 
 void neuron_linear_init(neuron_params_t * n_params, uint32_t num_inputs);
-double neuron_linear_get_output(neuron_params_t *n_params, double *inputs);
+double neuron_linear_get_output(neuron_params_t *n_params);
 
 // Mutations:
 void neuron_linear_stash_state(neuron_params_t * n_params);

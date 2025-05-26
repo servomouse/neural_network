@@ -11,6 +11,7 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
     n_params->num_coeffs = 1 << num_inputs;
     n_params->mutation_step = 0.1;
     n_params->is_mutable = 1;
+    n_params->inputs_set = 0;
 
     n_params->inputs = alloc_memory(n_params->inputs, n_params->num_inputs, sizeof(double));
     n_params->indices = alloc_memory(n_params->indices, n_params->num_inputs, sizeof(uint32_t));
@@ -26,18 +27,20 @@ void neuron_poly_init(neuron_params_t * n_params, uint32_t num_inputs) {
     }
 }
 
-double neuron_poly_get_output(neuron_params_t *n_params, double *inputs) {
+double neuron_poly_get_output(neuron_params_t *n_params) {
     complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
+    // printf("Inputs: [%f, %f, %f, %f]\n", n_params->inputs[0], n_params->inputs[1], n_params->inputs[2], n_params->inputs[3]);
     double output = coeffs[0].val[MUL];     // BIAS
     for(size_t i=1; i<n_params->num_coeffs; i++) {
         double temp = 1.0;
         for(size_t j=0; j<n_params->num_inputs; j++) {
             if(((1 << j) & i)> 0) {
                 uint32_t idx = n_params->indices[j];
-                temp *= inputs[idx];
+                temp *= n_params->inputs[idx];
             }
         }
         output += (temp * coeffs[i].val[MUL]) / coeffs[i].val[DIV];
+        // printf("temp = %f, coeffs = [%f, %f], output = %f\n", temp, coeffs[i].val[MUL] , coeffs[i].val[DIV], output);
     }
     return output;
 }

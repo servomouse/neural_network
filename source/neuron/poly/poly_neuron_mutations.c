@@ -25,6 +25,18 @@ void neuron_poly_stash_state(neuron_params_t * n_params) {
     }
 }
 
+void gen_random_1d_vector(neuron_params_t * n_params) {
+    complex_coeff_t *rand_vector = (complex_coeff_t*)n_params->rand_vector;
+    uint32_t idx = random_int(0, n_params->num_coeffs);
+    uint32_t mul_div = random_int(0, 2);
+    double val = random_double(0, n_params->mutation_step);
+    for(uint32_t i=0; i<n_params->num_coeffs; i++) {
+        rand_vector[i].val[0] = 0;
+        rand_vector[i].val[1] = 0;
+    }
+    rand_vector[idx].val[mul_div] = val;
+}
+
 void neuron_poly_mutate(neuron_params_t * n_params) {
     neuron_poly_stash_state(n_params);
     complex_coeff_t *coeffs = (complex_coeff_t*)n_params->coeffs;
@@ -36,8 +48,10 @@ void neuron_poly_mutate(neuron_params_t * n_params) {
         if(n_params->bad_mutations_counter >= 10000) {
             // If there were many unsuccessfull mutations, try a large mutation
             gen_complex_vector(n_params->num_coeffs, random_double(0, 1), rand_vector);
+            n_params->bad_mutations_counter = 0;
         } else {
             gen_complex_vector(n_params->num_coeffs, random_double(0, n_params->mutation_step), rand_vector);
+            // gen_random_1d_vector(n_params);
         }
     }
     for(uint32_t i=0; i<n_params->num_coeffs; i++) {

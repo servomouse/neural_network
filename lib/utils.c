@@ -104,3 +104,15 @@ void * alloc_memory(void *p, size_t num_elements, size_t sizeof_element) {
     if(p) { free(p); }
     return calloc(num_elements, sizeof_element);
 }
+
+
+void __stack_chk_guard_setup(void)
+{
+     __stack_chk_guard = 0xBAAAAAAD;    //provide some magic numbers
+}
+
+void __stack_chk_fail(void)
+{
+    printf("Stack corrupted!\n");
+    exit(EXIT_FAILURE);                                
+}

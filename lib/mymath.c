@@ -116,3 +116,12 @@ uint64_t get_hash(uint8_t *data, size_t size) {
     }
     return hash;
 }
+
+int are_equal(double val1, double val2, int precision) {
+    double factor = pow(10.0, precision);
+    
+    long long scaled_val1 = (long long)round(val1 * factor);
+    long long scaled_val2 = (long long)round(val2 * factor);
+    
+    return scaled_val1 == scaled_val2;
+}

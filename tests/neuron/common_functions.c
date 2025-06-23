@@ -10,6 +10,13 @@ int test_func(int(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_
     return EXIT_SUCCESS;
 }
 
+int test_func_no_ret(void(*foo)(neuron_params_t*), neuron_params_t *n, const char *test_name) {
+    printf("Testing %s . . . ", test_name);
+    foo(n);
+    printf("SUCCESS!\n");
+    return EXIT_SUCCESS;
+}
+
 double get_error(neuron_params_t *config, dataset_entry_t *dataset, size_t dataset_size, uint8_t to_print) {
     double error = 0;
     // neuron_reset_output_counter(config);

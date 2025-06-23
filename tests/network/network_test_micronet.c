@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "network_test_micronet.h"
+#include "lib/utils.h"
 
 #define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
 
@@ -55,27 +56,23 @@ static double get_error(network_t *config, u_dataset_entry_t *dataset, size_t da
     return error / dataset_size;
 }
 
-int test_basic_functions(network_t *config) {
+void test_basic_functions(network_t *config) {
     double init_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     network_mutate(config);
     double error_before = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == init_error) {
-        printf("Error: error after mutation == initial error!\n");
-        return EXIT_FAILURE;
+        RAISE("Error: error after mutation == initial error!\n");
     }
     network_rollback(config);
     double error_after = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(error_before == error_after) {
-        printf("Error: error after rollback == error after mutation!\n");
-        return EXIT_FAILURE;
+        RAISE("Error: error after rollback == error after mutation!\n");
     } else if(error_after != init_error) {
-        printf("Error: error after rollback != initial error!\n");
-        return EXIT_FAILURE;
+        RAISE("Error: error after rollback != initial error!\n");
     }
-    return EXIT_SUCCESS;
 }
 
-int test_multiple_mutations(network_t *config) {
+void test_multiple_mutations(network_t *config) {
     double init_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     double error_before, error_after;
     for(uint32_t i=0; i<10000; i++) {
@@ -85,16 +82,15 @@ int test_multiple_mutations(network_t *config) {
             network_rollback(config);
             error_after = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(error_before == error_after) {
-                return EXIT_FAILURE;
+                RAISE("Error: error_before == init_error (%f == %f)\n", error_before, init_error);
             } else if(error_after != init_error) {
-                return EXIT_FAILURE;
+                RAISE("Error: error_after != init_error (%f != %f)\n", error_after, init_error);
             }
         }
     }
-    return EXIT_SUCCESS;
 }
 
-int test_evolution(network_t *config) {
+void test_evolution(network_t *config) {
     double current_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     // double init_error = current_error;
     size_t counter = 0;
@@ -105,34 +101,29 @@ int test_evolution(network_t *config) {
             network_rollback(config);
             double temp_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(temp_error != current_error) {
-                return EXIT_FAILURE;
+                RAISE("Error: temp_error != current_error (%f != %f)\n", temp_error, current_error);
             }
         } else {
             current_error = new_error;
             double temp_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
             if(temp_error != current_error) {
-                return EXIT_FAILURE;
+                RAISE("Error: temp_error != current_error (%f != %f)\n", temp_error, current_error);
             }
         }
         if(new_error < current_error) {
-            return EXIT_FAILURE;
+            RAISE("Error: new_error < current_error (%f < %f)\n", new_error, current_error);
         }
     }
     
     double after_error = get_error(config, micronet_dataset, sizeof_arr(micronet_dataset), 1, 0);
     if(after_error != current_error) {
-        printf("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
-        return EXIT_FAILURE;
+        RAISE("ERROR: after_error != current_error: after_error = %f, current_error = %f\n", after_error, current_error);
     }
-    return EXIT_SUCCESS;
 }
 
-int test_func(int(*foo)(network_t*), network_t *n, const char *test_name) {
+int test_func(void(*foo)(network_t*), network_t *n, const char *test_name) {
     printf("Testing %s . . . ", test_name);
-    if(foo(n) == EXIT_FAILURE) {
-        printf(" ERROR!\n");
-        return EXIT_FAILURE;
-    }
+    foo(n);
     printf("SUCCESS!\n");
     return EXIT_SUCCESS;
 }

@@ -323,7 +323,7 @@ network_t * init_network(void) {
 int main(void) {
     srand(time(NULL));
     network_t *config = init_network();
-    printf("Network initialised! arr_size = %lld\n", sizeof_arr(dataset));
+    printf("Network initialised! arr_size = %d\n", sizeof_arr(dataset));
     // return 0;
 
     double init_error = get_error(config, dataset, sizeof_arr(dataset), network_map.num_outputs, 0);

@@ -12,6 +12,8 @@
 
 #define sizeof_arr(_x) sizeof(_x)/sizeof(_x[0])
 
+#define RAISE(msg, ...) printf(msg " (line %d in file %s)\n", ##__VA_ARGS__, __LINE__, __FILE__); fflush(stdout); exit(EXIT_FAILURE)
+
 void sleep_ms(int ms);
 void sleep_s(int s);
 int store_data(void *data, size_t size, char *filename);
@@ -31,6 +33,9 @@ double round_to_precision(double value, uint32_t precision);
 uint8_t count_bits(size_t value);
 uint64_t get_hash(uint8_t *data, size_t size);
 
+// Checks if the integer parts and the specified number of digits after the decimal point are equal
+int are_equal(double val1, double val2, int precision);
+
 // work_with_folders.c:
 // Returns 1 if the folder exists, 0 if it doesn't
 int is_dir_exist(const char *folder);
@@ -38,3 +43,6 @@ int is_dir_exist(const char *folder);
 FILE* fopen_no_matter_what(const char *filename, const char *access_mode);
 int remove_directory(const char *dir);
 
+unsigned long __stack_chk_guard;
+void __stack_chk_guard_setup(void);
+void __stack_chk_fail(void);

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <errno.h>
 
 // Function to create a directory recursively
 int mkdir_recursive(const char *dir) {

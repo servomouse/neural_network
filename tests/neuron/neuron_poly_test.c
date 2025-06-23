@@ -9,19 +9,17 @@
 #define DATASET polynome_dataset
 #define DATASET_SIZE sizeof_arr(DATASET)
 
-int test_mutation(neuron_params_t *n) {
+void test_mutation(neuron_params_t *n) {
     double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
 
     neuron_mutate(n);
     double error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(error == init_error) {
-        printf("Error: mutation doesn't work, error == init_error");
-        return EXIT_FAILURE;
+        RAISE("Error: mutation doesn't work, error == init_error");
     }
-    return EXIT_SUCCESS;
 }
 
-int test_rollback(neuron_params_t *n) {
+void test_rollback(neuron_params_t *n) {
     double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
     neuron_stash_state(n);
 
@@ -34,13 +32,11 @@ int test_rollback(neuron_params_t *n) {
     }
     error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(error != init_error) {
-        printf("Error: rollback doesn't work, error != init_error");
-        return EXIT_FAILURE;
+        RAISE("Error: rollback doesn't work, error != init_error");
     }
-    return EXIT_SUCCESS;
 }
 
-int test_save_restore(neuron_params_t *n) {
+void test_save_restore(neuron_params_t *n) {
     double init_error = get_error(n, DATASET, DATASET_SIZE, 0);
     compressed_neuron_t *c_neuron = neuron_save(n);
     double coeff_values[] = {0.5, 1.0};
@@ -51,13 +47,11 @@ int test_save_restore(neuron_params_t *n) {
     free(c_neuron);
     double error = get_error(n, DATASET, DATASET_SIZE, 0);
     if(init_error != error) {
-        printf("Error: save-restore doesn't work: error after restore != error before save");
-        return EXIT_FAILURE;
+        RAISE("Error: save-restore doesn't work: error after restore != error before save");
     }
-    return EXIT_SUCCESS;
 }
 
-int test_output(neuron_params_t *n) {
+void test_output(neuron_params_t *n) {
     neuron_stash_state(n);
     for(uint32_t i=0; i<16; i++) {
         double coeff_values[] = {0.02 * i+1, 1.0};
@@ -65,11 +59,9 @@ int test_output(neuron_params_t *n) {
     }
     double error = get_error(n, DATASET, DATASET_SIZE, 0);
     neuron_rollback(n);
-    if(round_to_precision(error, 6) == 0.517241) {
-        return EXIT_SUCCESS;
+    if(!are_equal(error, 0.517241, 6)) {
+        RAISE("Error: error value differs from expected! Value: %f\n", round_to_precision(error, 6));
     }
-    printf("Error: error value differs from expected! Error: %f\n", error);
-    return EXIT_FAILURE;
 }
 
 int main() {
@@ -79,10 +71,10 @@ int main() {
     for(size_t j=0; j<4; j++) {
         neuron_set_input_idx(&poly_neuron, j, j);
     }
-    if(test_func(test_output,       &poly_neuron, "poly neuron output")     ||
-       test_func(test_mutation,     &poly_neuron, "poly neuron mutations")  ||
-       test_func(test_rollback,     &poly_neuron, "poly neuron rollback")   ||
-       test_func(test_save_restore, &poly_neuron, "poly neuron save-restore")) {
+    if(test_func_no_ret(test_output,       &poly_neuron, "poly neuron output")     ||
+       test_func_no_ret(test_mutation,     &poly_neuron, "poly neuron mutations")  ||
+       test_func_no_ret(test_rollback,     &poly_neuron, "poly neuron rollback")   ||
+       test_func_no_ret(test_save_restore, &poly_neuron, "poly neuron save-restore")) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

@@ -5,7 +5,7 @@ add_subdirectory(network)
 add_subdirectory(neuron)
 
 add_custom_target(runtests
-    COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed --output-on-failure
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure  # --rerun-failed
 )
 
 # Function to create a custom target for running a specific test

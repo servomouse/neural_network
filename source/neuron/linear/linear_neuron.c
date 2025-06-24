@@ -6,6 +6,7 @@
 #include "linear_neuron.h"
 
 void neuron_linear_init(neuron_params_t * n_params, uint32_t num_inputs) {
+    printf("Creating linear neuron with %d inputs\n", num_inputs);
     n_params->n_type = NLinear;
     n_params->num_inputs = num_inputs;
     n_params->num_coeffs = num_inputs+1;    // +1 for BIAS
@@ -29,8 +30,8 @@ double neuron_linear_get_output(neuron_params_t *n_params) {
     double *coeffs = (double*)n_params->coeffs;
     double output = coeffs[n_params->num_inputs];     // BIAS
     for(size_t i=0; i<n_params->num_inputs; i++) {
-        uint32_t idx = n_params->indices[i];
-        output += n_params->inputs[idx] * coeffs[i];
+        double value = n_params->inputs[i] * coeffs[i];
+        output += value;
     }
     return output;
 }
